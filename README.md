@@ -45,7 +45,10 @@ While you can certainly use the sandbox keys available within our sample app whi
  pod install
  pod update
  ```
-
+4. Sometimes while using Cocoapods, in Xcode beta versions you may face `Sandbox deny` errors when running app on Simulator. To solve this simply:
+	- Go to the `build settings`
+	- Mark `all`
+	- Set `ENABLE_USER_SCRIPT_SANDBOXING` to `NO`
 # Step 4: Integrating Pay-Button-iOS[](https://developers.tap.company/docs/pay-button-ios#step-4-pay-button-ios)
 
 This integration offers two distinct options: a  [simple integration](https://developers.tap.company/docs/pay-button-ios#simple-integration)  designed for rapid development and streamlined merchant requirements, and an  [advanced integration](https://developers.tap.company/docs/pay-button-ios#advanced-integration)  that adds extra features for a more dynamic payment integration experience.
