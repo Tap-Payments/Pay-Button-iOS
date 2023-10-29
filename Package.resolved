@@ -1,0 +1,41 @@
+{
+  "pins" : [
+    {
+      "identity" : "robin",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ahmdx/Robin",
+      "state" : {
+        "revision" : "3805e9862b981f7127eaa30cabb6ea1186e586be",
+        "version" : "0.98.0"
+      }
+    },
+    {
+      "identity" : "shareddatamodels-ios",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Tap-Payments/SharedDataModels-iOS.git",
+      "state" : {
+        "revision" : "1dff74525847544e3e155503acd77f35a2022d7c",
+        "version" : "0.0.13"
+      }
+    },
+    {
+      "identity" : "swiftyrsa",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/TakeScoop/SwiftyRSA.git",
+      "state" : {
+        "revision" : "6521919ad0e99dff927685f142d8136479acb452",
+        "version" : "1.8.0"
+      }
+    },
+    {
+      "identity" : "tapfontkit-ios",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Tap-Payments/TapFontKit-iOS.git",
+      "state" : {
+        "revision" : "279ac52e3f05d04eaa14eecc548f5de9124cdf89",
+        "version" : "0.0.10"
+      }
+    }
+  ],
+  "version" : 2
+}

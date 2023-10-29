@@ -1,0 +1,457 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 60;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		E88462742AEEA4EE000040C3 /* Pay-Button-iOS in Frameworks */ = {isa = PBXBuildFile; productRef = E88462732AEEA4EE000040C3 /* Pay-Button-iOS */; };
+		E8BD67D72AEA40D700DED568 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8BD67D62AEA40D700DED568 /* AppDelegate.swift */; };
+		E8BD67D92AEA40D700DED568 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8BD67D82AEA40D700DED568 /* SceneDelegate.swift */; };
+		E8BD67DB2AEA40D700DED568 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8BD67DA2AEA40D700DED568 /* ViewController.swift */; };
+		E8BD67DE2AEA40D700DED568 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E8BD67DC2AEA40D700DED568 /* Main.storyboard */; };
+		E8BD67E02AEA40D900DED568 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E8BD67DF2AEA40D900DED568 /* Assets.xcassets */; };
+		E8BD67E32AEA40D900DED568 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E8BD67E12AEA40D900DED568 /* LaunchScreen.storyboard */; };
+		E8BD67EC2AEA40F200DED568 /* Pay-Button-iOS in Frameworks */ = {isa = PBXBuildFile; productRef = E8BD67EB2AEA40F200DED568 /* Pay-Button-iOS */; };
+		E8BD67F02AEA474E00DED568 /* PayButtonExample.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8BD67ED2AEA474E00DED568 /* PayButtonExample.swift */; };
+		E8BD67F12AEA474E00DED568 /* PayButtonSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8BD67EE2AEA474E00DED568 /* PayButtonSettingsViewController.swift */; };
+		E8BD67F22AEA474E00DED568 /* OnSuccessViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8BD67EF2AEA474E00DED568 /* OnSuccessViewController.swift */; };
+		E8BD67F52AEA478B00DED568 /* Toast in Frameworks */ = {isa = PBXBuildFile; productRef = E8BD67F42AEA478B00DED568 /* Toast */; };
+		E8BD67F82AEA479800DED568 /* Eureka in Frameworks */ = {isa = PBXBuildFile; productRef = E8BD67F72AEA479800DED568 /* Eureka */; };
+		E8BD67FA2AEA47A500DED568 /* Pay-Button-iOS in Frameworks */ = {isa = PBXBuildFile; productRef = E8BD67F92AEA47A500DED568 /* Pay-Button-iOS */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		E8BD67D32AEA40D700DED568 /* PayButtonSDK.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PayButtonSDK.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E8BD67D62AEA40D700DED568 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		E8BD67D82AEA40D700DED568 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+		E8BD67DA2AEA40D700DED568 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		E8BD67DD2AEA40D700DED568 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		E8BD67DF2AEA40D900DED568 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		E8BD67E22AEA40D900DED568 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		E8BD67E42AEA40D900DED568 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		E8BD67ED2AEA474E00DED568 /* PayButtonExample.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PayButtonExample.swift; sourceTree = "<group>"; };
+		E8BD67EE2AEA474E00DED568 /* PayButtonSettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PayButtonSettingsViewController.swift; sourceTree = "<group>"; };
+		E8BD67EF2AEA474E00DED568 /* OnSuccessViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OnSuccessViewController.swift; sourceTree = "<group>"; };
+		E8BD67FB2AEA808B00DED568 /* PayButtonSDK.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PayButtonSDK.entitlements; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		E8BD67D02AEA40D700DED568 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E88462742AEEA4EE000040C3 /* Pay-Button-iOS in Frameworks */,
+				E8BD67F52AEA478B00DED568 /* Toast in Frameworks */,
+				E8BD67FA2AEA47A500DED568 /* Pay-Button-iOS in Frameworks */,
+				E8BD67EC2AEA40F200DED568 /* Pay-Button-iOS in Frameworks */,
+				E8BD67F82AEA479800DED568 /* Eureka in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		E8BD67CA2AEA40D700DED568 = {
+			isa = PBXGroup;
+			children = (
+				E8BD67D52AEA40D700DED568 /* PayButtonSDK */,
+				E8BD67D42AEA40D700DED568 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		E8BD67D42AEA40D700DED568 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				E8BD67D32AEA40D700DED568 /* PayButtonSDK.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		E8BD67D52AEA40D700DED568 /* PayButtonSDK */ = {
+			isa = PBXGroup;
+			children = (
+				E8BD67FB2AEA808B00DED568 /* PayButtonSDK.entitlements */,
+				E8BD67D62AEA40D700DED568 /* AppDelegate.swift */,
+				E8BD67D82AEA40D700DED568 /* SceneDelegate.swift */,
+				E8BD67DA2AEA40D700DED568 /* ViewController.swift */,
+				E8BD67ED2AEA474E00DED568 /* PayButtonExample.swift */,
+				E8BD67EE2AEA474E00DED568 /* PayButtonSettingsViewController.swift */,
+				E8BD67EF2AEA474E00DED568 /* OnSuccessViewController.swift */,
+				E8BD67DC2AEA40D700DED568 /* Main.storyboard */,
+				E8BD67DF2AEA40D900DED568 /* Assets.xcassets */,
+				E8BD67E12AEA40D900DED568 /* LaunchScreen.storyboard */,
+				E8BD67E42AEA40D900DED568 /* Info.plist */,
+			);
+			path = PayButtonSDK;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		E8BD67D22AEA40D700DED568 /* PayButtonSDK */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E8BD67E72AEA40D900DED568 /* Build configuration list for PBXNativeTarget "PayButtonSDK" */;
+			buildPhases = (
+				E8BD67CF2AEA40D700DED568 /* Sources */,
+				E8BD67D02AEA40D700DED568 /* Frameworks */,
+				E8BD67D12AEA40D700DED568 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = PayButtonSDK;
+			packageProductDependencies = (
+				E8BD67EB2AEA40F200DED568 /* Pay-Button-iOS */,
+				E8BD67F42AEA478B00DED568 /* Toast */,
+				E8BD67F72AEA479800DED568 /* Eureka */,
+				E8BD67F92AEA47A500DED568 /* Pay-Button-iOS */,
+				E88462732AEEA4EE000040C3 /* Pay-Button-iOS */,
+			);
+			productName = PayButtonSDK;
+			productReference = E8BD67D32AEA40D700DED568 /* PayButtonSDK.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		E8BD67CB2AEA40D700DED568 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					E8BD67D22AEA40D700DED568 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = E8BD67CE2AEA40D700DED568 /* Build configuration list for PBXProject "PayButtonSDK" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = E8BD67CA2AEA40D700DED568;
+			packageReferences = (
+				E8BD67F32AEA478B00DED568 /* XCRemoteSwiftPackageReference "toast-swift" */,
+				E8BD67F62AEA479800DED568 /* XCRemoteSwiftPackageReference "Eureka" */,
+				E88462722AEEA4EE000040C3 /* XCLocalSwiftPackageReference ".." */,
+			);
+			productRefGroup = E8BD67D42AEA40D700DED568 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				E8BD67D22AEA40D700DED568 /* PayButtonSDK */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		E8BD67D12AEA40D700DED568 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E8BD67E32AEA40D900DED568 /* LaunchScreen.storyboard in Resources */,
+				E8BD67E02AEA40D900DED568 /* Assets.xcassets in Resources */,
+				E8BD67DE2AEA40D700DED568 /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		E8BD67CF2AEA40D700DED568 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E8BD67DB2AEA40D700DED568 /* ViewController.swift in Sources */,
+				E8BD67D72AEA40D700DED568 /* AppDelegate.swift in Sources */,
+				E8BD67F12AEA474E00DED568 /* PayButtonSettingsViewController.swift in Sources */,
+				E8BD67D92AEA40D700DED568 /* SceneDelegate.swift in Sources */,
+				E8BD67F02AEA474E00DED568 /* PayButtonExample.swift in Sources */,
+				E8BD67F22AEA474E00DED568 /* OnSuccessViewController.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		E8BD67DC2AEA40D700DED568 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E8BD67DD2AEA40D700DED568 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		E8BD67E12AEA40D900DED568 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E8BD67E22AEA40D900DED568 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		E8BD67E52AEA40D900DED568 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		E8BD67E62AEA40D900DED568 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		E8BD67E82AEA40D900DED568 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = PayButtonSDK/PayButtonSDK.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = VBT94B5CQ8;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PayButtonSDK/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = tap.PayButtonSDK;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		E8BD67E92AEA40D900DED568 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = PayButtonSDK/PayButtonSDK.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = VBT94B5CQ8;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PayButtonSDK/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = tap.PayButtonSDK;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		E8BD67CE2AEA40D700DED568 /* Build configuration list for PBXProject "PayButtonSDK" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E8BD67E52AEA40D900DED568 /* Debug */,
+				E8BD67E62AEA40D900DED568 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E8BD67E72AEA40D900DED568 /* Build configuration list for PBXNativeTarget "PayButtonSDK" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E8BD67E82AEA40D900DED568 /* Debug */,
+				E8BD67E92AEA40D900DED568 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		E88462722AEEA4EE000040C3 /* XCLocalSwiftPackageReference ".." */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ..;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		E8BD67F32AEA478B00DED568 /* XCRemoteSwiftPackageReference "toast-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/BastiaanJansen/toast-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
+		E8BD67F62AEA479800DED568 /* XCRemoteSwiftPackageReference "Eureka" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/xmartlabs/Eureka.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.4.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		E88462732AEEA4EE000040C3 /* Pay-Button-iOS */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = "Pay-Button-iOS";
+		};
+		E8BD67EB2AEA40F200DED568 /* Pay-Button-iOS */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = "Pay-Button-iOS";
+		};
+		E8BD67F42AEA478B00DED568 /* Toast */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E8BD67F32AEA478B00DED568 /* XCRemoteSwiftPackageReference "toast-swift" */;
+			productName = Toast;
+		};
+		E8BD67F72AEA479800DED568 /* Eureka */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E8BD67F62AEA479800DED568 /* XCRemoteSwiftPackageReference "Eureka" */;
+			productName = Eureka;
+		};
+		E8BD67F92AEA47A500DED568 /* Pay-Button-iOS */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = "Pay-Button-iOS";
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = E8BD67CB2AEA40D700DED568 /* Project object */;
+}

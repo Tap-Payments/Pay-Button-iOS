@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="22154" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BCf-fX-taS">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22130"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Pay Button Example-->
+        <scene sceneID="r75-Gd-6tI">
+            <objects>
+                <viewController storyboardIdentifier="CardWebSDKExample" useStoryboardIdentifierAsRestorationIdentifier="YES" id="cM1-xX-udr" customClass="PayButtonExample" customModule="PayButtonSDK" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="yrS-pN-kjZ">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" selectable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="iiu-5E-rhp">
+                                <rect key="frame" x="20" y="236" width="353" height="582"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <color key="textColor" systemColor="labelColor"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                            </textView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="8lZ-M3-bVS">
+                                <rect key="frame" x="289" y="103" width="84" height="35"/>
+                                <color key="tintColor" systemColor="labelColor"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="plain" title="Options"/>
+                                <connections>
+                                    <action selector="optionsClicked:" destination="cM1-xX-udr" eventType="touchUpInside" id="L0o-qc-RD9"/>
+                                </connections>
+                            </button>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="txe-cs-swh" customClass="PayButtonView" customModule="Pay_Button_iOS">
+                                <rect key="frame" x="10" y="168" width="373" height="48"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="48" id="w7q-2o-dkX"/>
+                                </constraints>
+                            </view>
+                            <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2lv-xT-eek">
+                                <rect key="frame" x="20" y="96.666666666666671" width="48" height="48.000000000000014"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="48" id="6uD-rN-egW"/>
+                                    <constraint firstAttribute="height" constant="48" id="hoL-yX-Zao"/>
+                                </constraints>
+                                <color key="tintColor" systemColor="systemGrayColor"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="plain" image="arrow.clockwise.circle" catalog="system"/>
+                                <connections>
+                                    <action selector="refreshButtonClicked:" destination="cM1-xX-udr" eventType="touchUpInside" id="uDL-dW-AlD"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="Jdl-3R-lyu"/>
+                        <color key="backgroundColor" systemColor="systemGray6Color"/>
+                        <constraints>
+                            <constraint firstItem="iiu-5E-rhp" firstAttribute="bottom" secondItem="Jdl-3R-lyu" secondAttribute="bottom" id="16Z-5T-i1s"/>
+                            <constraint firstItem="Jdl-3R-lyu" firstAttribute="trailing" secondItem="8lZ-M3-bVS" secondAttribute="trailing" constant="20" id="6rX-cZ-PKZ"/>
+                            <constraint firstItem="txe-cs-swh" firstAttribute="top" secondItem="8lZ-M3-bVS" secondAttribute="bottom" constant="30" id="94j-1Q-LXq"/>
+                            <constraint firstItem="iiu-5E-rhp" firstAttribute="leading" secondItem="Jdl-3R-lyu" secondAttribute="leading" constant="20" id="FuJ-tM-gdE"/>
+                            <constraint firstItem="2lv-xT-eek" firstAttribute="centerY" secondItem="8lZ-M3-bVS" secondAttribute="centerY" id="Mcb-n0-gSu"/>
+                            <constraint firstItem="txe-cs-swh" firstAttribute="leading" secondItem="Jdl-3R-lyu" secondAttribute="leading" constant="10" id="Pte-Vj-KVl"/>
+                            <constraint firstItem="Jdl-3R-lyu" firstAttribute="trailing" secondItem="txe-cs-swh" secondAttribute="trailing" constant="10" id="VAh-G6-brm"/>
+                            <constraint firstItem="8lZ-M3-bVS" firstAttribute="top" secondItem="Jdl-3R-lyu" secondAttribute="top" id="Xux-q6-wHK"/>
+                            <constraint firstItem="iiu-5E-rhp" firstAttribute="top" secondItem="txe-cs-swh" secondAttribute="bottom" constant="20" id="duO-SQ-d3z"/>
+                            <constraint firstItem="Jdl-3R-lyu" firstAttribute="trailing" secondItem="iiu-5E-rhp" secondAttribute="trailing" constant="20" id="oQ6-t0-irh"/>
+                            <constraint firstItem="2lv-xT-eek" firstAttribute="leading" secondItem="Jdl-3R-lyu" secondAttribute="leading" constant="20" id="x2J-pv-clt"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" id="3wH-sK-s6a"/>
+                    <connections>
+                        <outlet property="eventsTextView" destination="iiu-5E-rhp" id="dQl-41-1c2"/>
+                        <outlet property="payButton" destination="txe-cs-swh" id="hhD-FM-EL6"/>
+                        <outlet property="refreshButton" destination="2lv-xT-eek" id="R5o-bk-TPg"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="h8r-Xj-dJu" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="4787.0229007633588" y="809.15492957746483"/>
+        </scene>
+        <!--On Success View Controller-->
+        <scene sceneID="MmC-M7-mVo">
+            <objects>
+                <viewController storyboardIdentifier="OnSuccessViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="e0Y-XY-qWQ" customClass="OnSuccessViewController" customModule="PayButtonSDK" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="5jz-yx-aQe">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <visualEffectView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="QdF-Nx-bMN">
+                                <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                                <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="eJ6-Kx-zZ3">
+                                    <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                </view>
+                                <blurEffect style="prominent"/>
+                            </visualEffectView>
+                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="L1C-1d-h95">
+                                <rect key="frame" x="0.0" y="122" width="393" height="696"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <color key="textColor" systemColor="labelColor"/>
+                                <fontDescription key="fontDescription" name="HelveticaNeue-Light" family="Helvetica Neue" pointSize="14"/>
+                                <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                            </textView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="CEG-z6-qsQ">
+                                <rect key="frame" x="358" y="79" width="19" height="23"/>
+                                <color key="tintColor" systemColor="systemRedColor"/>
+                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                <state key="normal" image="square.and.arrow.up" catalog="system"/>
+                                <connections>
+                                    <action selector="copyClicked:" destination="e0Y-XY-qWQ" eventType="touchUpInside" id="gBp-LM-AOV"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="0H9-dt-3r7">
+                                <rect key="frame" x="16" y="79" width="83.333333333333329" height="35"/>
+                                <color key="tintColor" systemColor="systemRedColor"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="plain" title="Dismiss"/>
+                                <connections>
+                                    <action selector="dismissClicked:" destination="e0Y-XY-qWQ" eventType="touchUpInside" id="JVc-yH-o8K"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="9aZ-la-Vym"/>
+                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstItem="CEG-z6-qsQ" firstAttribute="top" secondItem="9aZ-la-Vym" secondAttribute="top" constant="20" id="1JV-cI-cxx"/>
+                            <constraint firstItem="9aZ-la-Vym" firstAttribute="trailing" secondItem="QdF-Nx-bMN" secondAttribute="trailing" id="2eH-6x-hOY"/>
+                            <constraint firstAttribute="bottom" secondItem="QdF-Nx-bMN" secondAttribute="bottom" id="83C-bh-5kB"/>
+                            <constraint firstItem="L1C-1d-h95" firstAttribute="leading" secondItem="9aZ-la-Vym" secondAttribute="leading" id="GLm-Wx-2hP"/>
+                            <constraint firstItem="9aZ-la-Vym" firstAttribute="trailing" secondItem="CEG-z6-qsQ" secondAttribute="trailing" constant="16" id="IzZ-N3-Skv"/>
+                            <constraint firstItem="QdF-Nx-bMN" firstAttribute="top" secondItem="5jz-yx-aQe" secondAttribute="top" id="Slb-L0-fQB"/>
+                            <constraint firstItem="0H9-dt-3r7" firstAttribute="top" secondItem="9aZ-la-Vym" secondAttribute="top" constant="20" id="XZX-Eo-OaY"/>
+                            <constraint firstItem="L1C-1d-h95" firstAttribute="top" secondItem="0H9-dt-3r7" secondAttribute="bottom" constant="8" id="XcW-YR-NmF"/>
+                            <constraint firstItem="9aZ-la-Vym" firstAttribute="bottom" secondItem="L1C-1d-h95" secondAttribute="bottom" id="bdh-24-8uh"/>
+                            <constraint firstItem="0H9-dt-3r7" firstAttribute="leading" secondItem="9aZ-la-Vym" secondAttribute="leading" constant="16" id="eIL-Nl-2U3"/>
+                            <constraint firstItem="9aZ-la-Vym" firstAttribute="trailing" secondItem="L1C-1d-h95" secondAttribute="trailing" id="ocn-iU-QGV"/>
+                            <constraint firstItem="QdF-Nx-bMN" firstAttribute="leading" secondItem="9aZ-la-Vym" secondAttribute="leading" id="p8v-56-3v8"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="textView" destination="L1C-1d-h95" id="WXa-OP-Y2k"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="81c-qz-IhW" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="5762.5954198473282" y="1528.8732394366198"/>
+        </scene>
+        <!--Pay Button Settings View Controller-->
+        <scene sceneID="bBk-7Z-aOB">
+            <objects>
+                <viewController storyboardIdentifier="BenefitPayButtonSettingsViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="X6S-Ei-9V0" customClass="PayButtonSettingsViewController" customModule="PayButtonSDK" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="Xmr-ZX-pEy">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <viewLayoutGuide key="safeArea" id="zq3-sG-B3P"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Ggy-w1-dGV" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="5762.5954198473282" y="831.69014084507046"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="j4w-4y-quU">
+            <objects>
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="BCf-fX-taS" sceneMemberID="viewController">
+                    <toolbarItems/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="NZ6-Lu-OJa">
+                        <rect key="frame" x="0.0" y="59" width="393" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="cM1-xX-udr" kind="relationship" relationship="rootViewController" id="OIH-6c-X3g"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="gwz-El-9Cf" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="3860.3053435114502" y="809.15492957746483"/>
+        </scene>
+    </scenes>
+    <resources>
+        <image name="arrow.clockwise.circle" catalog="system" width="128" height="123"/>
+        <image name="square.and.arrow.up" catalog="system" width="108" height="128"/>
+        <systemColor name="labelColor">
+            <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="systemGray6Color">
+            <color red="0.94901960780000005" green="0.94901960780000005" blue="0.96862745100000003" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+        <systemColor name="systemGrayColor">
+            <color red="0.5568627451" green="0.5568627451" blue="0.57647058819999997" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+        <systemColor name="systemRedColor">
+            <color red="1" green="0.23137254900000001" blue="0.18823529410000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+    </resources>
+</document>
