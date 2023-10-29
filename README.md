@@ -811,8 +811,13 @@ let post:[String:String] = ["url":""]
     func generateTapHashString(publicKey:String, secretKey:String, amount:Double, currency:String, postUrl:String = "", transactionReference:String = "") -> String {
         // Let us generate our encryption key
         let key = SymmetricKey(data: Data(secretKey.utf8))
-        // For amounts, you will need to make sure they are formatted in a way to have the correct number of decimal points. For BHD we need them to have 3 decimal points
-        let formattedAmount:String = String(format: "%.3f", amount)
+		// For amounts, you will need to make sure they are formatted in a way to have the correct number of decimal points. For BHD we need them to have 3 decimal points
+	    // We will need to format it based on the currency's decimal points
+	    let numberFormatter = NumberFormatter()
+	    numberFormatter.numberStyle = .currency
+	    numberFormatter.currencySymbol = ""
+	    numberFormatter.currencyCode = currency
+	    let formattedAmount: String = numberFormatter.string(for: amount) ?? ""
         // Let us format the string that we will hash
         let toBeHashed = "x_publickey\(publicKey)x_amount\(formattedAmount)x_currency\(currency)x_transaction\(transactionReference)x_post\(postUrl)"
         // let us generate the hash string now using the HMAC SHA256 algorithm
@@ -823,7 +828,7 @@ let post:[String:String] = ["url":""]
 ```
 3. Call it as follows:
 ```swift
-let hashString:String = generateTapHashString(publicKey: publicKey, secretKey: secretString, amount: amount, currency: currency, postUrl: postUrl)
+let hashString:String = generateTapHashString(publicKey: publicKey, secretKey: secretString, amount: amount, currency: currency, postUrl: postUrl, transactionReference: transactionReference)
 ```
 4. Pass it within the operator model
 ```swift
