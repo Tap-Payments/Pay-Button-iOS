@@ -77,7 +77,7 @@ Noting that in iOS, you have the ability to create the UI part of the PayButton-
 	2.  Declare as of type  `PayButtonView`
 	3.  Make an IBOutlet to the  `UIViewController`.
 	4. ![enter image description here](https://i.ibb.co/xhd0Qsf/Screenshot-2023-10-29-at-5-09-50-PM.png)
-2. **Accessing the BenefitPayButton created in storyboard in your code**
+2. **Accessing the PayButtonView created in storyboard in your code**
 	3. Create an IBOutlet from the created view above to your UIViewController
  ```swift
   /// The outlet from the created view above
@@ -88,7 +88,7 @@ Noting that in iOS, you have the ability to create the UI part of the PayButton-
 
 -   **Creating the PayButtonView from code**
     
-    1.  Head to your UIViewController where you want to display the `BenefitPayButton` as a subview.
+    1.  Head to your UIViewController where you want to display the `PayButtonView` as a subview.
     2. Import `PayButton-iOS` as follows `import Pay_Button_iOS` at the top of your UIViewController.
     3. Create a class variable `**var**  payButton: PayButtonView = .init() ///  An instance of the pay button`
     4. In the coming code sample, we will show how to create the view and how to set its layout constraints to take full width as recommended.
@@ -741,14 +741,14 @@ let customer: [String: Any] = [
     -   **loader**  
         _Definition:_  A boolean to indicate wether or not you want to show a loading view on top of the benefit button while it is performing api requests.  
     -   **locale**  
-        _Definition:_  The language of the benefit button. Accepted values as of now are:  
+        _Definition:_  The language of the pay button. Accepted values as of now are:  
         _Possible Values:_
         
         1.  **en**(for english)
         2.  **ar**(for arabic).  
         
     -   **theme**  
-        _Definition:_  The display styling of the benefit button. Accepted values as of now are:  
+        _Definition:_  The display styling of the pay button. Accepted values as of now are:  
         _Options:_
         
         1.  **light**
@@ -763,7 +763,7 @@ let customer: [String: Any] = [
         2.  **flat**  
 
     -   **colorStyle**  
-        _Definition:_  How do you want the icons rendered inside the benefit button
+        _Definition:_  How do you want the icons rendered inside the pay button
         _Possible Values:_
         
         1.  **colored**
