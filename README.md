@@ -330,6 +330,7 @@ Each parameter is linked to the  [reference](https://developers.tap.company/docs
 |Configuration|Description | Required | Type| Sample
 |--|--|--| --|--|
 | operator|It has the key obtained after registering your package name, also known as Public key. Also, the [hashString](https://developers.tap.company/docs/pay-button-ios#generate-the-hash-string) value which is used to validate live charges. | True  | `Dictionary`| `let operator:[String:Any]: ["publicKey":"pk_test_YhUjg9PNT8oDlKJ1aE2fMRz7", "hashString":""]` |
+| scope| Intention of the pay button (optional.) | False  | `String`| ` let scope:String = "charge"` |
 | transaction| Transaction details linked to the charge. | True  | `Dictionary`| ` let transaction:[String:Any] = ["authentication":true,"authorize":["type":"VOID","time":12],"paymentAgreement": ["id": "","contract": ["id": ""]], "reference":"trx", "metadata":[:]]` |
 | order| Order details linked to the charge. | True  | `Dictionary`| ` let order:[String:String] = ["id":"", "amount":1, "currency":"SAR", "description": " description","reference":"","metadata":[:]]` |
 | invoice| Invoice id to link to the order (optional). | False  | `Dictionary`| ` let invoice:[String:String] = ["id":""]` |
