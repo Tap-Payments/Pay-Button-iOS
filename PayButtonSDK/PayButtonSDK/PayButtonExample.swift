@@ -16,31 +16,70 @@ class PayButtonExample: UIViewController {
     @IBOutlet weak var refreshButton: UIButton!
     
     var selectedButtonType:PayButtonTypeEnum = .BenefitPay
-    var dictConfig:[String:Any] = ["operator":["publicKey":"pk_test_6jdl4Qo0FYOSXmrZTR1U5EHp","hashString":""],
-                                   "scope":"charge",
-                                   "transaction":["reference":"trx",
-                                                  "authorize":[
-                                                    "type":"VOID",
-                                                    "time":12
-                                                  ]],
-                                   "order":["id":"",
-                                            "amount":0.1,
-                                            "currency":"KWD",
-                                            "description": "Authentication description",
-                                            "reference":"ordRef",
-                                            "metadata":[:]],
-                                   "invoice":["id":""],
-                                   "merchant":["id":""],
-                                   "customer":["id":"",
-                                               "name":[["lang":"en","first":"TAP","middle":"","last":"PAYMENTS"]],
-                                               "contact":["email":"tap@tap.company",
-                                                          "phone":["countryCode":"+965","number":"88888888"]]],
-                                   "interface":["locale": "en",
-                                                "theme": UIView().traitCollection.userInterfaceStyle == .dark ? "dark": "light",
-                                                "edges": "curved",
-                                                "colorStyle":UIView().traitCollection.userInterfaceStyle == .dark ? "monochrome": "colored",
-                                                "loader": true],
-                                   "post":["url":""]]
+    var dictConfig:[String:Any] = [
+        "operator": ["publicKey": "pk_test_YhUjg9PNT8oDlKJ1aE2fMRz7"],
+        "scope": "AuthenticatedToken",
+        "purpose": "Transaction",
+        "transaction": [
+          "paymentAgreement": [
+            "id": "",
+            "contract": ["id": ""],
+          ]
+        ],
+        "order": [
+          "id": "",
+          "amount": 1,
+          "currency": "SAR",
+          "description": "Authentication description",
+          "reference": "",
+          "metadata": ["key": "value"],
+        ],
+        "invoice": ["id": ""],
+        "merchant": ["id": ""],
+        "customer": [
+          "id": "",
+          "name": [["lang": "en", "first": "TAP", "middle": "", "last": "PAYMENTS"]],
+          "nameOnCard": "TAP PAYMENTS",
+          "editable": true,
+          "contact": [
+            "email": "tap@tap.company",
+            "phone": ["countryCode": "+965", "number": "88888888"],
+          ],
+        ],
+        "features": [
+          "alternativeCardInputs": [
+            "cardScanner": true,
+            "cardNFC": false,
+          ],
+          "acceptanceBadge": true,
+          "customerCards": [
+            "saveCard": false,
+            "autoSaveCard": false,
+          ],
+
+        ],
+        "acceptance": [
+          "supportedSchemes": ["AMERICAN_EXPRESS", "VISA", "MASTERCARD", "OMANNET", "MADA"],
+          "supportedFundSource": ["CREDIT", "DEBIT"],
+          "supportedPaymentAuthentications": ["3DS"],
+        ],
+        "fieldVisibility": [
+          "card": [
+            "cvv": true,
+            "cardHolder": true,
+          ]
+        ],
+        "interface": [
+          "locale": "en",
+          "theme": UIView().traitCollection.userInterfaceStyle == .dark ? "dark" : "light",
+          "edges": "curved",
+          "cardDirection": "dynamic",
+          "powered": true,
+          "loader": true,
+          "colorStyle": UIView().traitCollection.userInterfaceStyle == .dark ? "monochrome" : "colored",
+        ],
+        "post": ["url": ""],
+      ]
     
     override func viewDidLoad() {
         super.viewDidLoad()

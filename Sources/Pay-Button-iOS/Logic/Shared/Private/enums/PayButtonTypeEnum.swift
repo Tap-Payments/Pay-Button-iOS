@@ -15,6 +15,8 @@ import Foundation
     case Knet
     /// The button will work to show payment in form of Benefit
     case Benefit
+    /// The button will work to show payment in form of Fawry
+    case Fawry
     
     /// A string representation of the payment type
     public func toString() -> String {
@@ -25,6 +27,8 @@ import Foundation
             return "KNET"
         case .Benefit:
             return "BENEFIT"
+        case .Fawry:
+            return "FAWRY"
         }
     }
     
@@ -37,6 +41,8 @@ import Foundation
             return "https://button.dev.tap.company/wrapper/knet?configurations="
         case .Benefit:
             return "https://button.dev.tap.company/wrapper/benefit?configurations="
+        case .Fawry:
+            return "https://button.dev.tap.company/wrapper/fawry?configurations="
         }
     }
     
@@ -49,6 +55,8 @@ import Foundation
             return "tapknetwebsdk://"
         case .Benefit:
             return "tapbenefitwebsdk://"
+        case .Fawry:
+            return "tapfawrywebsdk://"
         }
     }
     

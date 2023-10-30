@@ -37,6 +37,9 @@ import UIKit
         case .Knet:
             buttonView = RedirectionPayButton()
             (buttonView as? RedirectionPayButton)?.updateType(to: .Knet)
+        case .Fawry:
+            buttonView = RedirectionPayButton()
+            (buttonView as? RedirectionPayButton)?.updateType(to: .Fawry)
         case .Benefit:
             buttonView = RedirectionPayButton()
             (buttonView as? RedirectionPayButton)?.updateType(to: .Benefit)

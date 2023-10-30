@@ -13,6 +13,8 @@ import SharedDataModels_iOS
 /// An extension to take care of the notifications being sent from the web view through the url schemes
 extension RedirectionPayButton:WKNavigationDelegate {
     
+    
+    
     public func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         var action: WKNavigationActionPolicy?
         
@@ -73,6 +75,15 @@ extension RedirectionPayButton:WKNavigationDelegate {
         }
         // Let us pass the charge created id for the delegae
         self.delegate?.onChargeCreated?(data: chargeID)
+        // Let us see if we have to redirect or now
+        if !(redirection.stopRedirection ?? false) {
+            showRedirectionView(for: redirection)
+        }
+    }
+    
+    /// Will create a redirection UIView and display it alert level on top of the current screen
+    /// - Parameter for redirection: The redirection model that contains the redirection URL + the redirection finished keyword
+    func showRedirectionView(for redirection:Redirection) {
         // This means we are ok to start the authentication process
         threeDsView = .init()
         threeDsView?.isModalInPresentation = true
@@ -109,7 +120,6 @@ extension RedirectionPayButton:WKNavigationDelegate {
         // Tell it to start rendering 3ds content in background
         //SwiftEntryKit.display(entry: threeDsView, using: threeDsView.swiftEntryAttributes())
         threeDsView?.startLoading()
-        
     }
     
     func handleOnSuccess(url:URL) {

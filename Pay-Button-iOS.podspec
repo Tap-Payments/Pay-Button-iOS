@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = 'Pay-Button-iOS'
-  s.version          = '0.0.1'
+  s.version          = '0.0.2'
   s.summary          = 'From the shelf card processing library provided by Tap Payments'
   s.homepage         = 'https://github.com/Tap-Payments/Pay-Button-iOS'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
@@ -14,7 +14,4 @@ Pod::Spec.new do |s|
   s.dependency'SharedDataModels-iOS'
   s.dependency'TapFontKit-iOS'
   s.dependency'Robin'
-
-  
-  
 end

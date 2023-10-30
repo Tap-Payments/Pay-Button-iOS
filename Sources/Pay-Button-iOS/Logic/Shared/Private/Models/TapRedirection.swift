@@ -15,6 +15,8 @@ internal struct Redirection: Codable {
     var id: String?
     /// Whether or not we shall show the powered by tap flag
     var powered:Bool?
+    /// Whether or not we shall do the redirection
+    var stopRedirection:Bool?
 }
 
 // MARK: KnetRedirection convenience initializers and mutators
@@ -39,12 +41,14 @@ extension Redirection {
         threeDsUrl: String?? = nil,
         id: String?? = nil,
         keyword: String?? = nil,
-        powered: Bool?? = true
+        powered: Bool?? = true,
+        stopRedirection: Bool?? = false
     ) -> Redirection {
         return Redirection(
             url: threeDsUrl ?? self.url,
             id: id ?? self.id,
-            powered: powered ?? self.powered
+            powered: powered ?? self.powered,
+            stopRedirection: stopRedirection ?? self.stopRedirection
         )
     }
     
