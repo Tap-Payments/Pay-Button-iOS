@@ -56,9 +56,9 @@ extension GooglePayButton:WKNavigationDelegate {
                 }
                 break
             case _ where url.absoluteString.contains(CallBackSchemeEnum.onClosePopup.rawValue):
-                let _ = self.removeGooglePayPopupEntry {
+                /*let _ = self.removeGooglePayPopupEntry {
                     self.delegate?.onCanceled?()
-                }
+                }*/
                 break
             default:
                 break
@@ -129,7 +129,7 @@ extension GooglePayButton:WKNavigationDelegate {
         googlePayController?.selectedLocale = currentlyLoadedConfigurations?.getButtonLocale() ?? "en"
         googlePayController?.googlePayCanceled = {
             self.googlePayController?.dismiss(animated: true) {
-                self.openUrl(url: self.currentlyLoadedConfigurations)
+                //self.openUrl(url: self.currentlyLoadedConfigurations)
             }
         }
         // Set to web view the needed urls
