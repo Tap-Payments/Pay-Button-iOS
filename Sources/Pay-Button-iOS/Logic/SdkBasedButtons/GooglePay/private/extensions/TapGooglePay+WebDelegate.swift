@@ -126,15 +126,16 @@ extension GooglePayButton:WKNavigationDelegate {
         googlePayController = .init()
         googlePayController?.isModalInPresentation = true
         googlePayController?.restorationIdentifier = "GooglePayVC"
+        googlePayController?.redirectionData = .init(url: url.absoluteString, id: "", powered: true, stopRedirection: false)
         googlePayController?.selectedLocale = currentlyLoadedConfigurations?.getButtonLocale() ?? "en"
-        googlePayController?.googlePayCanceled = {
+        googlePayController?.threeDSCanceled = {
             self.googlePayController?.dismiss(animated: true) {
                 //self.openUrl(url: self.currentlyLoadedConfigurations)
             }
         }
         // Set to web view the needed urls
         /// The redirect url scheme
-        googlePayController?.googlePayUrl = url.absoluteString
+        googlePayController?.redirectUrl = PayButtonTypeEnum.GooglePay.baseUrl()
         // Set to web view what should it when the process is completed by the user
         googlePayController?.redirectionReached = { redirectionUrl in
             self.googlePayController?.dismiss(animated: true) {

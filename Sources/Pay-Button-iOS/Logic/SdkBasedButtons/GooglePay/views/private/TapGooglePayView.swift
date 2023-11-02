@@ -20,7 +20,7 @@ class GooglePayButton: PayButtonBaseView {
     /// keeps a hold of the loaded web sdk configurations url
     internal var currentlyLoadedConfigurations:URL?
     /// The view that will present full screen Google Pay flow
-    internal var googlePayController:GooglPayPopupViewController?
+    internal var googlePayController:ThreeDSView?
     /// The view that will present full screen 3ds flow
     internal var threeDsView:ThreeDSView?
     

@@ -148,7 +148,13 @@ extension ThreeDSView: WKNavigationDelegate {
            let redirectUrl:String = redirectUrl?.lowercased(),
            requestURL.absoluteString.lowercased().hasPrefix(redirectUrl) {
             // The web sdk only needs the query string
-            self.redirectionReached(NSURL(string: requestURL.absoluteString)?.query ??  requestURL.absoluteString)
+            if redirectUrl == PayButtonTypeEnum.GooglePay.baseUrl() {
+                self.redirectionReached(requestURL.absoluteString)
+                
+            }else{
+                self.redirectionReached(NSURL(string: requestURL.absoluteString)?.query ??  requestURL.absoluteString)
+                
+            }
             decisionHandler(.cancel)
             return
         }
