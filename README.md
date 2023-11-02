@@ -797,6 +797,11 @@ let post:[String:String] = ["url":""]
 1. BenefitPay
 2. KNET
 3. Benefit
+4. FAWRY
+5. PAYPAL
+6. TABBY
+7. GOOGLEPAY
+
 
 # Generate the hash string[](https://developers.tap.company/docs/pay-button-ios#generate-the-hash-string)
 
