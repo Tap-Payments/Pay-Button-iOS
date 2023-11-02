@@ -68,7 +68,7 @@ internal class BenefitPayButton: PayButtonBaseView {
          */
     }
     
-    /// Used to open a url inside the Tap card web sdk.
+    /// Used to open a url inside the Tap button web sdk.
     /// - Parameter url: The url needed to load.
     internal func openUrl(url: URL?) {
         // Store it for further usages
@@ -83,7 +83,7 @@ internal class BenefitPayButton: PayButtonBaseView {
         webView.load(request)
     }
     
-    /// used to setup the constraint of the Tap card sdk view
+    /// used to setup the constraint of the Tap button sdk view
     private func setupWebView() {
         // Creates needed configuration for the web view
         let preferences = WKPreferences()
@@ -157,8 +157,8 @@ internal class BenefitPayButton: PayButtonBaseView {
     
     
     /// Call it when you want to remove the benefitpay entry and get back to the merchant app
-    /// - Parameter shouldStopOnCancel: Whether or not, we should listen to the onCancel coming after this event or not.
-    /// - Parameter onDosmiss: a callback if needed to do some logic post closeing
+    /// - Parameter handleOnCancel: Whether or not, we should listen to the onCancel coming after this event or not.
+    /// - Parameter onDismiss: a callback if needed to do some logic post closeing
     internal func removeBenefitPayPopupEntry(handleOnCancel:Bool = false,  onDismiss:@escaping()->()) -> Bool {
         guard let viewController:UIViewController = UIApplication.shared.topViewController(),
               viewController.restorationIdentifier == "BenefitQRVC" else { return false }

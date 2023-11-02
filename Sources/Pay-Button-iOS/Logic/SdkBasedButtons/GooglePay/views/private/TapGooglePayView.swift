@@ -1,14 +1,26 @@
+//
+//  TapGooglePayView.swift
+//  
+//
+//  Created by Osama Rabie on 02/11/2023.
+//
 
 import UIKit
 import WebKit
 import SharedDataModels_iOS
 
-/// The custom view that provides an interface for the  knet button
-internal class RedirectionPayButton: PayButtonBaseView {
-    /// The web view used to render the knet button
+
+class GooglePayButton: PayButtonBaseView {
+    /// The scheme prefix used by google pay sdk to show the google pay popup
+    let googlePaySDKUrlScheme:String = "https://pay.google.com"
+    /// The scheme prefix used by gppge pay sdk to show the google pay popup
+    let googlePaySDKPopupKeyword:String = "pay?ng=true"
+    /// The web view used to render the google pay button
     internal var webView: WKWebView = .init()
     /// keeps a hold of the loaded web sdk configurations url
     internal var currentlyLoadedConfigurations:URL?
+    /// The view that will present full screen Google Pay flow
+    internal var googlePayController:GooglPayPopupViewController?
     /// The view that will present full screen 3ds flow
     internal var threeDsView:ThreeDSView?
     
@@ -23,21 +35,20 @@ internal class RedirectionPayButton: PayButtonBaseView {
         commonInit()
     }
     
+    
+    
     //MARK: - Private methods
     /// Used as a consolidated method to do all the needed steps upon creating the view
     private func commonInit() {
+        // Set the button type
+        payButtonType = .GooglePay
         // Setuo the web view contais the web sdk
         setupWebView()
         // setup the constraint to put each view in its correct positiob
         setupConstraints()
     }
     
-    /// Updates the button to the correct type.
-    internal func updateType(to payButtonType:PayButtonTypeEnum) {
-        self.payButtonType = payButtonType
-    }
-    
-    /// Used to open a url inside the Tap card web sdk.
+    /// Used to open a url inside the Tap button web sdk.
     /// - Parameter url: The url needed to load.
     internal func openUrl(url: URL?) {
         // Store it for further usages
@@ -47,14 +58,21 @@ internal class RedirectionPayButton: PayButtonBaseView {
         
         
         webView.navigationDelegate = self
+        webView.uiDelegate = self
         webView.load(request)
     }
     
-    /// used to setup the constraint of the Tap card sdk view
+    
+    /// used to setup the constraint of the Tap button sdk view
     private func setupWebView() {
         // Creates needed configuration for the web view
-        let config = WKWebViewConfiguration()
-        webView = WKWebView(frame: .zero, configuration: config)
+        let preferences = WKPreferences()
+        preferences.javaScriptEnabled = true
+        preferences.javaScriptCanOpenWindowsAutomatically = true
+        let configuration = WKWebViewConfiguration()
+        configuration.preferences = preferences
+        
+        webView = WKWebView(frame: .zero, configuration: configuration)
         // Let us make sure it is of a clear background and opaque, not to interfer with the merchant's app background
         webView.isOpaque = false
         webView.backgroundColor = UIColor.clear
@@ -65,6 +83,8 @@ internal class RedirectionPayButton: PayButtonBaseView {
         self.backgroundColor = .clear
         self.addSubview(webView)
     }
+    
+    
     
     /// Setup Constaraints for the sub views.
     private func setupConstraints() {
@@ -86,6 +106,45 @@ internal class RedirectionPayButton: PayButtonBaseView {
         self.layoutIfNeeded()
     }
     
+    /// Will add the web view again to the normal view after removing it from the popup screen we presented to show the benefitpay popup
+    internal func addWebViewToContainerView() {
+        DispatchQueue.main.async {
+            self.webView.removeFromSuperview()
+            self.webView.frame = .zero
+            self.addSubview(self.webView)
+            self.setupConstraints()
+        }
+    }
+    
+    /// Call it when you want to remove the googlepay popyp and get back to the merchant app
+    /// - Parameter onDismiss: a callback if needed to do some logic post closeing
+    internal func removeGooglePayPopupEntry(onDismiss:@escaping()->()) -> Bool {
+        guard let viewController:UIViewController = UIApplication.shared.topViewController(),
+              viewController.restorationIdentifier == "GooglePayVC" else {
+            onDismiss()
+            return false
+        }
+        self.addWebViewToContainerView()
+        viewController.dismiss(animated: true) {
+            onDismiss()
+        }
+        return true
+    }
+    
+    
+    /// Tells the web sdk the process is finished with google ay and here is the oogle pay's response
+    /// - Parameter googlePayToken: The parsed json of the google pay token part if any
+    /// - Parameter fullUrl: The full redirection url from google just in case we have to fetch something
+    internal func passToSDK(googlePayToken:String, fullUrl:String) {
+        // The web sdk wants the query parameters only
+        // BASE 64
+        let base64Token:String = Data(googlePayToken.utf8).base64EncodedString()
+        print("window.sendPaymentRequest('\(base64Token)');");
+        
+        webView.evaluateJavaScript("window.sendPaymentRequest('\(base64Token)');")
+        //generateTapToken()
+    }
+    
     
     /// Tells the web sdk the process is finished with the data from backend
     /// - Parameter rediectionUrl: The url with the needed data coming from back end at the end of the currently running process
@@ -95,12 +154,11 @@ internal class RedirectionPayButton: PayButtonBaseView {
         //generateTapToken()
     }
     
-    
-    ///  configures the knet button with the needed configurations for it to work
+    //MARK: - Public init methods
+    ///  configures the google pay button with the needed configurations for it to work
     ///  - Parameter config: The configurations dctionary. Recommended, as it will make you able to customly add models without updating
-    ///  - Parameter delegate:A protocol that allows integrators to get notified from events fired from knet button
-    override
-    internal func initPayButton(configDict: [String : Any], delegate: PayButtonDelegate? = nil) {
+    ///  - Parameter delegate:A protocol that allows integrators to get notified from events fired from google  pay button
+    override internal func initPayButton(configDict: [String : Any], delegate: PayButtonDelegate? = nil) {
         self.delegate = delegate
         //let operatorModel:Operator = .init(publicKey: configDict["publicKey"] as? String ?? "", metadata: generateApplicationHeader())
         var updatedConfigurations:[String:Any] = configDict
@@ -116,4 +174,5 @@ internal class RedirectionPayButton: PayButtonBaseView {
             self.delegate?.onError?(data: "{error:\(error.localizedDescription)}")
         }
     }
+    
 }

@@ -23,5 +23,7 @@ internal enum CallBackSchemeEnum:String {
     case onOrderCreated
     /// The charge has been created
     case onChargeCreated
+    /// We need to close Google pay popup
+    case onClosePopup
     
 }

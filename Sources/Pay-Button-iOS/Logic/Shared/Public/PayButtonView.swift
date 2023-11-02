@@ -43,6 +43,14 @@ import UIKit
         case .Benefit:
             buttonView = RedirectionPayButton()
             (buttonView as? RedirectionPayButton)?.updateType(to: .Benefit)
+        case .Paypal:
+            buttonView = RedirectionPayButton()
+            (buttonView as? RedirectionPayButton)?.updateType(to: .Paypal)
+        case .Tabby:
+            buttonView = RedirectionPayButton()
+            (buttonView as? RedirectionPayButton)?.updateType(to: .Tabby)
+        case .GooglePay:
+            buttonView = GooglePayButton()
         }
         addSubview(buttonView)
         buttonView.translatesAutoresizingMaskIntoConstraints = false

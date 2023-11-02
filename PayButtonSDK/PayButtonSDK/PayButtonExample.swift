@@ -15,68 +15,54 @@ class PayButtonExample: UIViewController {
     
     @IBOutlet weak var refreshButton: UIButton!
     
-    var selectedButtonType:PayButtonTypeEnum = .BenefitPay
+    var selectedButtonType:PayButtonTypeEnum = .GooglePay
     var dictConfig:[String:Any] = [
-        "operator": ["publicKey": "pk_test_YhUjg9PNT8oDlKJ1aE2fMRz7"],
-        "scope": "AuthenticatedToken",
-        "purpose": "Transaction",
+        "operator": ["publicKey": "pk_test_6jdl4Qo0FYOSXmrZTR1U5EHp", "hashString": ""],
+        "scope": "charge",
         "transaction": [
+          "authentication": true,
+          "authorize": [
+            "type": "VOID",
+            "time": 12,
+          ],
           "paymentAgreement": [
             "id": "",
             "contract": ["id": ""],
-          ]
+          ],
+          "reference": "trx",
+          "metadata": [:],
         ],
         "order": [
           "id": "",
-          "amount": 1,
-          "currency": "SAR",
+          "amount": 0.1,
+          "currency": "KWD",
           "description": "Authentication description",
-          "reference": "",
-          "metadata": ["key": "value"],
+          "reference": "ordRef",
+          "metadata": [:],
         ],
         "invoice": ["id": ""],
         "merchant": ["id": ""],
         "customer": [
           "id": "",
           "name": [["lang": "en", "first": "TAP", "middle": "", "last": "PAYMENTS"]],
-          "nameOnCard": "TAP PAYMENTS",
-          "editable": true,
           "contact": [
             "email": "tap@tap.company",
             "phone": ["countryCode": "+965", "number": "88888888"],
           ],
         ],
-        "features": [
-          "alternativeCardInputs": [
-            "cardScanner": true,
-            "cardNFC": false,
-          ],
-          "acceptanceBadge": true,
-          "customerCards": [
-            "saveCard": false,
-            "autoSaveCard": false,
-          ],
-
-        ],
         "acceptance": [
-          "supportedSchemes": ["AMERICAN_EXPRESS", "VISA", "MASTERCARD", "OMANNET", "MADA"],
-          "supportedFundSource": ["CREDIT", "DEBIT"],
-          "supportedPaymentAuthentications": ["3DS"],
-        ],
-        "fieldVisibility": [
-          "card": [
-            "cvv": true,
-            "cardHolder": true,
-          ]
-        ],
+                  "supportedSchemes": ["AMERICAN_EXPRESS", "VISA", "MASTERCARD", "OMANNET", "MADA"],
+                  "supportedFundSource": ["CREDIT", "DEBIT"],
+                  "supportedPaymentAuthentications": ["3DS"],
+                ],
         "interface": [
           "locale": "en",
           "theme": UIView().traitCollection.userInterfaceStyle == .dark ? "dark" : "light",
           "edges": "curved",
-          "cardDirection": "dynamic",
-          "powered": true,
+          "colorStyle": UIView().traitCollection.userInterfaceStyle == .dark
+            ? "monochrome" : "colored",
           "loader": true,
-          "colorStyle": UIView().traitCollection.userInterfaceStyle == .dark ? "monochrome" : "colored",
+          "powered":true
         ],
         "post": ["url": ""],
       ]
@@ -84,6 +70,9 @@ class PayButtonExample: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupPayButton()
+           if let jsonData = try? JSONSerialization.data(withJSONObject: dictConfig, options: .prettyPrinted) {
+               print(String(decoding: jsonData, as: UTF8.self))
+        }
     }
 
     @IBAction func refreshButtonClicked(_ sender: Any) {
@@ -149,6 +138,8 @@ class PayButtonExample: UIViewController {
             let signature = HMAC<SHA256>.authenticationCode(for: Data(toBeHashed.utf8), using: key)
             let hashedString = Data(signature).map { String(format: "%02hhx", $0) }.joined()
             return hashedString
+            
+            
         }
     
     /*func setConfig(config: CardWebSDKConfig) {

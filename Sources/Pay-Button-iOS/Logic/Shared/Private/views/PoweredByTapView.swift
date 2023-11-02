@@ -158,7 +158,7 @@ extension PoweredByTapView {
         
         
         let constraintsBackLabel = [
-            backLabel.leadingAnchor.constraint(equalTo: backIconImageView.leadingAnchor, constant: 8),
+            backLabel.leadingAnchor.constraint(equalTo: backIconImageView.trailingAnchor, constant: 8),
             backLabel.centerYAnchor.constraint(equalTo: backIconImageView.centerYAnchor),
             backLabel.trailingAnchor.constraint(equalTo: backView.trailingAnchor)
         ]

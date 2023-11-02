@@ -56,7 +56,7 @@ class PayButtonSettingsViewController: FormViewController {
         form +++ Section("scope")
         <<< AlertRow<String>("scope"){ row in
             row.title = "Scope"
-            row.options = ["charge","authorize"]
+            row.options = ["charge","authorize","taptoken","googlepaytoken"]
             row.value = (config! as NSDictionary).value(forKeyPath: "scope") as? String ?? "charge"
             row.onChange { row in
                 self.update(dictionary: &self.config!, at: ["scope"], with: row.value ?? "charge")
@@ -186,6 +186,34 @@ class PayButtonSettingsViewController: FormViewController {
             }
         }*/
         
+        
+        form +++ Section("acceptance")
+        <<< MultipleSelectorRow<String>("acceptance.supportedSchemes"){ row in
+            row.title = "supportedSchemes"
+            row.options = ["AMERICAN_EXPRESS","MADA","MASTERCARD","VISA","OMANNET","MEEZA"]
+            row.value = Set((config! as NSDictionary).value(forKeyPath: "acceptance.supportedSchemes") as? [String] ?? ["AMERICAN_EXPRESS","MADA","MASTERCARD","VISA","OMANNET","MEEZA"])
+            row.onChange { row in
+                self.update(dictionary: &self.config!, at: ["acceptance","supportedSchemes"], with: Array(row.value ?? ["AMERICAN_EXPRESS","MADA","MASTERCARD","VISA","OMANNET","MEEZA"]))
+            }
+        }
+        
+        <<< MultipleSelectorRow<String>("acceptance.supportedFundSource"){ row in
+            row.title = "supportedFundSource"
+            row.options = ["CREDIT","DEBIT"]
+            row.value = Set((config! as NSDictionary).value(forKeyPath: "acceptance.supportedFundSource") as? [String] ?? ["DEBIT","CREDIT"])
+            row.onChange { row in
+                self.update(dictionary: &self.config!, at: ["acceptance","supportedFundSource"], with: Array(row.value ?? ["DEBIT","CREDIT"]))
+            }
+        }
+        
+        <<< MultipleSelectorRow<String>("acceptance.supportedPaymentAuthentications"){ row in
+            row.title = "supportedPaymentAuthentications"
+            row.options = ["3DS"]
+            row.value = Set((config! as NSDictionary).value(forKeyPath: "acceptance.supportedPaymentAuthentications") as? [String] ?? ["3DS"])
+            row.onChange { row in
+                self.update(dictionary: &self.config!, at: ["acceptance","supportedPaymentAuthentications"], with: Array(row.value ?? ["3DS"]))
+            }
+        }
         
         form +++ Section("interface")
         <<< AlertRow<String>("interface.locale"){ row in
