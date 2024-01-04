@@ -47,7 +47,7 @@ internal class UrlBasedUtils {
     static func generateApplicationHeader(headersEncryptionPublicKey:String) -> [String:String] {
         return [
             Constants.HTTPHeaderKey.application: applicationHeaderValue(headersEncryptionPublicKey: headersEncryptionPublicKey),
-            Constants.HTTPHeaderKey.mdn: Crypter.encrypt(TapApplicationPlistInfo.shared.bundleIdentifier ?? "", using: headersEncryptionPublicKey) ?? ""
+            Constants.HTTPHeaderKey.mdn: Crypter.encrypt("https://button.dev.tap.company"/*TapApplicationPlistInfo.shared.bundleIdentifier ?? ""*/, using: headersEncryptionPublicKey) ?? ""
         ]
     }
     

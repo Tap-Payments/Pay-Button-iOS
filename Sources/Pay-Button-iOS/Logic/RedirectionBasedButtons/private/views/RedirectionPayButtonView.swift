@@ -89,9 +89,16 @@ internal class RedirectionPayButton: PayButtonBaseView {
     
     /// Tells the web sdk the process is finished with the data from backend
     /// - Parameter rediectionUrl: The url with the needed data coming from back end at the end of the currently running process
-    internal func passRedirectionDataToSDK(rediectionUrl:String) {
-        // The web sdk wants the query parameters only
-        webView.evaluateJavaScript("window.retrieve('\(rediectionUrl)')")
+    /// - Parameter cardBased: Indicates if we will need to pass the authentication back to the card pay button ot we will pass the normal ID we got from a normal redirection based payment method
+    internal func passRedirectionDataToSDK(rediectionUrl:String, cardBased:Bool = false) {
+        
+        if cardBased {
+            // If it is a card based payment button, then we will need to pass the authentication response we got to the button web sdk
+            webView.evaluateJavaScript("window.loadAuthentication('\(rediectionUrl)')")
+        }else {
+            // If it is a non card based payment button, then it is a normal redirection button which retrieves the charge
+            webView.evaluateJavaScript("window.retrieve('\(rediectionUrl)')")
+        }
         //generateTapToken()
     }
     

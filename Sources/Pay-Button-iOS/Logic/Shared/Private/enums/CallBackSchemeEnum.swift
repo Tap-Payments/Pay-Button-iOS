@@ -22,8 +22,14 @@ internal enum CallBackSchemeEnum:String {
     /// An order has been created
     case onOrderCreated
     /// The charge has been created
-    case onChargeCreated
+    case onChargeCreated 
     /// We need to close Google pay popup
     case onClosePopup
+    /// We need to change the height of the view
+    case onHeightChange
+    /// We need to show the authentication screen when paying with a card within the button
+    case on3dsRedirect
+    /// We need to tell the merchant which card had been entered. This will only happen if the payment button is card based and the merchant didn't pass auth and token
+    case onBinIdentification
     
 }

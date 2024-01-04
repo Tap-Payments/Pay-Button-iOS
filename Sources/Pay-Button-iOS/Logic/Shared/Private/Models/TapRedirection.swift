@@ -11,6 +11,8 @@ import Foundation
 internal struct Redirection: Codable {
     /// The 3DS/Otp page link we need to display
     var url: String?
+    /// The redirection url if the web sdk wants to listent to a certain redirection url
+    var redirectionUrl: String?
     /// The id of the charge created
     var id: String?
     /// Whether or not we shall show the powered by tap flag
@@ -39,6 +41,7 @@ extension Redirection {
     
     func with(
         threeDsUrl: String?? = nil,
+        redirectionUrl: String?? = nil,
         id: String?? = nil,
         keyword: String?? = nil,
         powered: Bool?? = true,
@@ -46,6 +49,7 @@ extension Redirection {
     ) -> Redirection {
         return Redirection(
             url: threeDsUrl ?? self.url,
+            redirectionUrl: redirectionUrl ?? self.redirectionUrl,
             id: id ?? self.id,
             powered: powered ?? self.powered,
             stopRedirection: stopRedirection ?? self.stopRedirection

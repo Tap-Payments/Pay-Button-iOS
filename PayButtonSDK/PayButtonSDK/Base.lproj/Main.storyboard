@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="22154" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BCf-fX-taS">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="22155" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BCf-fX-taS">
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22130"/>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22131"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -17,7 +18,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" selectable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="iiu-5E-rhp">
-                                <rect key="frame" x="20" y="236" width="353" height="582"/>
+                                <rect key="frame" x="20" y="262" width="353" height="556"/>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <color key="textColor" systemColor="labelColor"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
@@ -36,7 +37,7 @@
                                 <rect key="frame" x="10" y="168" width="373" height="48"/>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="48" id="w7q-2o-dkX"/>
+                                    <constraint firstAttribute="height" priority="750" constant="48" id="w7q-2o-dkX"/>
                                 </constraints>
                             </view>
                             <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2lv-xT-eek">
@@ -52,6 +53,14 @@
                                     <action selector="refreshButtonClicked:" destination="cM1-xX-udr" eventType="touchUpInside" id="uDL-dW-AlD"/>
                                 </connections>
                             </button>
+                            <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="qZZ-SP-bEt">
+                                <rect key="frame" x="74.666666666666686" y="224" width="244" height="30"/>
+                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                <state key="normal" title="Generate Authenticated Token Data"/>
+                                <connections>
+                                    <action selector="generateAuthenticatedTokenDataClicked:" destination="cM1-xX-udr" eventType="touchUpInside" id="K6A-mX-7kq"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="Jdl-3R-lyu"/>
                         <color key="backgroundColor" systemColor="systemGray6Color"/>
@@ -61,16 +70,19 @@
                             <constraint firstItem="txe-cs-swh" firstAttribute="top" secondItem="8lZ-M3-bVS" secondAttribute="bottom" constant="30" id="94j-1Q-LXq"/>
                             <constraint firstItem="iiu-5E-rhp" firstAttribute="leading" secondItem="Jdl-3R-lyu" secondAttribute="leading" constant="20" id="FuJ-tM-gdE"/>
                             <constraint firstItem="2lv-xT-eek" firstAttribute="centerY" secondItem="8lZ-M3-bVS" secondAttribute="centerY" id="Mcb-n0-gSu"/>
+                            <constraint firstItem="iiu-5E-rhp" firstAttribute="top" secondItem="qZZ-SP-bEt" secondAttribute="bottom" constant="8" symbolic="YES" id="Nv9-iJ-T7C"/>
                             <constraint firstItem="txe-cs-swh" firstAttribute="leading" secondItem="Jdl-3R-lyu" secondAttribute="leading" constant="10" id="Pte-Vj-KVl"/>
                             <constraint firstItem="Jdl-3R-lyu" firstAttribute="trailing" secondItem="txe-cs-swh" secondAttribute="trailing" constant="10" id="VAh-G6-brm"/>
                             <constraint firstItem="8lZ-M3-bVS" firstAttribute="top" secondItem="Jdl-3R-lyu" secondAttribute="top" id="Xux-q6-wHK"/>
-                            <constraint firstItem="iiu-5E-rhp" firstAttribute="top" secondItem="txe-cs-swh" secondAttribute="bottom" constant="20" id="duO-SQ-d3z"/>
+                            <constraint firstItem="qZZ-SP-bEt" firstAttribute="centerX" secondItem="yrS-pN-kjZ" secondAttribute="centerX" id="bjQ-Ke-sXg"/>
                             <constraint firstItem="Jdl-3R-lyu" firstAttribute="trailing" secondItem="iiu-5E-rhp" secondAttribute="trailing" constant="20" id="oQ6-t0-irh"/>
+                            <constraint firstItem="qZZ-SP-bEt" firstAttribute="top" secondItem="txe-cs-swh" secondAttribute="bottom" constant="8" id="sJU-45-wVa"/>
                             <constraint firstItem="2lv-xT-eek" firstAttribute="leading" secondItem="Jdl-3R-lyu" secondAttribute="leading" constant="20" id="x2J-pv-clt"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="3wH-sK-s6a"/>
                     <connections>
+                        <outlet property="authenticatedTokenButton" destination="qZZ-SP-bEt" id="xCj-Fg-E2W"/>
                         <outlet property="eventsTextView" destination="iiu-5E-rhp" id="dQl-41-1c2"/>
                         <outlet property="payButton" destination="txe-cs-swh" id="hhD-FM-EL6"/>
                         <outlet property="refreshButton" destination="2lv-xT-eek" id="R5o-bk-TPg"/>
@@ -79,6 +91,21 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="h8r-Xj-dJu" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="4787.0229007633588" y="809.15492957746483"/>
+        </scene>
+        <!--Create Auth Token View Controller-->
+        <scene sceneID="zIp-Ba-zxF">
+            <objects>
+                <viewController storyboardIdentifier="CreateAuthTokenViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="0e4-yk-erc" customClass="CreateAuthTokenViewController" customModule="PayButtonSDK" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="gZs-pg-TG1">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <viewLayoutGuide key="safeArea" id="Px2-Fr-R8H"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="khU-cz-b7W" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="4787" y="1539"/>
         </scene>
         <!--On Success View Controller-->
         <scene sceneID="MmC-M7-mVo">
@@ -191,13 +218,13 @@
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="systemGray6Color">
-            <color red="0.94901960780000005" green="0.94901960780000005" blue="0.96862745100000003" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemGrayColor">
-            <color red="0.5568627451" green="0.5568627451" blue="0.57647058819999997" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.55686274509803924" green="0.55686274509803924" blue="0.57647058823529407" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemRedColor">
-            <color red="1" green="0.23137254900000001" blue="0.18823529410000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="1" green="0.23137254901960785" blue="0.18823529411764706" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>

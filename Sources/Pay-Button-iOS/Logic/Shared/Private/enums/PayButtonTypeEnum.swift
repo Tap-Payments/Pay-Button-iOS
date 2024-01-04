@@ -23,6 +23,12 @@ import Foundation
     case Tabby
     /// The button will work to show payment in form of google pay
     case GooglePay
+    /// The button will work to show payment in form of careem pay
+    case CareemPay
+    /// The button will work to show payment in form of  card
+    case Card
+    /// The button will work to show payment in form of ApplePay
+    case ApplePay
     
     /// A string representation of the payment type
     public func toString() -> String {
@@ -41,6 +47,12 @@ import Foundation
             return "TABBY"
         case .GooglePay:
             return "GOOGLEPAY"
+        case .CareemPay:
+            return "CAREEMPAY"
+        case .Card:
+            return "CARD"
+        case .ApplePay:
+            return "APPLEPAY"
         }
     }
     
@@ -61,6 +73,12 @@ import Foundation
             return "https://button.dev.tap.company/wrapper/tabby?configurations="
         case .GooglePay:
             return "https://button.dev.tap.company/wrapper/googlepay?configurations="
+        case .CareemPay:
+            return "https://button.dev.tap.company/wrapper/careempay?configurations="
+        case .Card:
+            return "https://button.dev.tap.company/wrapper/card?configurations="
+        case .ApplePay:
+            return "https://button.dev.tap.company/wrapper/applepay?configurations="
         }
     }
     
@@ -81,6 +99,12 @@ import Foundation
             return "taptabbywebsdk://"
         case .GooglePay:
             return "tapgooglepaywebsdk://"
+        case .CareemPay:
+            return "tapcareempaywebsdk://"
+        case .Card:
+            return "tapcardwebsdk://"
+        case .ApplePay:
+            return "tapapplepaywebsdk://"
         }
     }
     

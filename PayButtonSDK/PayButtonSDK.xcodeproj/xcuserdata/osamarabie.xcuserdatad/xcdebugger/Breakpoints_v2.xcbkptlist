@@ -7,16 +7,64 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "D0F21653-CC15-4BAD-A885-39AF8ED247B8"
+            uuid = "3D01733A-4B14-44B0-86D2-D02BAB7C054C"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../Sources/Pay-Button-iOS/Logic/Shared/Private/views/ThreeDSViewController.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "31"
+            endingLineNumber = "31"
+            landmarkName = "selectedLocale"
+            landmarkType = "24">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "BDC4080C-6FD9-4F54-B6F4-725F8A671D59"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "../Sources/Pay-Button-iOS/Logic/SdkBasedButtons/GooglePay/private/extensions/TapGooglePay+WebDelegate.swift"
+            filePath = "../Sources/Pay-Button-iOS/Logic/SdkBasedButtons/CareemPay/private/extensions/TapCareemPay+WebDelegate.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "144"
-            endingLineNumber = "144"
-            landmarkName = "showGooglePay(for:)"
+            startingLineNumber = "180"
+            endingLineNumber = "180"
+            landmarkName = "handleOnCancel()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "25220D33-441C-4AC4-9B6A-A9FEBC84F350"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../Sources/Pay-Button-iOS/Logic/SdkBasedButtons/CareemPay/views/private/TapCareemPayView.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "140"
+            endingLineNumber = "140"
+            landmarkName = "passRedirectionDataToSDK(rediectionUrl:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "DC746D90-541A-4B11-AB2D-F415D0A17132"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../Sources/Pay-Button-iOS/Logic/RedirectionBasedButtons/private/views/RedirectionPayButtonView.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "100"
+            endingLineNumber = "100"
+            landmarkName = "passRedirectionDataToSDK(rediectionUrl:cardBased:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

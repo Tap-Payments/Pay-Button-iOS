@@ -54,6 +54,15 @@ extension RedirectionPayButton:WKNavigationDelegate {
             case _ where url.absoluteString.contains(CallBackSchemeEnum.onCancel.rawValue):
                 self.delegate?.onCanceled?()
                 break
+            case _ where url.absoluteString.contains(CallBackSchemeEnum.onBinIdentification.rawValue):
+                self.delegate?.onBinIdentification?(data: tap_extractDataFromUrl(url.absoluteURL))
+                break
+            case _ where url.absoluteString.contains(CallBackSchemeEnum.on3dsRedirect.rawValue):
+                handleRedirection(data: tap_extractDataFromUrl(url.absoluteURL))
+                break
+            case _ where url.absoluteString.contains(CallBackSchemeEnum.onHeightChange.rawValue):
+                self.handleOnHeightChange(newHeight: Double(tap_extractDataFromUrl(url, for: "data", shouldBase64Decode: false)) ?? 48)
+                break
             default:
                 break
             }
@@ -67,7 +76,6 @@ extension RedirectionPayButton:WKNavigationDelegate {
     internal func handleOnChargeCreated(data:String) {
         // let us make sure we have the data we need to start such a process
         guard let redirection:Redirection = try? Redirection(data),
-              let _:String = redirection.url,
               let chargeID:String = redirection.id else {
             // This means, there is such an error from the integration with web sdk
             delegate?.onError?(data: "Failed to start authentication process")
@@ -83,14 +91,16 @@ extension RedirectionPayButton:WKNavigationDelegate {
     
     /// Will create a redirection UIView and display it alert level on top of the current screen
     /// - Parameter for redirection: The redirection model that contains the redirection URL + the redirection finished keyword
-    func showRedirectionView(for redirection:Redirection) {
+    /// - Parameter cardBased: Indicates if we will need to pass the authentication back to the card pay button ot we will pass the normal ID we got from a normal redirection based payment method
+    func showRedirectionView(for redirection:Redirection, cardBased:Bool = false) {
         // This means we are ok to start the authentication process
         threeDsView = .init()
         threeDsView?.isModalInPresentation = true
         // Set to web view the needed urls
         /// The redirect url scheme
-        threeDsView?.redirectUrl = payButtonType.tapRedirectionSchemeUrl()
+        threeDsView?.redirectUrl = redirection.redirectionUrl ?? payButtonType.tapRedirectionSchemeUrl()
         threeDsView?.redirectionData = redirection
+        threeDsView?.queryOnly = !cardBased
         // Set the selected card locale for correct semantic rendering
         threeDsView?.selectedLocale = currentlyLoadedConfigurations?.getButtonLocale() ?? "en"
         // Set to web view what should it when the process is canceled by the user
@@ -106,7 +116,7 @@ extension RedirectionPayButton:WKNavigationDelegate {
         threeDsView?.redirectionReached = { redirectionUrl in
             self.threeDsView?.dismiss(animated: true) {
                 DispatchQueue.main.async {
-                    self.passRedirectionDataToSDK(rediectionUrl: redirectionUrl)
+                    self.passRedirectionDataToSDK(rediectionUrl: redirectionUrl, cardBased: cardBased)
                 }
             }
         }
@@ -122,9 +132,52 @@ extension RedirectionPayButton:WKNavigationDelegate {
         threeDsView?.startLoading()
     }
     
+    /// Executes the logic needed where the web sdk is telling is onSuccess
+    /// - Parameter url: the full web scheke url passed from the web sdk
     func handleOnSuccess(url:URL) {
         self.delegate?.onSuccess?(data: tap_extractDataFromUrl(url, for: "data", shouldBase64Decode: true))
         //self.openUrl(url: self.currentlyLoadedConfigurations)
+    }
+    
+    
+    /// Will handle & starte the redirection process when called
+    /// - Parameter data: The data string fetched from the url parameter
+    func handleRedirection(data:String) {
+        // let us make sure we have the data we need to start such a process
+        guard let cardRedirection:CardRedirection = try? CardRedirection(data),
+              let _:String = cardRedirection.threeDsUrl,
+              let _:String = cardRedirection.redirectUrl else {
+            // This means, there is such an error from the integration with web sdk
+            delegate?.onError?(data: "Failed to start authentication process")
+            return
+        }
+        
+        showRedirectionView(for: .init(url: cardRedirection.threeDsUrl, redirectionUrl: cardRedirection.redirectUrl, id: cardRedirection.keyword, powered: cardRedirection.powered, stopRedirection: false), cardBased: true)
+    }
+    
+    /// Executes the logic needed where the web sdk is telling is changing in height
+    /// - Parameter data: the new height passed from the web sdk
+    func handleOnHeightChange(newHeight:Double) {
+        // make sure we are in the main thread
+        DispatchQueue.main.async {
+            // move to the new height or safely to the default height
+            let currentWidth:CGFloat = self.frame.width
+            
+            let buttonHeight = self.heightAnchor.constraint(equalToConstant: newHeight + 10.0)
+            let buttonWidth = self.widthAnchor.constraint(equalToConstant: currentWidth)
+            
+            // Activate the constraints
+            self.constraints.first { $0.firstAnchor == self.heightAnchor }?.isActive = false
+            self.constraints.first { $0.firstAnchor == self.widthAnchor }?.isActive = false
+            NSLayoutConstraint.activate([buttonHeight,buttonWidth])
+            // Update the layout of the affected views
+            self.layoutIfNeeded()
+            self.updateConstraints()
+            self.layoutSubviews()
+            self.webView.layoutIfNeeded()
+            self.delegate?.onHeightChange?(height: newHeight)
+        }
+        
     }
     
     func handleOnCancel() {

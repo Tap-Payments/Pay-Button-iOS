@@ -17,7 +17,7 @@ class PayButtonSettingsViewController: FormViewController {
 
     var config: [String:Any]?
     var delegate: PayButtonSettingsViewControllerDelegate?
-    var selectedButtonType:PayButtonTypeEnum = .BenefitPay
+    var selectedButtonType:PayButtonTypeEnum = .CareemPay
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -30,16 +30,41 @@ class PayButtonSettingsViewController: FormViewController {
             row.value = selectedButtonType.toString()
             row.onChange { row in
                 self.selectedButtonType = PayButtonTypeEnum.init(rawValue: PayButtonTypeEnum.allCases.map{ $0.toString() }.firstIndex(of: row.value ?? "BENEFITPAY") ?? 0) ?? self.selectedButtonType
+                self.update(dictionary: &self.config!, at: ["scope"], with: "charge")
+                self.form.rowBy(tag: "scope")?.value = "charge"
+                self.form.rowBy(tag: "scope")?.reload()
+                self.form.rowBy(tag: "scope")?.updateCell()
+                
+                var selectedCurrency:String = "KWD"
+                switch self.selectedButtonType {
+                case .BenefitPay,.Benefit:
+                    selectedCurrency = "BHD"
+                case .Knet:
+                    selectedCurrency = "KWD"
+                case .Fawry:
+                    selectedCurrency = "EGP"
+                case .Paypal, .GooglePay:
+                    selectedCurrency = "USD"
+                case .Tabby, .CareemPay:
+                    selectedCurrency = "AED"
+                case .Card, .ApplePay:
+                    selectedCurrency = "SAR"
+                }
+                
+                self.update(dictionary: &self.config!, at: ["order","currency"], with: selectedCurrency)
+                self.form.rowBy(tag: "order.currency")?.value = selectedCurrency
+                self.form.rowBy(tag: "order.currency")?.reload()
+                self.form.rowBy(tag: "order.currency")?.updateCell()
             }
         }
         
         form +++ Section("operator")
         <<< AlertRow<String>("operator.publicKey"){ row in
             row.title = "Tap public key"
-            row.options = ["pk_test_6jdl4Qo0FYOSXmrZTR1U5EHp","pk_live_I8aWfZkiGtw9HYsRCcAgQzS6"]
-            row.value = (config! as NSDictionary).value(forKeyPath: "operator.publicKey") as? String ?? "pk_test_HJN863LmO15EtDgo9cqK7sjS"
+            row.options = ["pk_test_Wa4ju8UC1zoi0HhST9yO3M6n","pk_live_Q4EYIh0BJe17uDwtGV2CsT8X"]
+            row.value = (config! as NSDictionary).value(forKeyPath: "operator.publicKey") as? String ?? "pk_test_Wa4ju8UC1zoi0HhST9yO3M6n"
             row.onChange { row in
-                self.update(dictionary: &self.config!, at: ["operator","publicKey"], with: row.value ?? "pk_test_HJN863LmO15EtDgo9cqK7sjS")
+                self.update(dictionary: &self.config!, at: ["operator","publicKey"], with: row.value ?? "pk_test_Wa4ju8UC1zoi0HhST9yO3M6n")
             }
         }
         
@@ -56,11 +81,14 @@ class PayButtonSettingsViewController: FormViewController {
         form +++ Section("scope")
         <<< AlertRow<String>("scope"){ row in
             row.title = "Scope"
-            row.options = ["charge","authorize","taptoken","googlepaytoken"]
+            row.options = scopes(for: selectedButtonType)
             row.value = (config! as NSDictionary).value(forKeyPath: "scope") as? String ?? "charge"
             row.onChange { row in
                 self.update(dictionary: &self.config!, at: ["scope"], with: row.value ?? "charge")
             }
+        }
+        .cellUpdate { cell, row in
+            row.options = self.scopes(for: self.selectedButtonType)
         }
         
         form +++ Section("transaction")
@@ -215,10 +243,44 @@ class PayButtonSettingsViewController: FormViewController {
             }
         }
         
+        
+        form +++ Section("features.customerCards")
+                <<< SwitchRow("features.acceptanceBadge"){ row in
+                    row.title = "acceptanceBadge"
+                    row.value = (config! as NSDictionary).value(forKeyPath: "features.acceptanceBadge") as? Bool ?? true
+                    row.onChange { row in
+                        self.update(dictionary: &self.config!, at: ["features","acceptanceBadge"], with: row.value ?? true)
+                    }
+                }
+        
+                <<< SwitchRow("features.customerCards.saveCard"){ row in
+                    row.title = "customerCards.saveCard"
+                    row.value = (config! as NSDictionary).value(forKeyPath: "features.customerCards.saveCard") as? Bool ?? true
+                    row.onChange { row in
+                        self.update(dictionary: &self.config!, at: ["features","customerCards","saveCard"], with: row.value ?? true)
+                    }
+                }
+                <<< SwitchRow("features.customerCards.autoSaveCard"){ row in
+                    row.title = "customerCards.autoSaveCard"
+                    row.value = (config! as NSDictionary).value(forKeyPath: "features.customerCards.autoSaveCard") as? Bool ?? true
+                    row.onChange { row in
+                        self.update(dictionary: &self.config!, at: ["features","customerCards","autoSaveCard"], with: row.value ?? true)
+                    }
+                }
+        
+        form +++ Section("fieldVisibility.card")
+        <<< SwitchRow("fieldVisibility.card.cardHolder"){ row in
+            row.title = "Card holder"
+            row.value = (config! as NSDictionary).value(forKeyPath: "fieldVisibility.card.cardHolder") as? Bool ?? true
+            row.onChange { row in
+                self.update(dictionary: &self.config!, at: ["fieldVisibility","card","cardHolder"], with: row.value ?? true)
+            }
+        }
+        
         form +++ Section("interface")
         <<< AlertRow<String>("interface.locale"){ row in
             row.title = "locale"
-            row.options = ["en","ar"]
+            row.options = ["en","ar","dynamic"]
             row.value = (config! as NSDictionary).value(forKeyPath: "interface.locale") as? String ?? "en"
             row.onChange { row in
                 self.update(dictionary: &self.config!, at: ["interface","locale"], with: row.value ?? "en")
@@ -226,7 +288,7 @@ class PayButtonSettingsViewController: FormViewController {
         }
         <<< AlertRow<String>("interface.theme"){ row in
             row.title = "theme"
-            row.options = ["light","dark"]
+            row.options = ["light","dark","dynamic"]
             row.value = (config! as NSDictionary).value(forKeyPath: "interface.theme") as? String ?? "light"
             row.onChange { row in
                 self.update(dictionary: &self.config!, at: ["interface","theme"], with: row.value ?? "light")
@@ -235,10 +297,10 @@ class PayButtonSettingsViewController: FormViewController {
         
         <<< AlertRow<String>("interface.edges"){ row in
             row.title = "edges"
-            row.options = ["curved","flat"]
-            row.value = (config! as NSDictionary).value(forKeyPath: "interface.edges") as? String ?? "curved"
+            row.options = ["circular","curved","flat"]
+            row.value = (config! as NSDictionary).value(forKeyPath: "interface.edges") as? String ?? "circular"
             row.onChange { row in
-                self.update(dictionary: &self.config!, at: ["interface","edges"], with: row.value ?? "curved")
+                self.update(dictionary: &self.config!, at: ["interface","edges"], with: row.value ?? "circular")
             }
         }
         
@@ -291,6 +353,32 @@ class PayButtonSettingsViewController: FormViewController {
         
         
         */
+    }
+    
+    
+    func scopes(for button:PayButtonTypeEnum) -> [String] {
+        switch button {
+        case .BenefitPay:
+            return ["charge"]
+        case .Knet:
+            return ["charge","authorize"]
+        case .Benefit:
+            return ["charge"]
+        case .Fawry:
+            return ["charge"]
+        case .Paypal:
+            return ["charge"]
+        case .Tabby:
+            return ["charge"]
+        case .GooglePay:
+            return ["charge","authorize","taptoken","googlepaytoken"]
+        case .CareemPay:
+            return ["charge"]
+        case .Card:
+            return ["charge","authorize"]
+        case .ApplePay:
+            return ["charge","authorize","taptoken","applepaytoken"]
+        }
     }
     
     override func viewWillDisappear(_ animated: Bool) {

@@ -23,6 +23,8 @@ class ThreeDSView: UIViewController {
     var poweredByTapView:PoweredByTapView = .init(frame: .zero)
     /// The redirect url scheme
     var redirectUrl:String?
+    /// Should only return the query part of the redirection or not
+    var queryOnly:Bool = true
     /// Represents the locale needed to render the powered by tap view with
     var selectedLocale:String = "en" {
         didSet{
@@ -152,7 +154,7 @@ extension ThreeDSView: WKNavigationDelegate {
                 self.redirectionReached(requestURL.absoluteString)
                 
             }else{
-                self.redirectionReached(NSURL(string: requestURL.absoluteString)?.query ??  requestURL.absoluteString)
+                self.redirectionReached(queryOnly ? NSURL(string: requestURL.absoluteString)?.query ??  requestURL.absoluteString : requestURL.absoluteString)
                 
             }
             decisionHandler(.cancel)

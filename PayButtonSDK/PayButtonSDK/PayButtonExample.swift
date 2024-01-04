@@ -13,28 +13,36 @@ class PayButtonExample: UIViewController {
     @IBOutlet weak var payButton: PayButtonView!
     @IBOutlet weak var eventsTextView: UITextView!
     
+    @IBOutlet weak var authenticatedTokenButton: UIButton!
     @IBOutlet weak var refreshButton: UIButton!
     
-    var selectedButtonType:PayButtonTypeEnum = .GooglePay
+    var toast:Toast?
+    
+    var selectedButtonType:PayButtonTypeEnum = .Knet
+    
     var dictConfig:[String:Any] = [
-        "operator": ["publicKey": "pk_test_6jdl4Qo0FYOSXmrZTR1U5EHp", "hashString": ""],
+        "debug":true,
+        "operator": ["publicKey": "pk_test_Wa4ju8UC1zoi0HhST9yO3M6n", "hashString": ""],
         "scope": "charge",
         "transaction": [
           "authentication": true,
+          "authenticate":[
+            "id":"",
+            "required":true
+          ],
+          "source":[
+            "id":""
+          ],
           "authorize": [
             "type": "VOID",
             "time": 12,
-          ],
-          "paymentAgreement": [
-            "id": "",
-            "contract": ["id": ""],
           ],
           "reference": "trx",
           "metadata": [:],
         ],
         "order": [
           "id": "",
-          "amount": 0.1,
+          "amount": 100,
           "currency": "KWD",
           "description": "Authentication description",
           "reference": "ordRef",
@@ -50,22 +58,35 @@ class PayButtonExample: UIViewController {
             "phone": ["countryCode": "+965", "number": "88888888"],
           ],
         ],
+        "fieldVisibility":["card": [
+                                "cvv":true,
+                                "cardHolder":true]
+                          ],
         "acceptance": [
                   "supportedSchemes": ["AMERICAN_EXPRESS", "VISA", "MASTERCARD", "OMANNET", "MADA"],
-                  "supportedFundSource": ["CREDIT", "DEBIT"],
+                  "supportedFundSource": ["DEBIT","CREDIT"],
                   "supportedPaymentAuthentications": ["3DS"],
                 ],
+        "features":["alternativeCardInputs":["cardScanner":true],
+                    "acceptanceBadge":true,
+                    "customerCards":["saveCard":true,
+                                     "autoSaveCard":true]
+                   ],
         "interface": [
           "locale": "en",
           "theme": UIView().traitCollection.userInterfaceStyle == .dark ? "dark" : "light",
-          "edges": "curved",
+          "edges": "circular",
           "colorStyle": UIView().traitCollection.userInterfaceStyle == .dark
             ? "monochrome" : "colored",
           "loader": true,
           "powered":true
         ],
         "post": ["url": ""],
-      ]
+    ] {
+        didSet {
+            generateHashString()
+        }
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -74,6 +95,20 @@ class PayButtonExample: UIViewController {
                print(String(decoding: jsonData, as: UTF8.self))
         }
     }
+    
+    func generateHashString() {
+        /*var hashString:String = (dictConfig as NSDictionary).value(forKeyPath: "operator.hashString") as? String ?? ""
+        if hashString == "" {
+            let publicKey:String = (dictConfig as NSDictionary).value(forKeyPath: "operator.publicKey") as? String ?? "pk_test_Wa4ju8UC1zoi0HhST9yO3M6n"
+            let amount:Double = (dictConfig as NSDictionary).value(forKeyPath: "order.amount") as? Double ?? 1.0
+            let currency:String = (dictConfig as NSDictionary).value(forKeyPath: "order.currency") as? String ?? "KWD"
+            let postUrl:String = (dictConfig as NSDictionary).value(forKeyPath: "post.url") as? String ?? ""
+            let transactionRef:String = (dictConfig as NSDictionary).value(forKeyPath: "transaction.reference") as? String ?? "trx"
+            let secretKey:String = publicKey == "pk_test_Wa4ju8UC1zoi0HhST9yO3M6n" ? "sk_test_UvDY01mebtdIK8Sox6iJFRQ9" : "sk_live_kn49iOuAHZ0xQGPDXFhBV71N"
+            hashString = PayButtonExample.generateTapHashString(publicKey: publicKey, secretKey: secretKey, amount: amount, currency: currency, postUrl: postUrl, transactionReference: transactionRef)
+            self.update(dictionary: &self.dictConfig, at: ["operator","hashString"], with: hashString)
+        }*/
+    }
 
     @IBAction func refreshButtonClicked(_ sender: Any) {
         setupPayButton()
@@ -81,6 +116,7 @@ class PayButtonExample: UIViewController {
     
     func setupPayButton() {
         refreshButton.isHidden = true
+        generateHashString()
         payButton.initPayButton(configDict: self.dictConfig, delegate: self, payButtonType: selectedButtonType)
     }
     
@@ -103,6 +139,7 @@ class PayButtonExample: UIViewController {
     }
     
     func configClicked() {
+        self.update(dictionary: &self.dictConfig, at: ["operator","hashString"], with: "")
         let configCtrl:PayButtonSettingsViewController = storyboard?.instantiateViewController(withIdentifier: "BenefitPayButtonSettingsViewController") as! PayButtonSettingsViewController
         configCtrl.config = dictConfig
         configCtrl.selectedButtonType = selectedButtonType
@@ -111,7 +148,6 @@ class PayButtonExample: UIViewController {
         self.navigationController?.pushViewController(configCtrl, animated: true)
         
     }
-    
     
     /**
          This is a helper method showing how can you generate a hash string when performing live charges
@@ -142,6 +178,42 @@ class PayButtonExample: UIViewController {
             
         }
     
+    
+    func update(dictionary dict: inout [String: Any], at keys: [String], with value: Any) {
+
+        if keys.count < 2 {
+            for key in keys { dict[key] = value }
+            return
+        }
+
+        var levels: [[AnyHashable: Any]] = []
+
+        for key in keys.dropLast() {
+            if let lastLevel = levels.last {
+                if let currentLevel = lastLevel[key] as? [AnyHashable: Any] {
+                    levels.append(currentLevel)
+                }
+                else if lastLevel[key] != nil, levels.count + 1 != keys.count {
+                    break
+                } else { return }
+            } else {
+                if let firstLevel = dict[keys[0]] as? [AnyHashable : Any] {
+                    levels.append(firstLevel )
+                }
+                else { return }
+            }
+        }
+
+        if levels[levels.indices.last!][keys.last!] != nil {
+            levels[levels.indices.last!][keys.last!] = value
+        } else { return }
+
+        for index in levels.indices.dropLast().reversed() {
+            levels[index][keys[index + 1]] = levels[index + 1]
+        }
+
+        dict[keys[0]] = levels[0]
+    }
     /*func setConfig(config: CardWebSDKConfig) {
         self.config = config
     }*/
@@ -163,6 +235,8 @@ extension PayButtonExample: PayButtonDelegate {
         //print("CardWebSDKExample onError \(data)")
         eventsTextView.text = "\n\n========\n\nonError \(data)\(eventsTextView.text ?? "")"
         refreshButton.isHidden = false
+        self.view.isUserInteractionEnabled = true
+        toast?.close()
     }
     
     func onSuccess(data: String) {
@@ -194,14 +268,20 @@ extension PayButtonExample: PayButtonDelegate {
     func onReady(){
         //print("CardWebSDKExample onReady")
         eventsTextView.text = "\n\n========\n\nonReady\(eventsTextView.text ?? "")"
+        self.view.isUserInteractionEnabled = true
+        toast?.close()
     }
     
-    func onClicked() {
+    func onClick() {
         //print("CardWebSDKExample onFocus")
         eventsTextView.text = "\n\n========\n\nonClicked\(eventsTextView.text ?? "")"
     }
     
     func onCanceled() {
         eventsTextView.text = "\n\n========\n\nonCanceled\(eventsTextView.text ?? "")"
+    }
+    
+    func onBinIdentification(data: String) {
+        eventsTextView.text = "\n\n========\n\nonBinIdentification \(data)\(eventsTextView.text ?? "")"
     }
 }
