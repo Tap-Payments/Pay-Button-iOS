@@ -5,8 +5,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/xmartlabs/Eureka.git",
       "state" : {
-        "revision" : "b6e35acf77a5551070afa6248935ec68e71f22af",
-        "version" : "5.4.0"
+        "revision" : "028ef8e3191a256b8f6b8bb6b9496efcb0762dbc",
+        "version" : "5.5.0"
       }
     },
     {
@@ -41,8 +41,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Tap-Payments/TapFontKit-iOS.git",
       "state" : {
-        "revision" : "279ac52e3f05d04eaa14eecc548f5de9124cdf89",
-        "version" : "0.0.10"
+        "revision" : "eb93da82e1eb70bcac864df8da3c4d916f743860",
+        "version" : "0.0.11"
       }
     },
     {
@@ -50,8 +50,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/BastiaanJansen/toast-swift",
       "state" : {
-        "revision" : "a24a15677179e66be1a8b45f4c6b21001fbb6ab2",
-        "version" : "2.0.0"
+        "revision" : "9a40b722b6eeb9683d47e3584501e81525741291",
+        "version" : "2.1.2"
       }
     }
   ],
