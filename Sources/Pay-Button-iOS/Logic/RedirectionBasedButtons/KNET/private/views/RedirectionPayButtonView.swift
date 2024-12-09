@@ -8,7 +8,7 @@ internal class RedirectionPayButton: PayButtonBaseView {
     /// The web view used to render the knet button
     internal var webView: WKWebView = .init()
     /// keeps a hold of the loaded web sdk configurations url
-    internal var currentlyLoadedConfigurations:URL?
+    internal var currentlyLoadedConfigurations:[String:Any]?
     /// The view that will present full screen 3ds flow
     internal var threeDsView:ThreeDSView?
     
@@ -41,7 +41,6 @@ internal class RedirectionPayButton: PayButtonBaseView {
     /// - Parameter url: The url needed to load.
     internal func openUrl(url: URL?) {
         // Store it for further usages
-        currentlyLoadedConfigurations = url
         // instruct the web view to load the needed url
         let request = URLRequest(url: url!)
         
@@ -107,10 +106,20 @@ internal class RedirectionPayButton: PayButtonBaseView {
         
         
         do {
-            currentlyLoadedConfigurations = try URL(string:UrlBasedUtils.generatePayButtonSdkURL(from: updatedConfigurations, payButtonType: payButtonType)) ?? nil
-            updatedConfigurations["headers"] = UrlBasedUtils.generateApplicationHeader(headersEncryptionPublicKey: currentlyLoadedConfigurations?.headersEncryptionPublicKey() ?? "")
+            //currentlyLoadedConfigurations = try URL(string:UrlBasedUtils.generatePayButtonSdkURL(from: updatedConfigurations, payButtonType: payButtonType)) ?? nil
+            updatedConfigurations["headers"] = UrlBasedUtils.generateApplicationHeader(headersEncryptionPublicKey: updatedConfigurations.headersEncryptionPublicKey() ?? "")
             updatedConfigurations["redirect"] = ["url":payButtonType.tapRedirectionSchemeUrl()]
-            try openUrl(url: URL(string: UrlBasedUtils.generatePayButtonSdkURL(from: updatedConfigurations, payButtonType: payButtonType)))
+            currentlyLoadedConfigurations = updatedConfigurations
+            try UrlBasedUtils.generatePayButtonSdkURL(from: updatedConfigurations, payButtonType: payButtonType) { buttonUrl, error in
+                DispatchQueue.main.async {
+                    // Check error
+                    if error.isEmpty {
+                        self.openUrl(url: URL(string: buttonUrl)!)
+                    }else{
+                        self.delegate?.onError?(data: "{error:\(error)}")
+                    }
+                }
+            }
         }
         catch {
             self.delegate?.onError?(data: "{error:\(error.localizedDescription)}")

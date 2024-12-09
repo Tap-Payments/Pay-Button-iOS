@@ -157,7 +157,7 @@ extension GooglePayButton:WKNavigationDelegate {
     /// - Parameter url: The url google pay redirected the user to after finishing the payment flow
     func fetchGooglePayToken(from url:String) -> String {
         // Remove non needed parts
-        let filtered:String = url.replacingOccurrences(of: "\(self.currentlyLoadedConfigurations?.absoluteString ?? "")#__WA_RES__=", with: "")
+        let filtered:String = url.replacingOccurrences(of: "\(self.currentlyLoadedUrl)#__WA_RES__=", with: "")
         // Turn it into pretty json string
         let decoded:String = filtered.removingPercentEncoding ?? ""
         if let json = try? JSONSerialization.jsonObject(with: Data(decoded.utf8), options: .mutableContainers),

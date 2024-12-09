@@ -18,7 +18,7 @@ internal class BenefitPayButton: PayButtonBaseView {
     /// The web view used to render the benefit pay button
     internal var webView: WKWebView = .init()
     /// keeps a hold of the loaded web sdk configurations url
-    internal var currentlyLoadedConfigurations:URL?
+    internal var currentlyLoadedConfigurations:[String:Any]?
     /// Keeps a reference to whether or not we should handle the on cancel because it comes directly after onSuccess
     internal var handleOnCancel:Bool = true
     /// Keeps a reference to the gif loader we will display when coming back from pay with benefit pay app
@@ -72,7 +72,6 @@ internal class BenefitPayButton: PayButtonBaseView {
     /// - Parameter url: The url needed to load.
     internal func openUrl(url: URL?) {
         // Store it for further usages
-        currentlyLoadedConfigurations = url
         handleOnCancel = true
         // instruct the web view to load the needed url
         let request = URLRequest(url: url!)
@@ -182,9 +181,20 @@ internal class BenefitPayButton: PayButtonBaseView {
         
         
         do {
-            currentlyLoadedConfigurations = try URL(string:UrlBasedUtils.generatePayButtonSdkURL(from: updatedConfigurations, payButtonType: payButtonType)) ?? nil
-            updatedConfigurations["headers"] = UrlBasedUtils.generateApplicationHeader(headersEncryptionPublicKey: currentlyLoadedConfigurations?.headersEncryptionPublicKey() ?? "")
-            try openUrl(url: URL(string: UrlBasedUtils.generatePayButtonSdkURL(from: updatedConfigurations, payButtonType: payButtonType)))
+            //currentlyLoadedConfigurations = try URL(string:UrlBasedUtils.generatePayButtonSdkURL(from: updatedConfigurations, payButtonType: payButtonType)) ?? nil
+            updatedConfigurations["headers"] = UrlBasedUtils.generateApplicationHeader(headersEncryptionPublicKey: updatedConfigurations.headersEncryptionPublicKey() ?? "")
+            updatedConfigurations["redirect"] = ["url":payButtonType.tapRedirectionSchemeUrl()]
+            currentlyLoadedConfigurations = updatedConfigurations
+            try UrlBasedUtils.generatePayButtonSdkURL(from: updatedConfigurations, payButtonType: payButtonType) { buttonUrl, error in
+                DispatchQueue.main.async {
+                    // Check error
+                    if error.isEmpty {
+                        self.openUrl(url: URL(string: buttonUrl)!)
+                    }else{
+                        self.delegate?.onError?(data: "{error:\(error)}")
+                    }
+                }
+            }
         }
         catch {
             self.delegate?.onError?(data: "{error:\(error.localizedDescription)}")

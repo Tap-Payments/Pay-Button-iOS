@@ -15,12 +15,19 @@ class PayButtonExample: UIViewController {
     
     @IBOutlet weak var refreshButton: UIButton!
     
-    var selectedButtonType:PayButtonTypeEnum = .GooglePay
+    var selectedButtonType:PayButtonTypeEnum = .CareemPay
     var dictConfig:[String:Any] = [
         "operator": ["publicKey": "pk_test_6jdl4Qo0FYOSXmrZTR1U5EHp", "hashString": ""],
+        "debug":true,
+        "data-testid": "TapButton",
+            "language": "en",
+            "themeMode": UIView().traitCollection.userInterfaceStyle == .dark ? "dark" : "light",
+            "edges": "curved",
+        "platform":"mobile",
+        "paymentMethod": PayButtonTypeEnum.CareemPay.toString().lowercased(),
         "scope": "charge",
         "transaction": [
-          "authentication": true,
+            "authentication": ["id":"","required":true,"metadata":[:]],
           "authorize": [
             "type": "VOID",
             "time": 12,
@@ -28,6 +35,7 @@ class PayButtonExample: UIViewController {
           "paymentAgreement": [
             "id": "",
             "contract": ["id": ""],
+            "metadata":[:]
           ],
           "reference": "trx",
           "metadata": [:],
@@ -51,6 +59,7 @@ class PayButtonExample: UIViewController {
           ],
         ],
         "acceptance": [
+            "supportedPaymentMethod":[PayButtonTypeEnum.CareemPay.toString().lowercased()],
                   "supportedSchemes": ["AMERICAN_EXPRESS", "VISA", "MASTERCARD", "OMANNET", "MADA"],
                   "supportedFundSource": ["CREDIT", "DEBIT"],
                   "supportedPaymentAuthentications": ["3DS"],
@@ -65,6 +74,8 @@ class PayButtonExample: UIViewController {
           "powered":true
         ],
         "post": ["url": ""],
+        "redirect": ["url": ""],
+        "metadata": ["": ""],
       ]
     
     override func viewDidLoad() {

@@ -37,6 +37,9 @@ import UIKit
         case .Knet:
             buttonView = RedirectionPayButton()
             (buttonView as? RedirectionPayButton)?.updateType(to: .Knet)
+        case .ApplePay:
+            buttonView = RedirectionPayButton()
+            (buttonView as? RedirectionPayButton)?.updateType(to: .ApplePay)
         case .Fawry:
             buttonView = RedirectionPayButton()
             (buttonView as? RedirectionPayButton)?.updateType(to: .Fawry)
@@ -51,6 +54,9 @@ import UIKit
             (buttonView as? RedirectionPayButton)?.updateType(to: .Tabby)
         case .GooglePay:
             buttonView = GooglePayButton()
+        case .CareemPay:
+            buttonView = RedirectionPayButton()
+            (buttonView as? RedirectionPayButton)?.updateType(to: .CareemPay)
         }
         addSubview(buttonView)
         buttonView.translatesAutoresizingMaskIntoConstraints = false

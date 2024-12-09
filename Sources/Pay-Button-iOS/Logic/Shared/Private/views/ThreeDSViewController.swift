@@ -29,6 +29,7 @@ class ThreeDSView: UIViewController {
             self.poweredByTapView.selectedLocale = selectedLocale
         }
     }
+    var popupWebView: WKWebView?
     
     //MARK: - Init methods
     override func viewDidLoad() {
@@ -73,6 +74,7 @@ extension ThreeDSView {
         let configuration = WKWebViewConfiguration()
         configuration.preferences = preferences
 
+        
         // Let us theme the web view
         webView = .init(frame: .zero, configuration: configuration)
         webView?.isOpaque = false
@@ -85,7 +87,7 @@ extension ThreeDSView {
         // Let set the delegates
         webView?.scrollView.delegate = self
         webView?.navigationDelegate = self
-        
+        webView?.uiDelegate = self
     }
     /// Applies constrains to correctly size and position the web view
     func webViewConstraints() {
@@ -175,5 +177,25 @@ extension ThreeDSView: WKNavigationDelegate {
     
     func triggeringValue(from url:URL, with triggeringKeyword:String) -> String? {
         return tap_extractDataFromUrl(url,for:triggeringKeyword, shouldBase64Decode: false)
+    }
+}
+
+
+extension ThreeDSView: WKUIDelegate {
+    //MARK: Creating new webView for popup
+    func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
+        popupWebView = WKWebView(frame: view.bounds, configuration: configuration)
+        popupWebView!.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        popupWebView!.navigationDelegate = self
+        popupWebView!.uiDelegate = self
+        view.addSubview(popupWebView!)
+        return popupWebView!
+    }
+    //MARK: To close popup
+    func webViewDidClose(_ webView: WKWebView) {
+        if webView == popupWebView {
+            popupWebView?.removeFromSuperview()
+            popupWebView = nil
+        }
     }
 }

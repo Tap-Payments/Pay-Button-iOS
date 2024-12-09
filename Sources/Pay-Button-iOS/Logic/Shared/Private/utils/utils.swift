@@ -16,14 +16,59 @@ internal class UrlBasedUtils {
     ///  Generates a card sdk url with correctly encoded values
     ///  - Parameter from configurations: the Dictionaty configurations to be url encoded
     ///  - Parameter payButtonType: The type you want to generate a url for
-    static func generatePayButtonSdkURL(from configuration: [String : Any], payButtonType:PayButtonTypeEnum) throws -> String {
+    static func generatePayButtonSdkURL(from configuration: [String : Any], payButtonType:PayButtonTypeEnum, completion: @escaping (_ buttonUrl:String, _ error:String) -> Void = {_,_ in}) throws -> String {
         do {
             // Make sure we have a valid string:any dictionaty
             let data = try JSONSerialization.data(withJSONObject: configuration, options: .prettyPrinted)
-            let jsonString = NSString(data: data, encoding: NSUTF8StringEncoding)
+            //let jsonString = NSString(data: data, encoding: NSUTF8StringEncoding)
             // ul encode the generated string
-            let urlEncodedJson = jsonString!.addingPercentEncoding(withAllowedCharacters: .urlFragmentAllowed)
-            let urlString = "\(payButtonType.baseUrl())\(urlEncodedJson!)"
+            //let urlEncodedJson = jsonString!.addingPercentEncoding(withAllowedCharacters: .urlFragmentAllowed)
+            let urlString = "https://mw-sdk.dev.tap.company/v2/button/config"//"\(payButtonType.baseUrl())\(urlEncodedJson!)"
+            
+            var request = URLRequest(url: URL(string: urlString)!)
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.httpMethod = "POST"
+            
+            request.httpBody = data
+
+            let task = URLSession.shared.dataTask(with: request) { data, response, error in
+                guard
+                    let data = data,
+                    let response = response as? HTTPURLResponse,
+                    error == nil
+                else {                                                               // check for fundamental networking error
+                    print("error", error ?? URLError(.badServerResponse).localizedDescription)
+                    completion("", error?.localizedDescription ?? URLError(.badServerResponse).localizedDescription)
+                    return
+                }
+                
+                guard (200 ... 299) ~= response.statusCode else {                    // check for http errors
+                    print("statusCode should be 2xx, but is \(response.statusCode), response \(response)")
+                    print("response = \(response)")
+                    completion("", "statusCode should be 2xx, but is \(response.statusCode), response \(response)")
+                    return
+                }
+                
+                // do whatever you want with the `data`, e.g.:
+                
+                do {
+                    let responseObject = try JSONDecoder().decode([String:String].self, from: data)
+                    print(responseObject)
+                    completion(responseObject["redirect_url"]!,"")
+                } catch {
+                    print(error) // parsing error
+                    
+                    if let responseString = String(data: data, encoding: .utf8) {
+                        completion("", "Unexpected response \(responseString) \(error)")
+                    } else {
+                        completion("", "unable to parse response as string \(error)")
+                    }
+                }
+            }
+
+            task.resume()
+                  // etc...
+            
             return urlString
         }
         catch {
@@ -34,10 +79,10 @@ internal class UrlBasedUtils {
     ///  Generates a card sdk url with correctly encoded values
     ///  - Parameter from configurations: the String configurations to be url encoded
     ///  - Parameter payButtonType: The type you want to generate a url for
-    static func generatePayButtonSdkURL(from configuration: String, payButtonType:PayButtonTypeEnum) -> String {
+    static func generatePayButtonSdkURL(from configuration: String, payButtonType:PayButtonTypeEnum, completion: @escaping () -> Void = {}) -> String {
         let urlEncodedJson = configuration.addingPercentEncoding(withAllowedCharacters: .urlFragmentAllowed)
         // ul encode the generated string
-        return "\(payButtonType.baseUrl())\(urlEncodedJson!)"
+        return "https://mw-sdk.dev.tap.company/v2/button/config"//"\(payButtonType.baseUrl())\(urlEncodedJson!)"
     }
     
     //MARK: - Network's headers
@@ -190,4 +235,27 @@ internal extension UIView {
     func subview(of classType: AnyClass?) -> UIView? {
         return subviews.first { type(of: $0) == classType }
     }
+}
+
+private extension Dictionary {
+    func percentEncoded() -> Data? {
+        map { key, value in
+            let escapedKey = "\(key)".addingPercentEncoding(withAllowedCharacters: .urlQueryValueAllowed) ?? ""
+            let escapedValue = "\(value)".addingPercentEncoding(withAllowedCharacters: .urlQueryValueAllowed) ?? ""
+            return escapedKey + "=" + escapedValue
+        }
+        .joined(separator: "&")
+        .data(using: .utf8)
+    }
+}
+
+private extension CharacterSet {
+    static let urlQueryValueAllowed: CharacterSet = {
+        let generalDelimitersToEncode = ":#[]@" // does not include "?" or "/" due to RFC 3986 - Section 3.4
+        let subDelimitersToEncode = "!$&'()*+,;="
+        
+        var allowed: CharacterSet = .urlQueryAllowed
+        allowed.remove(charactersIn: "\(generalDelimitersToEncode)\(subDelimitersToEncode)")
+        return allowed
+    }()
 }
