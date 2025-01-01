@@ -135,7 +135,8 @@ extension GooglePayButton:WKNavigationDelegate {
         }
         // Set to web view the needed urls
         /// The redirect url scheme
-        googlePayController?.redirectUrl = PayButtonTypeEnum.GooglePay.baseUrl()
+        // MARK: GOOGLEPAY
+        //googlePayController?.redirectUrl = PayButtonTypeEnum.GooglePay.baseUrl()
         // Set to web view what should it when the process is completed by the user
         googlePayController?.redirectionReached = { redirectionUrl in
             self.googlePayController?.dismiss(animated: true) {

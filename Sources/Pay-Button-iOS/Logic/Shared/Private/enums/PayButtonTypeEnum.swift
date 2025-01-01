@@ -52,33 +52,10 @@ import Foundation
         }
     }
     
-    /// Will define the base url for the payment type
-    internal func baseUrl() -> String {
-        switch self {
-        case .BenefitPay:
-            return "https://button.dev.tap.company/wrapper/benefitpay?configurations="
-        case .Knet:
-            return "https://button.dev.tap.company/wrapper/knet?configurations="
-        case .Benefit:
-            return "https://button.dev.tap.company/wrapper/benefit?configurations="
-        case .Fawry:
-            return "https://button.dev.tap.company/wrapper/fawry?configurations="
-        case .Paypal:
-            return "https://button.dev.tap.company/wrapper/paypal?configurations="
-        case .Tabby:
-            return "https://button.dev.tap.company/wrapper/tabby?configurations="
-        case .GooglePay:
-            return "https://button.dev.tap.company/wrapper/googlepay?configurations="
-        case .ApplePay:
-            return "https://button.dev.tap.company/wrapper/applepay?configurations="
-        case .CareemPay:
-            return "https://button.dev.tap.company/wrapper/careempay?configurations="
-        }
-    }
-    
     /// Will define the scheme will be used by the original web sdk to communicate with the native view
     internal func webSdkScheme() -> String {
-        switch self {
+        return "tapbuttonsdk://"
+        /*switch self {
         case .BenefitPay:
             return "tapbenefitpaywebsdk://"
         case .Knet:
@@ -97,7 +74,7 @@ import Foundation
             return "tapapplepaywebsdk://"
         case .CareemPay:
             return "tapcareempaywebsdk://"
-        }
+        }*/
     }
     
     /// The string that we will use to tell the backend which url it should redirect to upin finishing a redirection based payment

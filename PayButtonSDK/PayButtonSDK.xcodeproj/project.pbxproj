@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		E844126A2CF6F907001883CD /* TestApplePayViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E84412692CF6F907001883CD /* TestApplePayViewController.swift */; };
 		E88462742AEEA4EE000040C3 /* Pay-Button-iOS in Frameworks */ = {isa = PBXBuildFile; productRef = E88462732AEEA4EE000040C3 /* Pay-Button-iOS */; };
 		E8BD67D72AEA40D700DED568 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8BD67D62AEA40D700DED568 /* AppDelegate.swift */; };
 		E8BD67D92AEA40D700DED568 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8BD67D82AEA40D700DED568 /* SceneDelegate.swift */; };
@@ -25,7 +24,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		E84412692CF6F907001883CD /* TestApplePayViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestApplePayViewController.swift; sourceTree = "<group>"; };
 		E8BD67D32AEA40D700DED568 /* PayButtonSDK.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PayButtonSDK.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E8BD67D62AEA40D700DED568 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		E8BD67D82AEA40D700DED568 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -86,7 +84,6 @@
 				E8BD67DF2AEA40D900DED568 /* Assets.xcassets */,
 				E8BD67E12AEA40D900DED568 /* LaunchScreen.storyboard */,
 				E8BD67E42AEA40D900DED568 /* Info.plist */,
-				E84412692CF6F907001883CD /* TestApplePayViewController.swift */,
 			);
 			path = PayButtonSDK;
 			sourceTree = "<group>";
@@ -178,7 +175,6 @@
 				E8BD67D72AEA40D700DED568 /* AppDelegate.swift in Sources */,
 				E8BD67F12AEA474E00DED568 /* PayButtonSettingsViewController.swift in Sources */,
 				E8BD67D92AEA40D700DED568 /* SceneDelegate.swift in Sources */,
-				E844126A2CF6F907001883CD /* TestApplePayViewController.swift in Sources */,
 				E8BD67F02AEA474E00DED568 /* PayButtonExample.swift in Sources */,
 				E8BD67F22AEA474E00DED568 /* OnSuccessViewController.swift in Sources */,
 			);

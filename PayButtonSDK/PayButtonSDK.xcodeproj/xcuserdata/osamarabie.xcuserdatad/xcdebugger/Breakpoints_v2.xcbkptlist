@@ -7,16 +7,16 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "99A9FA6B-D916-4AE4-96D4-3B6F841D0DFD"
-            shouldBeEnabled = "Yes"
+            uuid = "66CD6715-3EDB-473C-A9BE-0DA009B71557"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "../Sources/Pay-Button-iOS/Logic/Shared/Private/views/ThreeDSViewController.swift"
+            filePath = "../Sources/Pay-Button-iOS/Logic/Shared/Public/PayButtonView.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "187"
-            endingLineNumber = "187"
-            landmarkName = "webView(_:createWebViewWith:for:windowFeatures:)"
+            startingLineNumber = "117"
+            endingLineNumber = "117"
+            landmarkName = "initPayButton(configDict:delegate:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

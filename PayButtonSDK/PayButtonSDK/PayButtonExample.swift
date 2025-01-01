@@ -17,65 +17,8 @@ class PayButtonExample: UIViewController {
     
     var selectedButtonType:PayButtonTypeEnum = .CareemPay
     var dictConfig:[String:Any] = [
-        "operator": ["publicKey": "pk_test_6jdl4Qo0FYOSXmrZTR1U5EHp", "hashString": ""],
-        "debug":true,
-        "data-testid": "TapButton",
-            "language": "en",
-            "themeMode": UIView().traitCollection.userInterfaceStyle == .dark ? "dark" : "light",
-            "edges": "curved",
-        "platform":"mobile",
-        "paymentMethod": PayButtonTypeEnum.CareemPay.toString().lowercased(),
-        "scope": "charge",
-        "transaction": [
-            "authentication": ["id":"","required":true,"metadata":[:]],
-          "authorize": [
-            "type": "VOID",
-            "time": 12,
-          ],
-          "paymentAgreement": [
-            "id": "",
-            "contract": ["id": ""],
-            "metadata":[:]
-          ],
-          "reference": "trx",
-          "metadata": [:],
-        ],
-        "order": [
-          "id": "",
-          "amount": 0.1,
-          "currency": "KWD",
-          "description": "Authentication description",
-          "reference": "ordRef",
-          "metadata": [:],
-        ],
-        "invoice": ["id": ""],
-        "merchant": ["id": ""],
-        "customer": [
-          "id": "",
-          "name": [["lang": "en", "first": "TAP", "middle": "", "last": "PAYMENTS"]],
-          "contact": [
-            "email": "tap@tap.company",
-            "phone": ["countryCode": "+965", "number": "88888888"],
-          ],
-        ],
-        "acceptance": [
-            "supportedPaymentMethod":[PayButtonTypeEnum.CareemPay.toString().lowercased()],
-                  "supportedSchemes": ["AMERICAN_EXPRESS", "VISA", "MASTERCARD", "OMANNET", "MADA"],
-                  "supportedFundSource": ["CREDIT", "DEBIT"],
-                  "supportedPaymentAuthentications": ["3DS"],
-                ],
-        "interface": [
-          "locale": "en",
-          "theme": UIView().traitCollection.userInterfaceStyle == .dark ? "dark" : "light",
-          "edges": "curved",
-          "colorStyle": UIView().traitCollection.userInterfaceStyle == .dark
-            ? "monochrome" : "colored",
-          "loader": true,
-          "powered":true
-        ],
-        "post": ["url": ""],
-        "redirect": ["url": ""],
-        "metadata": ["": ""],
+        "operator": ["publicKey": "pk_test_6jdl4Qo0FYOSXmrZTR1U5EHp"],
+        "intent":["id":"intent_aNpk40241858IKjJ308k115299"]
       ]
     
     override func viewDidLoad() {
@@ -92,7 +35,7 @@ class PayButtonExample: UIViewController {
     
     func setupPayButton() {
         refreshButton.isHidden = true
-        payButton.initPayButton(configDict: self.dictConfig, delegate: self, payButtonType: selectedButtonType)
+        payButton.initPayButton(configDict: self.dictConfig, delegate: self)
     }
     
     @IBAction func optionsClicked(_ sender: Any) {

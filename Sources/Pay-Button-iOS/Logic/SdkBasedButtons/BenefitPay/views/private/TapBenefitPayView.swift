@@ -13,8 +13,10 @@ import SharedDataModels_iOS
 internal class BenefitPayButton: PayButtonBaseView {
     /// The scheme prefix used by benefit pay sdk to show the benefit pay popup
     let benefitSDKUrlScheme:String = "https://benefit-checkout"
-    /// The scheme prefix used by benefit pay sdk to show the benefit pay popup
-    let benefitPayAppUrlScheme:String = "https://tbenefituser.page"
+    /// The Url to decide if this is the man in the middle page that we need to skip
+    internal static var benefitPayFireBaseURL:String = "https://preview.page.link/benefituser.page.link"
+    /// The Url to decide if this is the man in the middle page that we need to skip
+    internal static var javaScriptCodeToSkipManInTheMiddle:String = "document.getElementById('pzc6ed').click();"
     /// The web view used to render the benefit pay button
     internal var webView: WKWebView = .init()
     /// keeps a hold of the loaded web sdk configurations url
@@ -176,28 +178,9 @@ internal class BenefitPayButton: PayButtonBaseView {
     ///  - Parameter delegate:A protocol that allows integrators to get notified from events fired from benefit pay button
     override func initPayButton(configDict: [String : Any], delegate: PayButtonDelegate? = nil) {
         self.delegate = delegate
-        //let operatorModel:Operator = .init(publicKey: configDict["publicKey"] as? String ?? "", metadata: generateApplicationHeader())
-        var updatedConfigurations:[String:Any] = configDict
-        
-        
-        do {
-            //currentlyLoadedConfigurations = try URL(string:UrlBasedUtils.generatePayButtonSdkURL(from: updatedConfigurations, payButtonType: payButtonType)) ?? nil
-            updatedConfigurations["headers"] = UrlBasedUtils.generateApplicationHeader(headersEncryptionPublicKey: updatedConfigurations.headersEncryptionPublicKey() ?? "")
-            updatedConfigurations["redirect"] = ["url":payButtonType.tapRedirectionSchemeUrl()]
-            currentlyLoadedConfigurations = updatedConfigurations
-            try UrlBasedUtils.generatePayButtonSdkURL(from: updatedConfigurations, payButtonType: payButtonType) { buttonUrl, error in
-                DispatchQueue.main.async {
-                    // Check error
-                    if error.isEmpty {
-                        self.openUrl(url: URL(string: buttonUrl)!)
-                    }else{
-                        self.delegate?.onError?(data: "{error:\(error)}")
-                    }
-                }
-            }
-        }
-        catch {
-            self.delegate?.onError?(data: "{error:\(error.localizedDescription)}")
+        // Let us render the button
+        DispatchQueue.main.async {
+            self.openUrl(url: URL(string: UrlBasedUtils.buttonWrapperUrl)!)
         }
     }
 }

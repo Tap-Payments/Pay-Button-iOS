@@ -101,15 +101,17 @@ internal class RedirectionPayButton: PayButtonBaseView {
     override
     internal func initPayButton(configDict: [String : Any], delegate: PayButtonDelegate? = nil) {
         self.delegate = delegate
-        //let operatorModel:Operator = .init(publicKey: configDict["publicKey"] as? String ?? "", metadata: generateApplicationHeader())
-        var updatedConfigurations:[String:Any] = configDict
+        // Let us render the button
+        DispatchQueue.main.async {
+            self.openUrl(url: URL(string: UrlBasedUtils.buttonWrapperUrl)!)
+        }
         
-        
-        do {
+        /*do {
             //currentlyLoadedConfigurations = try URL(string:UrlBasedUtils.generatePayButtonSdkURL(from: updatedConfigurations, payButtonType: payButtonType)) ?? nil
             updatedConfigurations["headers"] = UrlBasedUtils.generateApplicationHeader(headersEncryptionPublicKey: updatedConfigurations.headersEncryptionPublicKey() ?? "")
             updatedConfigurations["redirect"] = ["url":payButtonType.tapRedirectionSchemeUrl()]
             currentlyLoadedConfigurations = updatedConfigurations
+            
             try UrlBasedUtils.generatePayButtonSdkURL(from: updatedConfigurations, payButtonType: payButtonType) { buttonUrl, error in
                 DispatchQueue.main.async {
                     // Check error
@@ -123,6 +125,6 @@ internal class RedirectionPayButton: PayButtonBaseView {
         }
         catch {
             self.delegate?.onError?(data: "{error:\(error.localizedDescription)}")
-        }
+        }*/
     }
 }

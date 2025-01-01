@@ -11,7 +11,121 @@ import CoreTelephony
 import SharedDataModels_iOS
 
 internal class UrlBasedUtils {
-    //MARK: - Generate tap card sdk url methods
+    //MARK: - Generate tap button sdk url methods
+    /// The used intent id
+    internal static var intentID:String = ""
+    /// The used public key
+    internal static var publicKey:String = ""
+    /// The base url for this version when talking to the checkout mw
+    internal static var checkoutMWBaseURL:String = "https://mw-sdk.dev.tap.company/v2/"
+    /// The name of the sdk when upadting the intent with the sdk info
+    internal static var sdkType:String = "button-ios"
+    /// The version of the sdk when upadting the intent with the sdk info
+    internal static var sdkVersion:String = "1.0.0"
+    /// The public key to use in case of sandbox transaction
+    internal static var sandboxEncryptionKey:String = """
+-----BEGIN PUBLIC KEY-----
+MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC8AX++RtxPZFtns4XzXFlDIxPB
+h0umN4qRXZaKDIlb6a3MknaB7psJWmf2l+e4Cfh9b5tey/+rZqpQ065eXTZfGCAu
+BLt+fYLQBhLfjRpk8S6hlIzc1Kdjg65uqzMwcTd0p7I4KLwHk1I0oXzuEu53fU1L
+SZhWp4Mnd6wjVgXAsQIDAQAB
+-----END PUBLIC KEY-----
+"""
+    /// The public key to use in case of production transaction
+    internal static var productionEncryptionKey:String = """
+-----BEGIN PUBLIC KEY-----
+MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC8AX++RtxPZFtns4XzXFlDIxPB
+h0umN4qRXZaKDIlb6a3MknaB7psJWmf2l+e4Cfh9b5tey/+rZqpQ065eXTZfGCAu
+BLt+fYLQBhLfjRpk8S6hlIzc1Kdjg65uqzMwcTd0p7I4KLwHk1I0oXzuEu53fU1L
+SZhWp4Mnd6wjVgXAsQIDAQAB
+-----END PUBLIC KEY-----
+"""
+    /// The encryption public key for the Checkout MW
+    internal static var publicEncryptionKey:String {
+        if UrlBasedUtils.publicKey.contains("test") {
+            return sandboxEncryptionKey
+        }else{
+            return productionEncryptionKey
+        }
+    }
+    /// The button wrapper format url
+    internal static var buttonWrapperUrlFormat:String = "https://button.dev.tap.company/?intentId=%@&publicKey=%@&mdn=%@&platform=mobile"
+    /// Computes the corrcet button url with data and format
+    internal static var buttonWrapperUrl:String {
+        return String(format: buttonWrapperUrlFormat, currentInentID, currentSdkInfo.sdkInfo?.authorization ?? "", currentSdkInfo.sdkInfo?.mdn?.toBase64() ?? "")
+    }
+    /// Currently used intent id
+    internal static var currentInentID:String = ""
+    /// Currently used SDKInfo
+    internal static var currentSdkInfo:SDKInfo = .init()
+    ///  Updates the intent with the required device data. Called before using the intent
+    ///  - Parameter for intentID: The id of the intent
+    ///  - Parameter with sdkInfo: The SDK info to update the intent with
+    static func updateSDKInfo(for intentID:String, with sdkInfo:SDKInfo, completion: @escaping (_ response:[String:Any]?, _ error:String?) -> Void = {response,error in }) throws {
+        do {
+            // Store for further reference
+            currentSdkInfo = sdkInfo
+            currentInentID = intentID
+            // Convert the sdk class into a json data
+            let data = try sdkInfo.jsonData()
+            // construct the update sdkinfo intent url
+            let updateSDKInfoURL = "\(checkoutMWBaseURL)intent/\(intentID)/sdk"
+            
+            var request = URLRequest(url: URL(string: updateSDKInfoURL)!)
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.httpMethod = "PUT"
+            request.httpBody = data
+            request.setValue(sdkInfo.sdkInfo?.authorization ?? "", forHTTPHeaderField: "Authorization")
+            request.setValue(sdkInfo.sdkInfo?.mdn ?? "", forHTTPHeaderField: "mdn")
+            request.setValue(sdkInfo.sdkInfo?.application ?? "", forHTTPHeaderField: "application")
+            
+            let task = URLSession.shared.dataTask(with: request) { data, response, error in
+                guard
+                    let data = data,
+                    let response = response as? HTTPURLResponse,
+                    error == nil
+                else {                                                               // check for fundamental networking error
+                    print("error", error ?? URLError(.badServerResponse).localizedDescription)
+                    //completion("", error?.localizedDescription ?? URLError(.badServerResponse).localizedDescription)
+                    completion(nil,"network error \(error?.localizedDescription ?? URLError(.badServerResponse).localizedDescription)")
+                    return
+                }
+                
+                guard (200 ... 299) ~= response.statusCode else {                    // check for http errors
+                    print("statusCode should be 2xx, but is \(response.statusCode), response \(response)")
+                    print("response = \(response)")
+                    //completion("", "statusCode should be 2xx, but is \(response.statusCode), response \(response)")
+                    //completion()
+                    completion(nil,"api error \(error?.localizedDescription ?? URLError(.badServerResponse).localizedDescription)")
+                    return
+                }
+                
+                // do whatever you want with the `data`, e.g.:
+                
+                do {
+                    let responseObject = String(data: data, encoding: .utf8)
+                    let jsonObject = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
+                    print(responseObject)
+                    completion(jsonObject, nil)
+                } catch {
+                    print(error) // parsing error
+                    
+                    if let responseString = String(data: data, encoding: .utf8) {
+                        print("", "Unexpected response \(responseString) \(error)")
+                        completion(nil, "response error \(responseString) \(error)")
+                    } else {
+                        print("", "unable to parse response as string \(error)")
+                        completion(nil, "response error \(error)")
+                    }
+                    completion(nil, "response error \(error)")
+                }
+            }
+
+            task.resume()
+        }catch {
+            throw error
+        }
+    }
     
     ///  Generates a card sdk url with correctly encoded values
     ///  - Parameter from configurations: the Dictionaty configurations to be url encoded
@@ -92,10 +206,17 @@ internal class UrlBasedUtils {
     static func generateApplicationHeader(headersEncryptionPublicKey:String) -> [String:String] {
         return [
             Constants.HTTPHeaderKey.application: applicationHeaderValue(headersEncryptionPublicKey: headersEncryptionPublicKey),
+            //Constants.HTTPHeaderKey.mdn: Crypter.encrypt("https://demo.dev.tap.company", using: headersEncryptionPublicKey) ?? ""
             Constants.HTTPHeaderKey.mdn: Crypter.encrypt(TapApplicationPlistInfo.shared.bundleIdentifier ?? "", using: headersEncryptionPublicKey) ?? ""
         ]
     }
     
+    /// Generates the SDK INFO object
+    /// - Parameter for publicKey: The public key passed by the merchant
+    static func generateSDKINFO(for publicKey:String) -> SDKInfo {
+        let headersInfo:[String:String] = UrlBasedUtils.generateApplicationHeader(headersEncryptionPublicKey: publicEncryptionKey)
+        return .init(sdkInfo: .init(type: sdkType, version: sdkVersion, authorization: publicKey, mdn: headersInfo[Constants.HTTPHeaderKey.mdn], application: headersInfo[Constants.HTTPHeaderKey.application]))
+    }
     
     
     /// HTTP headers that contains the device and app info

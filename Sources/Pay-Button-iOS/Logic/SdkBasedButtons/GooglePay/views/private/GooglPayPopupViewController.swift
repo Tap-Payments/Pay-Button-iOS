@@ -144,8 +144,9 @@ extension GooglPayPopupViewController: WKNavigationDelegate {
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         // Check if it is the return url
         print("3ds:\(navigationAction.request.url?.absoluteString ?? "")")
-        if let requestURL:URL = navigationAction.request.url,
-           requestURL.absoluteString.lowercased().hasPrefix(PayButtonTypeEnum.GooglePay.baseUrl().lowercased()) {
+        // MARK: GooglePay redirect
+        if let requestURL:URL = navigationAction.request.url/*,
+           requestURL.absoluteString.lowercased().hasPrefix(PayButtonTypeEnum.GooglePay.baseUrl().lowercased())*/ {
             // The web sdk only needs the query string
             self.redirectionReached(requestURL.absoluteString)
             decisionHandler(.cancel)

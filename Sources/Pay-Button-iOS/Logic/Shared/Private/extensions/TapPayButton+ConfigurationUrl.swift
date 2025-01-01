@@ -83,7 +83,7 @@ internal extension URL {
     
     /// comutes the encryption key for the respected server
     func headersEncryptionPublicKey() -> String {
-        if self.getPayButtonSDKKey().contains("test") {
+        if UrlBasedUtils.publicKey.contains("test") {
             return """
 -----BEGIN PUBLIC KEY-----
 MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC8AX++RtxPZFtns4XzXFlDIxPB
@@ -183,4 +183,23 @@ Hj+N6UWFOYK98Xi+sQIDAQAB
 """
         }
     }
+}
+
+
+internal extension String {
+
+    /// Converts a base64 string to the original
+    func fromBase64() -> String? {
+        guard let data = Data(base64Encoded: self) else {
+            return nil
+        }
+
+        return String(data: data, encoding: .utf8)
+    }
+
+    /// Converts original string to base64 one
+    func toBase64() -> String {
+        return Data(self.utf8).base64EncodedString()
+    }
+
 }
