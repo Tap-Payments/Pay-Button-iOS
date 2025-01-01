@@ -18,7 +18,7 @@ class PayButtonExample: UIViewController {
     var selectedButtonType:PayButtonTypeEnum = .CareemPay
     var dictConfig:[String:Any] = [
         "operator": ["publicKey": "pk_test_6jdl4Qo0FYOSXmrZTR1U5EHp"],
-        "intent":["id":"intent_aNpk40241858IKjJ308k115299"]
+        "intent":["id":"intent_rzgd5725539UhQ713R0a867"]
       ]
     
     override func viewDidLoad() {

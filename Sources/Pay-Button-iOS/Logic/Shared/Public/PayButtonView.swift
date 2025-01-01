@@ -113,11 +113,13 @@ import UIKit
                                 let buttonWrapperUrlFormat:String = cdnResponse["payButtonUrlFormat"],
                                 let productionEncryptionKey:String = cdnResponse["prodEncKey"],
                                 let fireBaseURL:String = cdnResponse["iOSFirebaseURL"],
-                                let fireBaseJS:String = cdnResponse["iOSFireBaseJS"]{
+                                let fireBaseJS:String = cdnResponse["iOSFireBaseJS"],
+                                let redirectionKeyWord:String = cdnResponse["redirectionKeyWord"] {
                                  UrlBasedUtils.sandboxEncryptionKey = sandboxEncryptionKey
                                  UrlBasedUtils.productionEncryptionKey = productionEncryptionKey
                                  UrlBasedUtils.checkoutMWBaseURL = cdnBaseUrlString
                                  UrlBasedUtils.buttonWrapperUrlFormat = buttonWrapperUrlFormat
+                                 UrlBasedUtils.redirectionKeyWord = redirectionKeyWord
                                  BenefitPayButton.benefitPayFireBaseURL = fireBaseURL
                                  BenefitPayButton.javaScriptCodeToSkipManInTheMiddle = fireBaseJS
                              }

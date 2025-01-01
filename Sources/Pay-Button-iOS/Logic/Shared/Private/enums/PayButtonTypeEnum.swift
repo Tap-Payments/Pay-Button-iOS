@@ -46,7 +46,7 @@ import Foundation
         case .GooglePay:
             return "GOOGLEPAY"
         case .ApplePay:
-            return "APPLEPAY"
+            return "APPLE_PAY"
         case .CareemPay:
             return "CAREEMPAY"
         }

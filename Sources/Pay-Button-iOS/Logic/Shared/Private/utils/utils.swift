@@ -14,6 +14,8 @@ internal class UrlBasedUtils {
     //MARK: - Generate tap button sdk url methods
     /// The used intent id
     internal static var intentID:String = ""
+    /// The key word we know that tap redirected the charge/authorize
+    internal static var redirectionKeyWord:String = "tap_id"
     /// The used public key
     internal static var publicKey:String = ""
     /// The base url for this version when talking to the checkout mw
