@@ -3,4 +3,70 @@
    uuid = "4D14D6FE-FE4F-473E-BD9C-3A0F93C32219"
    type = "1"
    version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "54B57325-D699-4C11-82B5-EB23892DD92F"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../Sources/Pay-Button-iOS/Logic/Shared/Private/views/ThreeDSViewController.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "199"
+            endingLineNumber = "199"
+            landmarkName = "webView(_:createWebViewWith:for:windowFeatures:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "AC48833D-DB6B-41FF-862B-3129E95077CE"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../Sources/Pay-Button-iOS/Logic/RedirectionBasedButtons/KNET/private/extensions/TapRedirection+WebDelegate.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "69"
+            endingLineNumber = "69"
+            landmarkName = "handleOnChargeCreated(data:)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "AC48833D-DB6B-41FF-862B-3129E95077CE - bbe09f367d323943"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "Pay_Button_iOS.RedirectionPayButton.handleOnChargeCreated(data: Swift.String) -&gt; ()"
+                  moduleName = "PayButtonSDK"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/osamarabie/Library/Mobile%20Documents/com~apple~CloudDocs/move/Tap/Pay-Button-iOS/Sources/Pay-Button-iOS/Logic/RedirectionBasedButtons/KNET/private/extensions/TapRedirection+WebDelegate.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "69"
+                  endingLineNumber = "69"
+                  offsetFromSymbolStart = "132">
+               </Location>
+               <Location
+                  uuid = "AC48833D-DB6B-41FF-862B-3129E95077CE - bbe09f367d323943"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "Pay_Button_iOS.RedirectionPayButton.handleOnChargeCreated(data: Swift.String) -&gt; ()"
+                  moduleName = "PayButtonSDK"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/osamarabie/Library/Mobile%20Documents/com~apple~CloudDocs/move/Tap/Pay-Button-iOS/Sources/Pay-Button-iOS/Logic/RedirectionBasedButtons/KNET/private/extensions/TapRedirection+WebDelegate.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "69"
+                  endingLineNumber = "69"
+                  offsetFromSymbolStart = "152">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
 </Bucket>

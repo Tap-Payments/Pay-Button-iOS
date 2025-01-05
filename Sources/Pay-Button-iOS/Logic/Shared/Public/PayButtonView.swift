@@ -7,9 +7,11 @@
 
 import UIKit
 
-@objc public class PayButtonView: UIView {
-
+/// The PayButton view .. interface to the pay button sdk
+@objcMembers public class PayButtonView: UIView {
+    /// The delegate that listents to the events from the pay button
     internal var delegate:PayButtonDelegate?
+    /// The reference to the pay button view itself
     internal var buttonView:PayButtonBaseView = .init()
     
     //MARK: - Init methods
@@ -29,7 +31,10 @@ import UIKit
         backgroundColor = .clear
     }
     
+    /// This creates and sets the internal type based on the passed button type
+    /// - Parameter with payButtonType: The needed button to be rendered
     private func generateTheView(with payButtonType:PayButtonTypeEnum) {
+        // let us remove if it was there before
         buttonView.removeFromSuperview()
         switch payButtonType {
         case .BenefitPay:
@@ -37,6 +42,9 @@ import UIKit
         case .Knet:
             buttonView = RedirectionPayButton()
             (buttonView as? RedirectionPayButton)?.updateType(to: .Knet)
+        case .DEEMA:
+            buttonView = RedirectionPayButton()
+            (buttonView as? RedirectionPayButton)?.updateType(to: .DEEMA)
         case .ApplePay:
             buttonView = RedirectionPayButton()
             (buttonView as? RedirectionPayButton)?.updateType(to: .ApplePay)
@@ -57,11 +65,15 @@ import UIKit
         case .CareemPay:
             buttonView = RedirectionPayButton()
             (buttonView as? RedirectionPayButton)?.updateType(to: .CareemPay)
+            (buttonView as? RedirectionPayButton)?.webView.customUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2.1 Safari/605.1.15"
         }
+        // Add the view now to the screen
         addSubview(buttonView)
+        // Stop the auto constraints so we can adjust the button sizes when needed
         buttonView.translatesAutoresizingMaskIntoConstraints = false
     }
     
+    /// The function that setups up the constraints of the button
     private func setupConstraints() {
         // Preprocessing needed setup
         buttonView.translatesAutoresizingMaskIntoConstraints = false
@@ -104,27 +116,7 @@ import UIKit
                 cdnRequest.timeoutInterval = 2
                 cdnRequest.cachePolicy = .reloadIgnoringLocalAndRemoteCacheData
                 URLSession.shared.dataTask(with: cdnRequest) { data, response, error in
-                     if let data = data {
-                         do {
-                             if let cdnResponse:[String:String] = try JSONSerialization.jsonObject(with: data, options: []) as? [String: String],
-                                let cdnBaseUrlString:String = cdnResponse["baseURL"], cdnBaseUrlString != "",
-                                let cdnBaseUrl:URL = URL(string: cdnBaseUrlString),
-                                let sandboxEncryptionKey:String = cdnResponse["testEncKey"],
-                                let buttonWrapperUrlFormat:String = cdnResponse["payButtonUrlFormat"],
-                                let productionEncryptionKey:String = cdnResponse["prodEncKey"],
-                                let fireBaseURL:String = cdnResponse["iOSFirebaseURL"],
-                                let fireBaseJS:String = cdnResponse["iOSFireBaseJS"],
-                                let redirectionKeyWord:String = cdnResponse["redirectionKeyWord"] {
-                                 UrlBasedUtils.sandboxEncryptionKey = sandboxEncryptionKey
-                                 UrlBasedUtils.productionEncryptionKey = productionEncryptionKey
-                                 UrlBasedUtils.checkoutMWBaseURL = cdnBaseUrlString
-                                 UrlBasedUtils.buttonWrapperUrlFormat = buttonWrapperUrlFormat
-                                 UrlBasedUtils.redirectionKeyWord = redirectionKeyWord
-                                 BenefitPayButton.benefitPayFireBaseURL = fireBaseURL
-                                 BenefitPayButton.javaScriptCodeToSkipManInTheMiddle = fireBaseJS
-                             }
-                         } catch {}
-                      }
+                    self.setLoadedDataFromCDN(data: data)
                     // we need to update the intent with the sdk info
                     self.postLoadingFromCDN(configDict: configDict, delegate: delegate)
                   }.resume()
@@ -133,6 +125,32 @@ import UIKit
                 postLoadingFromCDN(configDict: configDict, delegate: delegate)
             }
         }
+    }
+    
+    /// Saves the data loaded from the CDN to be used afterwards
+    /// - Parameter data: The data loaded from the CDN file
+    internal func setLoadedDataFromCDN(data: Data?) {
+        if let data = data {
+            do {
+                if let cdnResponse:[String:String] = try JSONSerialization.jsonObject(with: data, options: []) as? [String: String],
+                   let cdnBaseUrlString:String = cdnResponse["baseURL"], cdnBaseUrlString != "",
+                   let cdnBaseUrl:URL = URL(string: cdnBaseUrlString),
+                   let sandboxEncryptionKey:String = cdnResponse["testEncKey"],
+                   let buttonWrapperUrlFormat:String = cdnResponse["payButtonUrlFormat"],
+                   let productionEncryptionKey:String = cdnResponse["prodEncKey"],
+                   let fireBaseURL:String = cdnResponse["iOSFirebaseURL"],
+                   let fireBaseJS:String = cdnResponse["iOSFireBaseJS"],
+                   let redirectionKeyWord:String = cdnResponse["redirectionKeyWord"] {
+                    UrlBasedUtils.sandboxEncryptionKey = sandboxEncryptionKey
+                    UrlBasedUtils.productionEncryptionKey = productionEncryptionKey
+                    UrlBasedUtils.checkoutMWBaseURL = cdnBaseUrlString
+                    UrlBasedUtils.buttonWrapperUrlFormat = buttonWrapperUrlFormat
+                    UrlBasedUtils.redirectionKeyWord = redirectionKeyWord
+                    BenefitPayButton.benefitPayFireBaseURL = fireBaseURL
+                    BenefitPayButton.javaScriptCodeToSkipManInTheMiddle = fireBaseJS
+                }
+            } catch {}
+         }
     }
     
     /// Performs the needed logic after getting base url, encryption keys from the CDN
@@ -176,6 +194,9 @@ import UIKit
                             // Check if it is benefitpay
                             if(paymentMethod.contains("benefit") && paymentMethod.contains("pay")) {
                                 completion(.BenefitPay)
+                            }// Check if it is careempay to adjust the user agent of the webview
+                            else if(paymentMethod.contains("careem") && paymentMethod.contains("pay")) {
+                                completion(.CareemPay)
                             }else{
                                 completion(.Knet)
                             }

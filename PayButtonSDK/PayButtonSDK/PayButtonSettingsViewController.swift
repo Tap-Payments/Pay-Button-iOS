@@ -10,14 +10,12 @@ import Eureka
 import Pay_Button_iOS
 
 protocol PayButtonSettingsViewControllerDelegate {
-    func updateConfig(config: [String:Any], selectedButtonType:PayButtonTypeEnum)
+    func updateConfig()
 }
 
 class PayButtonSettingsViewController: FormViewController {
 
-    var config: [String:Any]?
     var delegate: PayButtonSettingsViewControllerDelegate?
-    var selectedButtonType:PayButtonTypeEnum = .BenefitPay
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -27,13 +25,13 @@ class PayButtonSettingsViewController: FormViewController {
         <<< AlertRow<String>("button.type"){ row in
             row.title = "Button"
             row.options = PayButtonTypeEnum.allCases.map{ $0.toString() }
-            row.value = selectedButtonType.toString()
+            row.value = PayButtonExample.intentRequestRequest.config?.acceptance?.supportedPaymentMethods?.first?.uppercased() ?? "KNET"
             row.onChange { row in
-                self.selectedButtonType = PayButtonTypeEnum.init(rawValue: PayButtonTypeEnum.allCases.map{ $0.toString() }.firstIndex(of: row.value ?? "BENEFITPAY") ?? 0) ?? self.selectedButtonType
+                PayButtonExample.intentRequestRequest.config?.acceptance?.supportedPaymentMethods = [row.value ?? "KNET"]
             }
         }
         
-        form +++ Section("operator")
+        /*form +++ Section("operator")
         <<< AlertRow<String>("operator.publicKey"){ row in
             row.title = "Tap public key"
             row.options = ["pk_test_6jdl4Qo0FYOSXmrZTR1U5EHp","pk_live_I8aWfZkiGtw9HYsRCcAgQzS6"]
@@ -50,16 +48,16 @@ class PayButtonSettingsViewController: FormViewController {
             row.onChange { row in
                 self.update(dictionary: &self.config!, at: ["operator","hashString"], with: row.value ?? "")
             }
-        }
+        }*/
         
         
         form +++ Section("scope")
         <<< AlertRow<String>("scope"){ row in
             row.title = "Scope"
-            row.options = ["charge","authorize","taptoken","googlepaytoken"]
-            row.value = (config! as NSDictionary).value(forKeyPath: "scope") as? String ?? "charge"
+            row.options = ["CHARGE","AUTHORIZE","TOKEN"]
+            row.value = PayButtonExample.intentRequestRequest.scope ?? "CHARGE"
             row.onChange { row in
-                self.update(dictionary: &self.config!, at: ["scope"], with: row.value ?? "charge")
+                PayButtonExample.intentRequestRequest.scope = row.value ?? "CHARGE"
             }
         }
         
@@ -67,13 +65,13 @@ class PayButtonSettingsViewController: FormViewController {
         <<< TextRow("transaction.reference"){ row in
             row.title = "Trx ref"
             row.placeholder = "Enter your trx ref"
-            row.value = (config! as NSDictionary).value(forKeyPath: "transaction.reference") as? String ?? ""
+            row.value = PayButtonExample.intentRequestRequest.transaction?.reference ?? ""
             row.onChange { row in
-                self.update(dictionary: &self.config!, at: ["transaction","reference"], with: row.value ?? "")
+                PayButtonExample.intentRequestRequest.transaction?.reference = row.value ?? ""
             }
         }
         
-        <<< AlertRow<String>("transaction.authorizetype"){ row in
+        /*<<< AlertRow<String>("transaction.authorizetype"){ row in
             row.title = "transaction.authorizetype"
             row.options = ["VOID","CAPTURE"]
             row.value = (config! as NSDictionary).value(forKeyPath: "transaction.authorize.type") as? String ?? "VOID"
@@ -89,52 +87,49 @@ class PayButtonSettingsViewController: FormViewController {
             row.onChange { row in
                 self.update(dictionary: &self.config!, at: ["transaction","authorize","time"], with: row.value ?? 12)
             }
-        }
+        }*/
         
         form +++ Section("order")
         <<< TextRow("order.id"){ row in
             row.title = "Tap order id"
             row.placeholder = "Enter your tap order id"
-            row.value = (config! as NSDictionary).value(forKeyPath: "order.id") as? String ?? ""
+            row.value = PayButtonExample.intentRequestRequest.order?.id ?? ""
             row.onChange { row in
-                self.update(dictionary: &self.config!, at: ["order","id"], with: row.value ?? "")
+                PayButtonExample.intentRequestRequest.order?.id = row.value ?? ""
             }
         }
         <<< DecimalRow("order.amount"){ row in
             row.title = "order amount"
             row.placeholder = "Enter order's amount"
-            row.value = (config?["order"] as? [String:Any])?["amount"] as? Double ?? 1.0
+            row.value = PayButtonExample.intentRequestRequest.order?.amount ?? 1.0
             row.onChange { row in
-                self.update(dictionary: &self.config!, at: ["order","amount"], with: row.value ?? 1.0)
+                PayButtonExample.intentRequestRequest.order?.amount = row.value ?? 1.0
             }
         }
-        <<< TextRow("order.currency"){ row in
+        <<< AlertRow<String>("order.currency"){ row in
             row.title = "order currency"
-            row.placeholder = "Enter order's currency"
-            
-            row.value = (config! as NSDictionary).value(forKeyPath: "order.currency") as? String ?? "SAR"
+            row.options = ["KWD","SAR","AED","EGP","QAR","BHD","OMR","USD","EUR","GBP"]
+            row.value = PayButtonExample.intentRequestRequest.order?.currency?.uppercased() ?? "KWD"
             row.onChange { row in
-                self.update(dictionary: &self.config!, at: ["order","currency"], with: row.value ?? "SAR")
+                PayButtonExample.intentRequestRequest.order?.currency = row.value ?? "KWD"
             }
         }
         
-        <<< TextRow("order.description"){ row in
+        /*<<< TextRow("order.description"){ row in
             row.title = "order description"
             row.placeholder = "Enter order's description"
-            
-            row.value = (config! as NSDictionary).value(forKeyPath: "order.description") as? String ?? ""
+            row.value = PayButtonExample.intentRequestRequest.order?.description ?? "KWD"
             row.onChange { row in
                 self.update(dictionary: &self.config!, at: ["order","description"], with: row.value ?? "")
             }
-        }
+        }*/
         
         <<< TextRow("order.reference"){ row in
             row.title = "order reference"
             row.placeholder = "Enter order's reference"
-            
-            row.value = (config! as NSDictionary).value(forKeyPath: "order.reference") as? String ?? ""
+            row.value = PayButtonExample.intentRequestRequest.order?.reference ?? ""
             row.onChange { row in
-                self.update(dictionary: &self.config!, at: ["order","reference"], with: row.value ?? "")
+                PayButtonExample.intentRequestRequest.order?.reference = row.value ?? ""
             }
         }
         
@@ -142,19 +137,19 @@ class PayButtonSettingsViewController: FormViewController {
         <<< TextRow("merchant.id"){ row in
             row.title = "Tap merchant id"
             row.placeholder = "Enter your tap merchnt id"
-            row.value = (config! as NSDictionary).value(forKeyPath: "merchant.id") as? String ?? ""
+            row.value = PayButtonExample.intentRequestRequest.merchant?.id ?? ""
             row.onChange { row in
-                self.update(dictionary: &self.config!, at: ["merchant","id"], with: row.value ?? "")
+                PayButtonExample.intentRequestRequest.merchant?.id = row.value ?? ""
             }
         }
+        
         form +++ Section("customer")
-       
        <<< TextRow("customer.id"){ row in
            row.title = "Customer id"
            row.placeholder = "Enter customer's id"
-           row.value = (config! as NSDictionary).value(forKeyPath: "customer.id") as? String ?? ""
+           row.value = PayButtonExample.intentRequestRequest.customer?.id ?? ""
            row.onChange { row in
-               self.update(dictionary: &self.config!, at: ["customer","id"], with: row.value ?? "")
+               PayButtonExample.intentRequestRequest.customer?.id = row.value ?? ""
            }
        }
         
@@ -191,73 +186,73 @@ class PayButtonSettingsViewController: FormViewController {
         <<< MultipleSelectorRow<String>("acceptance.supportedSchemes"){ row in
             row.title = "supportedSchemes"
             row.options = ["AMERICAN_EXPRESS","MADA","MASTERCARD","VISA","OMANNET","MEEZA"]
-            row.value = Set((config! as NSDictionary).value(forKeyPath: "acceptance.supportedSchemes") as? [String] ?? ["AMERICAN_EXPRESS","MADA","MASTERCARD","VISA","OMANNET","MEEZA"])
+            row.value = Set(PayButtonExample.intentRequestRequest.config?.acceptance?.supportedSchemes ?? ["AMERICAN_EXPRESS","MADA","MASTERCARD","VISA","OMANNET","MEEZA"])
             row.onChange { row in
-                self.update(dictionary: &self.config!, at: ["acceptance","supportedSchemes"], with: Array(row.value ?? ["AMERICAN_EXPRESS","MADA","MASTERCARD","VISA","OMANNET","MEEZA"]))
+                PayButtonExample.intentRequestRequest.config?.acceptance?.supportedSchemes = Array(row.value ?? ["AMERICAN_EXPRESS","MADA","MASTERCARD","VISA","OMANNET","MEEZA"])
             }
         }
         
         <<< MultipleSelectorRow<String>("acceptance.supportedFundSource"){ row in
             row.title = "supportedFundSource"
             row.options = ["CREDIT","DEBIT"]
-            row.value = Set((config! as NSDictionary).value(forKeyPath: "acceptance.supportedFundSource") as? [String] ?? ["DEBIT","CREDIT"])
+            row.value = Set( PayButtonExample.intentRequestRequest.config?.acceptance?.supportedFundSource ?? ["DEBIT","CREDIT"])
             row.onChange { row in
-                self.update(dictionary: &self.config!, at: ["acceptance","supportedFundSource"], with: Array(row.value ?? ["DEBIT","CREDIT"]))
+                PayButtonExample.intentRequestRequest.config?.acceptance?.supportedFundSource = Array(row.value ?? ["DEBIT","CREDIT"])
             }
         }
         
-        <<< MultipleSelectorRow<String>("acceptance.supportedPaymentAuthentications"){ row in
+        /*<<< MultipleSelectorRow<String>("acceptance.supportedPaymentAuthentications"){ row in
             row.title = "supportedPaymentAuthentications"
             row.options = ["3DS"]
             row.value = Set((config! as NSDictionary).value(forKeyPath: "acceptance.supportedPaymentAuthentications") as? [String] ?? ["3DS"])
             row.onChange { row in
                 self.update(dictionary: &self.config!, at: ["acceptance","supportedPaymentAuthentications"], with: Array(row.value ?? ["3DS"]))
             }
-        }
+        }*/
         
         form +++ Section("interface")
         <<< AlertRow<String>("interface.locale"){ row in
             row.title = "locale"
-            row.options = ["en","ar"]
-            row.value = (config! as NSDictionary).value(forKeyPath: "interface.locale") as? String ?? "en"
+            row.options = ["EN","AR"]
+            row.value = PayButtonExample.intentRequestRequest.config?.interface?.locale ?? "EN"
             row.onChange { row in
-                self.update(dictionary: &self.config!, at: ["interface","locale"], with: row.value ?? "en")
+                PayButtonExample.intentRequestRequest.config?.interface?.locale = row.value ?? "EN"
             }
         }
         <<< AlertRow<String>("interface.theme"){ row in
             row.title = "theme"
-            row.options = ["light","dark"]
-            row.value = (config! as NSDictionary).value(forKeyPath: "interface.theme") as? String ?? "light"
+            row.options = ["LIGHT","DARK"]
+            row.value = PayButtonExample.intentRequestRequest.config?.interface?.theme ?? "LIGHT"
             row.onChange { row in
-                self.update(dictionary: &self.config!, at: ["interface","theme"], with: row.value ?? "light")
+                PayButtonExample.intentRequestRequest.config?.interface?.theme = row.value ?? "LIGHT"
             }
         }
         
         <<< AlertRow<String>("interface.edges"){ row in
             row.title = "edges"
-            row.options = ["curved","flat"]
-            row.value = (config! as NSDictionary).value(forKeyPath: "interface.edges") as? String ?? "curved"
+            row.options = ["CURVED","FLAT","CIRCULAR"]
+            row.value = PayButtonExample.intentRequestRequest.config?.interface?.edges ?? "CURVED"
             row.onChange { row in
-                self.update(dictionary: &self.config!, at: ["interface","edges"], with: row.value ?? "curved")
+                PayButtonExample.intentRequestRequest.config?.interface?.edges = row.value ?? "CURVED"
             }
         }
         
         <<< AlertRow<String>("interface.colorStyle"){ row in
             row.title = "colorStyle"
-            row.options = ["colored","monochrome"]
-            row.value = (config! as NSDictionary).value(forKeyPath: "interface.colorStyle") as? String ?? "colored"
+            row.options = ["COLORED","MONOCHROME"]
+            row.value = PayButtonExample.intentRequestRequest.config?.interface?.colorStyle ?? "COLORED"
             row.onChange { row in
-                self.update(dictionary: &self.config!, at: ["interface","colorStyle"], with: row.value ?? "colored")
+                PayButtonExample.intentRequestRequest.config?.interface?.colorStyle = row.value ?? "COLORED"
             }
         }
         
-        <<< SwitchRow("interface.loader"){ row in
+        /*<<< SwitchRow("interface.loader"){ row in
                     row.title = "loader"
                     row.value = (config! as NSDictionary).value(forKeyPath: "interface.loader") as? Bool ?? true
                     row.onChange { row in
                         self.update(dictionary: &self.config!, at: ["interface","loader"], with: row.value ?? true)
                     }
-                }
+                }*/
         
         
         
@@ -295,7 +290,7 @@ class PayButtonSettingsViewController: FormViewController {
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        delegate?.updateConfig(config: config!, selectedButtonType: selectedButtonType)
+        delegate?.updateConfig()
     }
     
     /*

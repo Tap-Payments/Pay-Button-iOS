@@ -70,7 +70,7 @@ extension RedirectionPayButton:WKNavigationDelegate {
               let _:String = redirection.url,
               let chargeID:String = redirection.id else {
             // This means, there is such an error from the integration with web sdk
-            delegate?.onError?(data: "Failed to start authentication process")
+            delegate?.onError?(data: "Failed to start redirection process")
             return
         }
         // Let us pass the charge created id for the delegae

@@ -27,6 +27,8 @@ import Foundation
     case GooglePay
     /// The button will work to show payment in form of apple pay
     case ApplePay
+    /// The button will work to show payment in form of DEEMA
+    case DEEMA
     
     /// A string representation of the payment type
     public func toString() -> String {
@@ -44,11 +46,13 @@ import Foundation
         case .Tabby:
             return "TABBY"
         case .GooglePay:
-            return "GOOGLEPAY"
+            return "GOOGLE_PAY"
         case .ApplePay:
             return "APPLE_PAY"
         case .CareemPay:
             return "CAREEMPAY"
+        case .DEEMA:
+            return "DEEMA"
         }
     }
     

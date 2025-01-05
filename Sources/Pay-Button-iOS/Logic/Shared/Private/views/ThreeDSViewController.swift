@@ -30,6 +30,7 @@ class ThreeDSView: UIViewController {
         }
     }
     var popupWebView: WKWebView?
+    var closePopupImageView:UIImageView = .init(frame: .init(x: 16, y: 16, width: 32, height: 32))
     
     //MARK: - Init methods
     override func viewDidLoad() {
@@ -146,7 +147,18 @@ extension ThreeDSView: WKNavigationDelegate {
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         // Check if it is the return url
         print("3ds:\(navigationAction.request.url?.absoluteString ?? "")")
-        if let requestURL:URL = navigationAction.request.url,
+        
+        DispatchQueue.main.async {
+            self.closePopupImageView.removeFromSuperview()
+        }
+        
+        if (navigationAction.request.url?.absoluteString.lowercased() ?? "").contains("apps.apple") {
+            let historySize = webView.backForwardList.backList.count
+                let firstItem = webView.backForwardList.item(at: -historySize)
+
+                // go to it!
+                //webView.go(to: firstItem!)
+        }else if let requestURL:URL = navigationAction.request.url,
            requestURL.absoluteString.lowercased().contains(UrlBasedUtils.redirectionKeyWord.lowercased()) {
             // The web sdk only needs the query string
             // MARK: GooglePay redirect
@@ -188,9 +200,36 @@ extension ThreeDSView: WKUIDelegate {
         popupWebView!.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         popupWebView!.navigationDelegate = self
         popupWebView!.uiDelegate = self
+        
+        closePopupImageView = .init(frame: .init(x: 16, y: 16, width: 32, height: 32))
+        closePopupImageView.removeFromSuperview()
+        closePopupImageView.image = UIImage(named: "Close",in: Bundle.currentBundle, with: nil)
+        closePopupImageView.tintColor = .white
+        closePopupImageView.contentMode = .scaleAspectFit
+        
+        let closeCareemPayPopupGesture = UITapGestureRecognizer(target: self, action: #selector(self.closeCareemPayPopup(recognizer:)))
+        
+        closeCareemPayPopupGesture.numberOfTapsRequired = 1
+
+        closePopupImageView.isUserInteractionEnabled = true
+        closePopupImageView.addGestureRecognizer(closeCareemPayPopupGesture)
+        
+        
         view.addSubview(popupWebView!)
+        view.addSubview(closePopupImageView)
+        
         return popupWebView!
     }
+    
+    /// Will close the careempay popup
+    @objc func closeCareemPayPopup(recognizer : UITapGestureRecognizer)
+    {
+        DispatchQueue.main.async {
+            self.closePopupImageView.removeFromSuperview()
+            self.popupWebView?.removeFromSuperview()
+        }
+    }
+    
     //MARK: To close popup
     func webViewDidClose(_ webView: WKWebView) {
         if webView == popupWebView {
