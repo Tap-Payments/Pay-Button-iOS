@@ -15,6 +15,20 @@ internal class RedirectionPayButton: PayButtonBaseView {
     internal static let minimumButtonHeight:CGFloat = 48
     /// Kept around so the card based buttons (click to pay) can grow the view while the customer fills the form
     internal var heightConstraint:NSLayoutConstraint?
+    /// The card form reports a burst of heights while it lays itself out, one point apart.
+    /// Animating each of them stacks a new animation on top of a running one and the button jitters,
+    /// so wait for the burst to settle and animate once to the height it landed on.
+    private static let heightSettleDelay:TimeInterval = 0.05
+    /// How long the button takes to grow or shrink to a new height
+    private static let heightAnimationDuration:TimeInterval = 0.25
+    /// The height the last burst asked for
+    private var pendingHeight:CGFloat?
+    /// The height currently applied, a repeated value is not worth an animation
+    private var appliedHeight:CGFloat = 0
+    /// The first sizing snaps. Growing from the 48pt placeholder looks like a glitch rather than a transition
+    private var hasSizedOnce:Bool = false
+    /// Lets a new report cancel the one that has not fired yet
+    private var heightSettleWorkItem:DispatchWorkItem?
     
     //MARK: - Init methods
     override public init(frame: CGRect) {
@@ -93,13 +107,49 @@ internal class RedirectionPayButton: PayButtonBaseView {
 
     /// Grows or shrinks the button to the height the web sdk asks for.
     /// The card based buttons (click to pay) render a form that resizes while the customer types.
+    ///
+    /// Reports arrive in bursts, so the last one of a burst wins and only that one is animated.
+    /// The delegate is told once the burst settled too, so the merchant animates once as well.
     /// - Parameter to height: The height in points the web sdk reported
     internal func updateHeight(to height:CGFloat) {
         DispatchQueue.main.async {
-            self.heightConstraint?.constant = max(RedirectionPayButton.minimumButtonHeight, height)
+            self.pendingHeight = max(RedirectionPayButton.minimumButtonHeight, height)
+            // Let the newest report replace the one still waiting to fire
+            self.heightSettleWorkItem?.cancel()
+            let settleWorkItem:DispatchWorkItem = .init { [weak self] in
+                self?.applyPendingHeight()
+            }
+            self.heightSettleWorkItem = settleWorkItem
+            DispatchQueue.main.asyncAfter(deadline: .now() + RedirectionPayButton.heightSettleDelay, execute: settleWorkItem)
+        }
+    }
+
+    /// Applies the height the burst settled on
+    private func applyPendingHeight() {
+        guard let targetHeight = pendingHeight,
+              let heightConstraint = heightConstraint,
+              targetHeight != appliedHeight else { return }
+        appliedHeight = targetHeight
+        heightConstraint.constant = targetHeight
+
+        // The very first sizing has nothing to animate from
+        guard hasSizedOnce else {
+            hasSizedOnce = true
+            superview?.layoutIfNeeded()
+            layoutIfNeeded()
+            delegate?.onHeightChange?(height: Double(targetHeight))
+            return
+        }
+
+        // beginFromCurrentState picks up from wherever a running animation got to,
+        // instead of snapping back to the old height and starting over
+        UIView.animate(withDuration: RedirectionPayButton.heightAnimationDuration,
+                       delay: 0,
+                       options: [.beginFromCurrentState, .curveEaseOut, .allowUserInteraction]) {
             self.superview?.layoutIfNeeded()
             self.layoutIfNeeded()
         }
+        delegate?.onHeightChange?(height: Double(targetHeight))
     }
     
     

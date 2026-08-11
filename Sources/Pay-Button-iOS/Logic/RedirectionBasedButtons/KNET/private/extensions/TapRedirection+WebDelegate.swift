@@ -76,9 +76,9 @@ extension RedirectionPayButton:WKNavigationDelegate {
             // The height comes as a plain number, not as a base64 encoded json
             let reportedHeight:String = tap_extractDataFromUrl(url, for: "data", shouldBase64Decode: false)
             guard let height:Double = Double(reportedHeight) else { break }
-            // Resize ourselves, then let the merchant adjust his own layout if he pinned us to a fixed height
+            // Resize ourselves. The reports come in bursts, so updateHeight settles them and
+            // notifies the delegate once, rather than making the merchant animate on every report
             updateHeight(to: CGFloat(height))
-            delegate?.onHeightChange?(height: height)
             break
         case _ where url.absoluteString.contains(CallBackSchemeEnum.onBinIdentification.rawValue):
             delegate?.onBinIdentification?(data: tap_extractDataFromUrl(url, for: "data", shouldBase64Decode: true))
