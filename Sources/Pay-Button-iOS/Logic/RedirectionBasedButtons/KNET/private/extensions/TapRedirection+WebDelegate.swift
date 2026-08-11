@@ -68,6 +68,35 @@ extension RedirectionPayButton:WKNavigationDelegate {
         }
     }
 
+    /// Handles the events fired by the card based buttons (click to pay) over the `tapCardWebSDK://` scheme
+    /// - Parameter url: The url the web sdk tried to navigate to
+    internal func handleCardWebSdkCallback(url:URL) {
+        switch url.absoluteString {
+        case _ where url.absoluteString.contains(CallBackSchemeEnum.onHeightChange.rawValue):
+            // The height comes as a plain number, not as a base64 encoded json
+            let reportedHeight:String = tap_extractDataFromUrl(url, for: "data", shouldBase64Decode: false)
+            guard let height:Double = Double(reportedHeight) else { break }
+            // Resize ourselves. The reports come in bursts, so updateHeight settles them and
+            // notifies the delegate once, rather than making the merchant animate on every report
+            updateHeight(to: CGFloat(height))
+            break
+        case _ where url.absoluteString.contains(CallBackSchemeEnum.onBinIdentification.rawValue):
+            delegate?.onBinIdentification?(data: tap_extractDataFromUrl(url, for: "data", shouldBase64Decode: true))
+            break
+        case _ where url.absoluteString.contains(CallBackSchemeEnum.onScannerClick.rawValue):
+            delegate?.onScannerClick?()
+            break
+        case _ where url.absoluteString.contains(CallBackSchemeEnum.onNfcClick.rawValue):
+            delegate?.onNfcClick?()
+            break
+        case _ where url.absoluteString.contains(CallBackSchemeEnum.on3dsRedirect.rawValue):
+            handleCardRedirection(data: tap_extractDataFromUrl(url, for: "data", shouldBase64Decode: true))
+            break
+        default:
+            break
+        }
+    }
+    
     /// Will handle & starte the redirection process when called
     /// - Parameter data: The data string fetched from the url parameter
     internal func handleOnChargeCreated(data:String) {
@@ -128,6 +157,107 @@ extension RedirectionPayButton:WKNavigationDelegate {
         threeDsView?.startLoading()
     }
     
+    /// Starts the 3ds authentication the card form asked for.
+    /// Ported from Card-iOS, the card form behind the button is the same web sdk, so the contract is
+    /// the same: load `threeDsUrl`, watch the loaded pages for `keyword`, then hand the whole url back.
+    /// - Parameter data: The decoded json the card sdk sent with `on3dsRedirect`
+    internal func handleCardRedirection(data:String) {
+        // Let the merchant see it either way, some integrators drive their own ui from it
+        delegate?.onThreeDSRedirect?(data: data)
+
+        // Make sure we have what it takes to run the process
+        guard let cardRedirection:CardRedirection = try? CardRedirection(data),
+              let threeDsUrl:String = cardRedirection.threeDsUrl, !threeDsUrl.isEmpty,
+              let _:String = cardRedirection.redirectUrl else {
+            delegate?.onError?(data: "{\"error\":\"Failed to start authentication process\"}")
+            return
+        }
+
+        // An ACS that asks for a passkey can not run in a web view, it has no navigator.credentials.
+        // Card-iOS hands those over to the system browser, we do not have that path yet so say so
+        // rather than showing a page that can never complete
+        if threeDsUrl.lowercased().contains("passkey") {
+            delegate?.onError?(data: "{\"error\":\"This authentication needs a passkey, which a web view can not serve\"}")
+            return
+        }
+
+        threeDsView = .init()
+        threeDsView?.isModalInPresentation = true
+        threeDsView?.redirectionData = .init(url: threeDsUrl, id: nil, powered: cardRedirection.powered, stopRedirection: false)
+        // Watch for the card sdk's own keyword instead of the shared redirection one
+        threeDsView?.cardRedirectionKeyword = cardRedirection.keyword
+        threeDsView?.selectedLocale = currentlyLoadedConfigurations?.getButtonLocale() ?? "en"
+        threeDsView?.poweredByTapView.isHidden = !(cardRedirection.powered ?? true)
+        threeDsView?.threeDSCanceled = {
+            self.threeDsView?.dismiss(animated: true, completion: {
+                self.handleCardAuthenticationCanceled()
+            })
+        }
+        threeDsView?.redirectionReached = { redirectionUrl in
+            self.threeDsView?.dismiss(animated: true) {
+                DispatchQueue.main.async {
+                    self.passCardAuthenticationToSDK(redirectionUrl: redirectionUrl)
+                }
+            }
+        }
+        threeDsView?.idleForWhile = {
+            self.threeDsView?.idleForWhile = {}
+            DispatchQueue.main.async {
+                UIApplication.shared.topViewController()!.present(self.threeDsView!, animated: true)
+            }
+        }
+        threeDsView?.startLoading()
+    }
+
+    /// Tells the card form the payer finished authenticating.
+    ///
+    /// The button page wraps the card in an iframe, and its own `window.loadAuthentication` posts through
+    /// the button's iframe events which need an `iframeId` the mobile url never carries. `window.CardSDK`
+    /// talks to the card iframe directly, so prefer it and keep the other one as a fallback.
+    /// - Parameter redirectionUrl: The whole url the 3ds page landed on
+    internal func passCardAuthenticationToSDK(redirectionUrl:String) {
+        // Keep the url safe to drop inside a single quoted js string
+        let escapedUrl:String = redirectionUrl
+            .replacingOccurrences(of: "\\", with: "\\\\")
+            .replacingOccurrences(of: "'", with: "\\'")
+        let javaScript:String = """
+        (function() {
+            var authenticationUrl = '\(escapedUrl)';
+            if (window.CardSDK && typeof window.CardSDK.loadAuthentication === 'function') {
+                window.CardSDK.loadAuthentication(authenticationUrl);
+                return 'CardSDK';
+            }
+            if (typeof window.loadAuthentication === 'function') {
+                window.loadAuthentication(authenticationUrl);
+                return 'window';
+            }
+            return 'none';
+        })()
+        """
+        webView.evaluateJavaScript(javaScript) { result, error in
+            print("loadAuthentication handled by: \(result ?? "nil") \(error?.localizedDescription ?? "")")
+        }
+    }
+
+    /// The payer backed out of the 3ds page
+    internal func handleCardAuthenticationCanceled() {
+        delegate?.onCanceled?()
+        let javaScript:String = """
+        (function() {
+            if (window.CardSDK && typeof window.CardSDK.cancelAuthentication === 'function') {
+                window.CardSDK.cancelAuthentication();
+                return 'CardSDK';
+            }
+            if (typeof window.cancel === 'function') {
+                window.cancel();
+                return 'window';
+            }
+            return 'none';
+        })()
+        """
+        webView.evaluateJavaScript(javaScript)
+    }
+
     func handleOnSuccess(url:URL) {
         self.delegate?.onSuccess?(data: tap_extractDataFromUrl(url, for: "data", shouldBase64Decode: true))
         //self.openUrl(url: self.currentlyLoadedConfigurations)
