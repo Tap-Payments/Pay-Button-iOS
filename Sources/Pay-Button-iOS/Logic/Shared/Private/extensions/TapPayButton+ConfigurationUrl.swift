@@ -83,25 +83,8 @@ internal extension URL {
     
     /// comutes the encryption key for the respected server
     func headersEncryptionPublicKey() -> String {
-        if UrlBasedUtils.publicKey.contains("test") {
-            return """
------BEGIN PUBLIC KEY-----
-MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC8AX++RtxPZFtns4XzXFlDIxPB
-h0umN4qRXZaKDIlb6a3MknaB7psJWmf2l+e4Cfh9b5tey/+rZqpQ065eXTZfGCAu
-BLt+fYLQBhLfjRpk8S6hlIzc1Kdjg65uqzMwcTd0p7I4KLwHk1I0oXzuEu53fU1L
-SZhWp4Mnd6wjVgXAsQIDAQAB
------END PUBLIC KEY-----
-"""
-        }else{
-            return """
------BEGIN PUBLIC KEY-----
-MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC9hSRms7Ir1HmzdZxGXFYgmpi3
-ez7VBFje0f8wwrxYS9oVoBtN4iAt0DOs3DbeuqtueI31wtpFVUMGg8W7R0SbtkZd
-GzszQNqt/wyqxpDC9q+97XdXwkWQFA72s76ud7eMXQlsWKsvgwhY+Ywzt0KlpNC3
-Hj+N6UWFOYK98Xi+sQIDAQAB
------END PUBLIC KEY-----
-"""
-        }
+        // Same key the intent calls sign their headers with, so the mdn we report stays one single value
+        return UrlBasedUtils.publicEncryptionKey
     }
 }
 
@@ -163,25 +146,8 @@ internal extension Dictionary {
     
     /// comutes the encryption key for the respected server
     func headersEncryptionPublicKey() -> String {
-        if self.getPayButtonSDKKey().contains("test") {
-            return """
------BEGIN PUBLIC KEY-----
-MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC8AX++RtxPZFtns4XzXFlDIxPB
-h0umN4qRXZaKDIlb6a3MknaB7psJWmf2l+e4Cfh9b5tey/+rZqpQ065eXTZfGCAu
-BLt+fYLQBhLfjRpk8S6hlIzc1Kdjg65uqzMwcTd0p7I4KLwHk1I0oXzuEu53fU1L
-SZhWp4Mnd6wjVgXAsQIDAQAB
------END PUBLIC KEY-----
-"""
-        }else{
-            return """
------BEGIN PUBLIC KEY-----
-MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC9hSRms7Ir1HmzdZxGXFYgmpi3
-ez7VBFje0f8wwrxYS9oVoBtN4iAt0DOs3DbeuqtueI31wtpFVUMGg8W7R0SbtkZd
-GzszQNqt/wyqxpDC9q+97XdXwkWQFA72s76ud7eMXQlsWKsvgwhY+Ywzt0KlpNC3
-Hj+N6UWFOYK98Xi+sQIDAQAB
------END PUBLIC KEY-----
-"""
-        }
+        // Same key the intent calls sign their headers with, so the mdn we report stays one single value
+        return UrlBasedUtils.publicEncryptionKey
     }
 }
 

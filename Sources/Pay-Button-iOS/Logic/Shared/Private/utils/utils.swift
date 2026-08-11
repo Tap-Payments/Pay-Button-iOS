@@ -36,10 +36,10 @@ SZhWp4Mnd6wjVgXAsQIDAQAB
     /// The public key to use in case of production transaction
     internal static var productionEncryptionKey:String = """
 -----BEGIN PUBLIC KEY-----
-MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC8AX++RtxPZFtns4XzXFlDIxPB
-h0umN4qRXZaKDIlb6a3MknaB7psJWmf2l+e4Cfh9b5tey/+rZqpQ065eXTZfGCAu
-BLt+fYLQBhLfjRpk8S6hlIzc1Kdjg65uqzMwcTd0p7I4KLwHk1I0oXzuEu53fU1L
-SZhWp4Mnd6wjVgXAsQIDAQAB
+MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC9hSRms7Ir1HmzdZxGXFYgmpi3
+ez7VBFje0f8wwrxYS9oVoBtN4iAt0DOs3DbeuqtueI31wtpFVUMGg8W7R0SbtkZd
+GzszQNqt/wyqxpDC9q+97XdXwkWQFA72s76ud7eMXQlsWKsvgwhY+Ywzt0KlpNC3
+Hj+N6UWFOYK98Xi+sQIDAQAB
 -----END PUBLIC KEY-----
 """
     /// The encryption public key for the Checkout MW
@@ -54,7 +54,10 @@ SZhWp4Mnd6wjVgXAsQIDAQAB
     internal static var buttonWrapperUrlFormat:String = "https://button.dev.tap.company/?intentId=%@&publicKey=%@&mdn=%@&platform=mobile"
     /// Computes the corrcet button url with data and format
     internal static var buttonWrapperUrl:String {
-        return String(format: buttonWrapperUrlFormat, currentInentID, currentSdkInfo.sdkInfo?.authorization ?? "", currentSdkInfo.sdkInfo?.mdn?.toBase64() ?? "")
+        // The page has to report the same mdn the create intent & the sdk info calls reported, so we reuse the
+        // one generated back then .. falling back to generating it here in case no sdk info has been built yet
+        let mdn:String = currentSdkInfo.sdkInfo?.mdn ?? encryptedMdn(using: publicEncryptionKey)
+        return String(format: buttonWrapperUrlFormat, currentInentID, currentSdkInfo.sdkInfo?.authorization ?? publicKey, mdn.toBase64())
     }
     /// Currently used intent id
     internal static var currentInentID:String = ""
@@ -319,12 +322,34 @@ SZhWp4Mnd6wjVgXAsQIDAQAB
         return TapApplicationPlistInfo.shared.bundleIdentifier ?? ""
     }
 
+    /// The already encrypted mdn, kept per encryption key
+    private static var encryptedMdnCache:[String:String] = [:]
+
+    /// Guards `encryptedMdnCache` .. the headers are generated from network callbacks as well as the main thread
+    private static let encryptedMdnCacheLock:NSLock = .init()
+
+    /// The encrypted mdn to report. RSA encryption is randomised, so encrypting the same mdn twice produces two
+    /// different values. The backend correlates the mdn across the create intent call, the sdk info update, the
+    /// button configuration and the button page, hence they all have to carry the exact same value .. we encrypt
+    /// it once per encryption key and hand the very same result to every caller afterwards.
+    /// - Parameter headersEncryptionPublicKey: The encryption key to be used
+    static func encryptedMdn(using headersEncryptionPublicKey:String) -> String {
+        encryptedMdnCacheLock.lock()
+        defer { encryptedMdnCacheLock.unlock() }
+        if let alreadyEncryptedMdn:String = encryptedMdnCache[headersEncryptionPublicKey] {
+            return alreadyEncryptedMdn
+        }
+        let encryptedMdn:String = Crypter.encrypt(mdnValue, using: headersEncryptionPublicKey) ?? ""
+        encryptedMdnCache[headersEncryptionPublicKey] = encryptedMdn
+        return encryptedMdn
+    }
+
     /// Generates the mdn & the application required headers
     /// - Parameter headersEncryptionPublicKey: The encryption key to be used
     static func generateApplicationHeader(headersEncryptionPublicKey:String) -> [String:String] {
         return [
             Constants.HTTPHeaderKey.application: applicationHeaderValue(headersEncryptionPublicKey: headersEncryptionPublicKey),
-            Constants.HTTPHeaderKey.mdn: Crypter.encrypt(mdnValue, using: headersEncryptionPublicKey) ?? ""
+            Constants.HTTPHeaderKey.mdn: encryptedMdn(using: headersEncryptionPublicKey)
         ]
     }
     
