@@ -102,7 +102,8 @@ extension ThreeDSView {
         let constraints = [
             webView!.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
             webView!.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
-            webView!.topAnchor.constraint(equalTo: self.view.topAnchor, constant: 100),
+            // The powered by tap bar sits at the very top and overlaps the page by 12, so start right under it
+            webView!.topAnchor.constraint(equalTo: self.view.topAnchor, constant: 44),
             webView!.bottomAnchor.constraint(equalTo: self.view.bottomAnchor, constant: 40)
         ]
         
@@ -126,7 +127,9 @@ extension ThreeDSView {
             poweredByTapView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
             poweredByTapView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
             poweredByTapView.heightAnchor.constraint(equalToConstant: 56),
-            poweredByTapView.bottomAnchor.constraint(equalTo: self.webView!.topAnchor, constant: 12)
+            // Anchored to the top of the sheet. Hanging it off the web view instead left the 56 above it
+            // empty, and the controller's view is clear, so the app behind showed through as a white band
+            poweredByTapView.topAnchor.constraint(equalTo: self.view.topAnchor)
         ]
         
         NSLayoutConstraint.activate(constraints)

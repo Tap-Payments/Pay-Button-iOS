@@ -19,8 +19,14 @@ internal class PayButtonPopupViewController: UIViewController {
     internal let popupWebView:WKWebView
     /// Called when the payer dismisses the popup themselves rather than letting the flow finish
     internal var popupClosedByUser:()->() = {}
-    /// The close button, the popup has no chrome of its own
-    private let closeButton:UIButton = .init(type: .system)
+    /// The popup has no chrome of its own, so it gets the same bar the 3ds page has
+    internal let poweredByTapView:PoweredByTapView = .init(frame: .zero)
+    /// Represents the locale needed to render the powered by tap view with
+    internal var selectedLocale:String = "en" {
+        didSet{
+            self.poweredByTapView.selectedLocale = selectedLocale
+        }
+    }
 
     //MARK: - Init methods
     internal init(popupWebView:WKWebView) {
@@ -40,7 +46,7 @@ internal class PayButtonPopupViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .white
         setupWebView()
-        setupCloseButton()
+        setupPoweredByTapView()
     }
 
     //MARK: - Private methods
@@ -51,32 +57,28 @@ internal class PayButtonPopupViewController: UIViewController {
         NSLayoutConstraint.activate([
             popupWebView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             popupWebView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            // The bar sits at the top of the safe area and overlaps the page by 12, same as the 3ds page
             popupWebView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 44),
             popupWebView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
 
-    /// The popup is a bare web view, so give the payer a way out of it
-    private func setupCloseButton() {
-        closeButton.setImage(UIImage(named: "Close", in: Bundle.currentBundle, with: nil), for: .normal)
-        closeButton.tintColor = .darkGray
-        closeButton.imageView?.contentMode = .scaleAspectFit
-        closeButton.addTarget(self, action: #selector(closeButtonClicked), for: .touchUpInside)
-
-        view.addSubview(closeButton)
-        closeButton.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            closeButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            closeButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 6),
-            closeButton.widthAnchor.constraint(equalToConstant: 32),
-            closeButton.heightAnchor.constraint(equalToConstant: 32)
-        ])
-    }
-
-    /// The payer backed out of the popup
-    @objc private func closeButtonClicked() {
-        dismiss(animated: true) { [weak self] in
-            self?.popupClosedByUser()
+    /// The popup is a bare web view, so the bar is what tells the payer whose page this is and how to leave it
+    private func setupPoweredByTapView() {
+        poweredByTapView.selectedLocale = selectedLocale
+        poweredByTapView.backButtonClicked = { [weak self] in
+            self?.dismiss(animated: true) {
+                self?.popupClosedByUser()
+            }
         }
+
+        view.addSubview(poweredByTapView)
+        poweredByTapView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            poweredByTapView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            poweredByTapView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            poweredByTapView.heightAnchor.constraint(equalToConstant: 56),
+            poweredByTapView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor)
+        ])
     }
 }

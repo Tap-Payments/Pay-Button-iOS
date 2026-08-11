@@ -299,6 +299,7 @@ extension RedirectionPayButton:WKUIDelegate {
 
         // The button itself is only as tall as the form, the identity flow needs the whole screen
         let popupViewController:PayButtonPopupViewController = .init(popupWebView: popupWebView)
+        popupViewController.selectedLocale = currentlyLoadedConfigurations?.getButtonLocale() ?? "en"
         popupViewController.popupClosedByUser = { [weak self] in
             self?.popupViewController = nil
             self?.delegate?.onCanceled?()
