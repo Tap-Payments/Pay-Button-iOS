@@ -23,6 +23,10 @@ class ThreeDSView: UIViewController {
     var poweredByTapView:PoweredByTapView = .init(frame: .zero)
     /// The redirect url scheme
     var redirectUrl:String?
+    /// Set for the card based buttons only. The card web sdk names the query parameter it wants us to
+    /// watch for, ex `auth_payer`, instead of relying on the shared redirection keyword. When it is set
+    /// the whole url is handed back rather than only its query string, which is what the card sdk expects.
+    var cardRedirectionKeyword:String?
     /// Represents the locale needed to render the powered by tap view with
     var selectedLocale:String = "en" {
         didSet{
@@ -159,6 +163,14 @@ extension ThreeDSView: WKNavigationDelegate {
                 // go to it!
                 //webView.go(to: firstItem!)
         }else if let requestURL:URL = navigationAction.request.url,
+                 let cardRedirectionKeyword:String = cardRedirectionKeyword,
+                 !tap_extractDataFromUrl(requestURL, for: cardRedirectionKeyword, shouldBase64Decode: false).isEmpty {
+            // The card sdk wants the whole url back, it reads the result out of it itself
+            self.redirectionReached(requestURL.absoluteString)
+            decisionHandler(.cancel)
+            return
+        }else if let requestURL:URL = navigationAction.request.url,
+           cardRedirectionKeyword == nil,
            requestURL.absoluteString.lowercased().contains(UrlBasedUtils.redirectionKeyWord.lowercased()) {
             // The web sdk only needs the query string
             // MARK: GooglePay redirect

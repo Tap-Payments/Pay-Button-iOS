@@ -19,6 +19,33 @@ internal struct Redirection: Codable {
     var stopRedirection:Bool?
 }
 
+// MARK: - CardRedirection
+/// The model the card web sdk sends with `on3dsRedirect`, when the payer has to be authenticated.
+/// Same shape Card-iOS decodes, the card form behind the button is the same web sdk.
+internal struct CardRedirection: Codable {
+    /// The 3DS/Otp page link we need to display
+    var threeDsUrl: String?
+    /// The url we need to listen to, to detect the end of the authentication process
+    var redirectUrl: String?
+    /// The query parameter we watch for on the loaded pages to know the process is done
+    var keyword: String?
+    /// Whether or not we shall show the powered by tap flag
+    var powered: Bool?
+}
+
+extension CardRedirection {
+    init(data: Data) throws {
+        self = try newJSONDecoder().decode(CardRedirection.self, from: data)
+    }
+
+    init(_ json: String, using encoding: String.Encoding = .utf8) throws {
+        guard let data = json.data(using: encoding) else {
+            throw NSError(domain: "JSONDecoding", code: 0, userInfo: nil)
+        }
+        try self.init(data: data)
+    }
+}
+
 // MARK: KnetRedirection convenience initializers and mutators
 
 extension Redirection {
