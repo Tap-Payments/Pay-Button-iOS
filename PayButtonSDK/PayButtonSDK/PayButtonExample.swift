@@ -313,7 +313,7 @@ class PayButtonExample: UIViewController {
       "card_direction": "ltr",
       "edges": "circular",
       "theme": "light",
-      "color_style": "coloured",
+      "color_style": "colored",
       "loader": true,
       "powered": true
     }
@@ -377,11 +377,26 @@ class PayButtonExample: UIViewController {
         alertController.addAction(.init(title: "Configs", style: .default, handler: { _ in
             self.configClicked()
         }))
+
+        alertController.addAction(.init(title: "Edit intent JSON", style: .default, handler: { _ in
+            self.editIntentJSONClicked()
+        }))
         
         alertController.addAction(.init(title: "Cancel", style: .cancel))
         present(alertController, animated: true)
     }
     
+    /// Opens the raw intent json, the mobile counterpart of the web demo's config object editor
+    func editIntentJSONClicked() {
+        let editor:IntentJSONEditorViewController = .init()
+        editor.onSaved = { [weak self] in
+            self?.setupPayButton()
+        }
+        // Pushed rather than presented. Presenting from the action sheet's handler races with
+        // the sheet dismissing itself and the presentation gets swallowed
+        navigationController?.pushViewController(editor, animated: true)
+    }
+
     func configClicked() {
         let configCtrl:PayButtonSettingsViewController = storyboard?.instantiateViewController(withIdentifier: "BenefitPayButtonSettingsViewController") as! PayButtonSettingsViewController
         configCtrl.delegate = self

@@ -26,8 +26,11 @@ class PayButtonSettingsViewController: FormViewController {
             row.title = "Button"
             row.options = PayButtonTypeEnum.allCases.map{ $0.toString() }
             row.value = PayButtonExample.intentRequestRequest.config?.acceptance?.supportedPaymentMethods?.first?.uppercased() ?? "KNET"
-            row.onChange { row in
-                PayButtonExample.intentRequestRequest.config?.acceptance?.supportedPaymentMethods = [row.value ?? "KNET"]
+            row.onChange { [weak self] row in
+                let selectedMethod:String = row.value ?? "KNET"
+                PayButtonExample.intentRequestRequest.config?.acceptance?.supportedPaymentMethods = [selectedMethod]
+                // The token scopes belong to one wallet each, so the scope list follows the button
+                self?.refreshScopeOptions(for: selectedMethod)
             }
         }
         
@@ -51,13 +54,45 @@ class PayButtonSettingsViewController: FormViewController {
         }*/
         
         
+        form +++ Section("intent")
+        <<< TextRow("purpose"){ row in
+            row.title = "purpose"
+            row.value = PayButtonExample.intentRequestRequest.purpose ?? ""
+            row.onChange { row in PayButtonExample.intentRequestRequest.purpose = row.value ?? "" }
+        }
+        <<< TextRow("statementDescriptor"){ row in
+            row.title = "statement descriptor"
+            row.value = PayButtonExample.intentRequestRequest.statementDescriptor ?? ""
+            row.onChange { row in PayButtonExample.intentRequestRequest.statementDescriptor = row.value ?? "" }
+        }
+        <<< TextRow("description"){ row in
+            row.title = "description"
+            row.value = PayButtonExample.intentRequestRequest.description ?? ""
+            row.onChange { row in PayButtonExample.intentRequestRequest.description = row.value ?? "" }
+        }
+        <<< TextRow("reference"){ row in
+            row.title = "reference"
+            row.value = PayButtonExample.intentRequestRequest.reference ?? ""
+            row.onChange { row in PayButtonExample.intentRequestRequest.reference = row.value ?? "" }
+        }
+        <<< SwitchRow("customerInitiated"){ row in
+            row.title = "customer initiated"
+            row.value = PayButtonExample.intentRequestRequest.customerInitiated ?? true
+            row.onChange { row in PayButtonExample.intentRequestRequest.customerInitiated = row.value ?? true }
+        }
+        <<< SwitchRow("authenticate.required"){ row in
+            row.title = "authenticate required"
+            row.value = PayButtonExample.intentRequestRequest.authenticate?.authenticateRequired ?? true
+            row.onChange { row in PayButtonExample.intentRequestRequest.authenticate?.authenticateRequired = row.value ?? true }
+        }
+
         form +++ Section("scope")
         <<< AlertRow<String>("scope"){ row in
             row.title = "Scope"
-            row.options = ["CHARGE","AUTHORIZE","TOKEN"]
-            row.value = PayButtonExample.intentRequestRequest.scope ?? "CHARGE"
+            row.options = PayButtonConfig.Scope.allowed(for: PayButtonExample.intentRequestRequest.config?.acceptance?.supportedPaymentMethods?.first).map { $0.rawValue }
+            row.value = PayButtonExample.intentRequestRequest.scope ?? PayButtonConfig.Scope.charge.rawValue
             row.onChange { row in
-                PayButtonExample.intentRequestRequest.scope = row.value ?? "CHARGE"
+                PayButtonExample.intentRequestRequest.scope = row.value ?? PayButtonConfig.Scope.charge.rawValue
             }
         }
         
@@ -108,10 +143,10 @@ class PayButtonSettingsViewController: FormViewController {
         }
         <<< AlertRow<String>("order.currency"){ row in
             row.title = "order currency"
-            row.options = ["KWD","SAR","AED","EGP","QAR","BHD","OMR","USD","EUR","GBP"]
-            row.value = PayButtonExample.intentRequestRequest.order?.currency?.uppercased() ?? "KWD"
+            row.options = PayButtonConfig.Currency.allRawValues
+            row.value = PayButtonExample.intentRequestRequest.order?.currency?.uppercased() ?? PayButtonConfig.Currency.kwd.rawValue
             row.onChange { row in
-                PayButtonExample.intentRequestRequest.order?.currency = row.value ?? "KWD"
+                PayButtonExample.intentRequestRequest.order?.currency = row.value ?? PayButtonConfig.Currency.kwd.rawValue
             }
         }
         
@@ -183,21 +218,74 @@ class PayButtonSettingsViewController: FormViewController {
         
         
         form +++ Section("acceptance")
-        <<< MultipleSelectorRow<String>("acceptance.supportedSchemes"){ row in
-            row.title = "supportedSchemes"
-            row.options = ["AMERICAN_EXPRESS","MADA","MASTERCARD","VISA","OMANNET","MEEZA"]
-            row.value = Set(PayButtonExample.intentRequestRequest.config?.acceptance?.supportedSchemes ?? ["AMERICAN_EXPRESS","MADA","MASTERCARD","VISA","OMANNET","MEEZA"])
+        <<< MultipleSelectorRow<String>("acceptance.supportedRegions"){ row in
+            row.title = "supportedRegions"
+            row.options = PayButtonConfig.AcceptanceRegion.allRawValues
+            row.value = Set(PayButtonExample.intentRequestRequest.config?.acceptance?.supportedRegions ?? [])
             row.onChange { row in
-                PayButtonExample.intentRequestRequest.config?.acceptance?.supportedSchemes = Array(row.value ?? ["AMERICAN_EXPRESS","MADA","MASTERCARD","VISA","OMANNET","MEEZA"])
+                let selected:[String] = Array(row.value ?? [])
+                PayButtonExample.intentRequestRequest.config?.acceptance?.supportedRegions = selected.isEmpty ? nil : selected
             }
         }
-        
+
+        <<< MultipleSelectorRow<String>("acceptance.supportedCurrencies"){ row in
+            row.title = "supportedCurrencies"
+            row.options = PayButtonConfig.Currency.allRawValues
+            row.value = Set(PayButtonExample.intentRequestRequest.config?.acceptance?.supportedCurrencies ?? [])
+            row.onChange { row in
+                let selected:[String] = Array(row.value ?? [])
+                PayButtonExample.intentRequestRequest.config?.acceptance?.supportedCurrencies = selected.isEmpty ? nil : selected
+            }
+        }
+
+        <<< MultipleSelectorRow<String>("acceptance.supportedSchemes"){ row in
+            row.title = "supportedSchemes"
+            row.options = PayButtonConfig.Scheme.allRawValues
+            row.value = Set(PayButtonExample.intentRequestRequest.config?.acceptance?.supportedSchemes ?? [])
+            row.onChange { row in
+                let selected:[String] = Array(row.value ?? [])
+                PayButtonExample.intentRequestRequest.config?.acceptance?.supportedSchemes = selected.isEmpty ? nil : selected
+            }
+        }
+
+        <<< MultipleSelectorRow<String>("acceptance.supportedPaymentAuthentications"){ row in
+            row.title = "supportedPaymentAuthentications"
+            row.options = PayButtonConfig.PaymentAuthentication.allRawValues
+            row.value = Set(PayButtonExample.intentRequestRequest.config?.acceptance?.supportedPaymentAuthentications ?? [])
+            row.onChange { row in
+                let selected:[String] = Array(row.value ?? [])
+                PayButtonExample.intentRequestRequest.config?.acceptance?.supportedPaymentAuthentications = selected.isEmpty ? nil : selected
+            }
+        }
+
+        <<< MultipleSelectorRow<String>("acceptance.supportedPaymentFlows"){ row in
+            row.title = "supportedPaymentFlows"
+            row.options = PayButtonConfig.PaymentFlow.allRawValues
+            row.value = Set(PayButtonExample.intentRequestRequest.config?.acceptance?.supportedPaymentFlows ?? [])
+            row.onChange { row in
+                let selected:[String] = Array(row.value ?? [])
+                PayButtonExample.intentRequestRequest.config?.acceptance?.supportedPaymentFlows = selected.isEmpty ? nil : selected
+            }
+        }
+
+        <<< MultipleSelectorRow<String>("acceptance.supportedPaymentTypes"){ row in
+            row.title = "supportedPaymentTypes"
+            row.options = PayButtonConfig.AcceptancePaymentType.allRawValues
+            // Left unset by default, the web demo does not send this field at all
+            row.value = Set(PayButtonExample.intentRequestRequest.config?.acceptance?.supportedPaymentTypes ?? [])
+            row.onChange { row in
+                let selected:[String] = Array(row.value ?? [])
+                PayButtonExample.intentRequestRequest.config?.acceptance?.supportedPaymentTypes = selected.isEmpty ? nil : selected
+            }
+        }
+
         <<< MultipleSelectorRow<String>("acceptance.supportedFundSource"){ row in
             row.title = "supportedFundSource"
-            row.options = ["CREDIT","DEBIT"]
-            row.value = Set( PayButtonExample.intentRequestRequest.config?.acceptance?.supportedFundSource ?? ["DEBIT","CREDIT"])
+            row.options = PayButtonConfig.FundSource.allRawValues
+            row.value = Set(PayButtonExample.intentRequestRequest.config?.acceptance?.supportedFundSource ?? [])
             row.onChange { row in
-                PayButtonExample.intentRequestRequest.config?.acceptance?.supportedFundSource = Array(row.value ?? ["DEBIT","CREDIT"])
+                let selected:[String] = Array(row.value ?? [])
+                PayButtonExample.intentRequestRequest.config?.acceptance?.supportedFundSource = selected.isEmpty ? nil : selected
             }
         }
         
@@ -210,39 +298,169 @@ class PayButtonSettingsViewController: FormViewController {
             }
         }*/
         
+        form +++ Section("features")
+        <<< SwitchRow("features.acceptanceBadge"){ row in
+            row.title = "acceptance badge"
+            row.value = PayButtonExample.intentRequestRequest.config?.features?.acceptanceBadge ?? true
+            row.onChange { row in PayButtonExample.intentRequestRequest.config?.features?.acceptanceBadge = row.value ?? true }
+        }
+        <<< SwitchRow("features.order"){ row in
+            row.title = "order"
+            row.value = PayButtonExample.intentRequestRequest.config?.features?.order ?? true
+            row.onChange { row in PayButtonExample.intentRequestRequest.config?.features?.order = row.value ?? true }
+        }
+        <<< SwitchRow("features.multipleCurrencies"){ row in
+            row.title = "multiple currencies"
+            row.value = PayButtonExample.intentRequestRequest.config?.features?.multipleCurrencies ?? true
+            row.onChange { row in PayButtonExample.intentRequestRequest.config?.features?.multipleCurrencies = row.value ?? true }
+        }
+        <<< SwitchRow("features.customerCards.saveCard"){ row in
+            row.title = "save card"
+            row.value = PayButtonExample.intentRequestRequest.config?.features?.customerCards?.saveCard ?? true
+            row.onChange { row in PayButtonExample.intentRequestRequest.config?.features?.customerCards?.saveCard = row.value ?? true }
+        }
+        <<< SwitchRow("features.customerCards.autoSaveCard"){ row in
+            row.title = "auto save card"
+            row.value = PayButtonExample.intentRequestRequest.config?.features?.customerCards?.autoSaveCard ?? true
+            row.onChange { row in PayButtonExample.intentRequestRequest.config?.features?.customerCards?.autoSaveCard = row.value ?? true }
+        }
+        <<< SwitchRow("features.customerCards.displaySavedCards"){ row in
+            row.title = "display saved cards"
+            row.value = PayButtonExample.intentRequestRequest.config?.features?.customerCards?.displaySavedCards ?? true
+            row.onChange { row in PayButtonExample.intentRequestRequest.config?.features?.customerCards?.displaySavedCards = row.value ?? true }
+        }
+        <<< SwitchRow("features.alternativeCardInputs.cardScanner"){ row in
+            row.title = "card scanner"
+            row.value = PayButtonExample.intentRequestRequest.config?.features?.alternativeCardInputs?.cardScanner ?? true
+            row.onChange { row in PayButtonExample.intentRequestRequest.config?.features?.alternativeCardInputs?.cardScanner = row.value ?? true }
+        }
+        <<< SwitchRow("features.alternativeCardInputs.cardNFC"){ row in
+            row.title = "card nfc"
+            row.value = PayButtonExample.intentRequestRequest.config?.features?.alternativeCardInputs?.cardNFC ?? true
+            row.onChange { row in PayButtonExample.intentRequestRequest.config?.features?.alternativeCardInputs?.cardNFC = row.value ?? true }
+        }
+
+        form +++ Section("field visibility")
+        <<< SwitchRow("fieldVisibility.name"){ row in
+            row.title = "name"
+            row.value = PayButtonExample.intentRequestRequest.config?.fieldVisibility?.name ?? true
+            row.onChange { row in PayButtonExample.intentRequestRequest.config?.fieldVisibility?.name = row.value ?? true }
+        }
+        <<< SwitchRow("fieldVisibility.card.cardholder"){ row in
+            row.title = "card holder"
+            row.value = PayButtonExample.intentRequestRequest.config?.fieldVisibility?.card?.cardholder ?? true
+            row.onChange { row in PayButtonExample.intentRequestRequest.config?.fieldVisibility?.card?.cardholder = row.value ?? true }
+        }
+        <<< SwitchRow("fieldVisibility.contact.email"){ row in
+            row.title = "contact email"
+            row.value = PayButtonExample.intentRequestRequest.config?.fieldVisibility?.contact?.email ?? true
+            row.onChange { row in PayButtonExample.intentRequestRequest.config?.fieldVisibility?.contact?.email = row.value ?? true }
+        }
+        <<< SwitchRow("fieldVisibility.contact.number"){ row in
+            row.title = "contact number"
+            row.value = PayButtonExample.intentRequestRequest.config?.fieldVisibility?.contact?.number ?? true
+            row.onChange { row in PayButtonExample.intentRequestRequest.config?.fieldVisibility?.contact?.number = row.value ?? true }
+        }
+        <<< SwitchRow("fieldVisibility.shipping.address"){ row in
+            row.title = "shipping address"
+            row.value = PayButtonExample.intentRequestRequest.config?.fieldVisibility?.shipping?.address ?? true
+            row.onChange { row in PayButtonExample.intentRequestRequest.config?.fieldVisibility?.shipping?.address = row.value ?? true }
+        }
+
+        form +++ Section("receipt & checkout")
+        <<< SwitchRow("receipt.email"){ row in
+            row.title = "receipt email"
+            row.value = PayButtonExample.intentRequestRequest.receipt?.email ?? false
+            row.onChange { row in PayButtonExample.intentRequestRequest.receipt?.email = row.value ?? false }
+        }
+        <<< SwitchRow("receipt.sms"){ row in
+            row.title = "receipt sms"
+            row.value = PayButtonExample.intentRequestRequest.receipt?.sms ?? false
+            row.onChange { row in PayButtonExample.intentRequestRequest.receipt?.sms = row.value ?? false }
+        }
+        <<< SwitchRow("checkout.auto"){ row in
+            row.title = "checkout auto"
+            row.value = PayButtonExample.intentRequestRequest.checkout?.auto ?? true
+            row.onChange { row in PayButtonExample.intentRequestRequest.checkout?.auto = row.value ?? true }
+        }
+
         form +++ Section("interface")
         <<< AlertRow<String>("interface.locale"){ row in
             row.title = "locale"
-            row.options = ["EN","AR"]
-            row.value = PayButtonExample.intentRequestRequest.config?.interface?.locale ?? "EN"
+            row.options = PayButtonConfig.Locale.allRawValues
+            row.value = PayButtonExample.intentRequestRequest.config?.interface?.locale ?? PayButtonConfig.Locale.en.rawValue
             row.onChange { row in
-                PayButtonExample.intentRequestRequest.config?.interface?.locale = row.value ?? "EN"
+                PayButtonExample.intentRequestRequest.config?.interface?.locale = row.value ?? PayButtonConfig.Locale.en.rawValue
             }
         }
+
+        <<< AlertRow<String>("interface.direction"){ row in
+            row.title = "direction"
+            row.options = PayButtonConfig.Direction.allRawValues
+            row.value = PayButtonExample.intentRequestRequest.config?.interface?.direction ?? PayButtonConfig.Direction.dynamic.rawValue
+            row.onChange { row in
+                PayButtonExample.intentRequestRequest.config?.interface?.direction = row.value ?? PayButtonConfig.Direction.dynamic.rawValue
+            }
+        }
+
+        <<< AlertRow<String>("interface.cardDirection"){ row in
+            row.title = "card direction"
+            row.options = PayButtonConfig.Direction.allRawValues
+            row.value = PayButtonExample.intentRequestRequest.config?.interface?.cardDirection ?? PayButtonConfig.Direction.ltr.rawValue
+            row.onChange { row in
+                PayButtonExample.intentRequestRequest.config?.interface?.cardDirection = row.value ?? PayButtonConfig.Direction.ltr.rawValue
+            }
+        }
+
         <<< AlertRow<String>("interface.theme"){ row in
             row.title = "theme"
-            row.options = ["LIGHT","DARK"]
-            row.value = PayButtonExample.intentRequestRequest.config?.interface?.theme ?? "LIGHT"
+            row.options = PayButtonConfig.ThemeMode.allRawValues
+            row.value = PayButtonExample.intentRequestRequest.config?.interface?.theme ?? PayButtonConfig.ThemeMode.light.rawValue
             row.onChange { row in
-                PayButtonExample.intentRequestRequest.config?.interface?.theme = row.value ?? "LIGHT"
+                PayButtonExample.intentRequestRequest.config?.interface?.theme = row.value ?? PayButtonConfig.ThemeMode.light.rawValue
             }
         }
-        
+
         <<< AlertRow<String>("interface.edges"){ row in
             row.title = "edges"
-            row.options = ["CURVED","FLAT","CIRCULAR"]
-            row.value = PayButtonExample.intentRequestRequest.config?.interface?.edges ?? "CURVED"
+            row.options = PayButtonConfig.Edges.allRawValues
+            row.value = PayButtonExample.intentRequestRequest.config?.interface?.edges ?? PayButtonConfig.Edges.curved.rawValue
             row.onChange { row in
-                PayButtonExample.intentRequestRequest.config?.interface?.edges = row.value ?? "CURVED"
+                PayButtonExample.intentRequestRequest.config?.interface?.edges = row.value ?? PayButtonConfig.Edges.curved.rawValue
             }
         }
-        
+
         <<< AlertRow<String>("interface.colorStyle"){ row in
             row.title = "colorStyle"
-            row.options = ["COLORED","MONOCHROME"]
-            row.value = PayButtonExample.intentRequestRequest.config?.interface?.colorStyle ?? "COLORED"
+            row.options = PayButtonConfig.ColorStyle.allRawValues
+            row.value = PayButtonExample.intentRequestRequest.config?.interface?.colorStyle ?? PayButtonConfig.ColorStyle.colored.rawValue
             row.onChange { row in
-                PayButtonExample.intentRequestRequest.config?.interface?.colorStyle = row.value ?? "COLORED"
+                PayButtonExample.intentRequestRequest.config?.interface?.colorStyle = row.value ?? PayButtonConfig.ColorStyle.colored.rawValue
+            }
+        }
+
+        <<< AlertRow<String>("interface.userExperience"){ row in
+            row.title = "user experience"
+            row.options = PayButtonConfig.UserExperience.allRawValues
+            row.value = PayButtonExample.intentRequestRequest.config?.interface?.userExperience ?? PayButtonConfig.UserExperience.popup.rawValue
+            row.onChange { row in
+                PayButtonExample.intentRequestRequest.config?.interface?.userExperience = row.value ?? PayButtonConfig.UserExperience.popup.rawValue
+            }
+        }
+
+        <<< SwitchRow("interface.loader"){ row in
+            row.title = "loader"
+            row.value = PayButtonExample.intentRequestRequest.config?.interface?.loader ?? true
+            row.onChange { row in
+                PayButtonExample.intentRequestRequest.config?.interface?.loader = row.value ?? true
+            }
+        }
+
+        <<< SwitchRow("interface.powered"){ row in
+            row.title = "powered by tap"
+            row.value = PayButtonExample.intentRequestRequest.config?.interface?.powered ?? true
+            row.onChange { row in
+                PayButtonExample.intentRequestRequest.config?.interface?.powered = row.value ?? true
             }
         }
         
@@ -291,6 +509,23 @@ class PayButtonSettingsViewController: FormViewController {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         delegate?.updateConfig()
+    }
+
+    /// Narrows the scope picker to what the selected button can actually mint.
+    /// A token scope belongs to one wallet, so switching away from Apple Pay has to drop
+    /// APPLE_PAY_TOKEN, otherwise we would post a scope the backend rejects.
+    /// - Parameter paymentMethod: The currently selected payment method
+    private func refreshScopeOptions(for paymentMethod: String) {
+        guard let scopeRow = form.rowBy(tag: "scope") as? AlertRow<String> else { return }
+        let allowed:[String] = PayButtonConfig.Scope.allowed(for: paymentMethod).map { $0.rawValue }
+        scopeRow.options = allowed
+        // Fall back to CHARGE when the scope that was picked is no longer on offer
+        if let selected = scopeRow.value, !allowed.contains(selected) {
+            scopeRow.value = PayButtonConfig.Scope.charge.rawValue
+            PayButtonExample.intentRequestRequest.scope = scopeRow.value
+        }
+        scopeRow.updateCell()
+        scopeRow.reload()
     }
     
     /*

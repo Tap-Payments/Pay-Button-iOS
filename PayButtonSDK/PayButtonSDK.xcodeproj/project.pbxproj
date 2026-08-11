@@ -17,6 +17,7 @@
 		E8BD67EC2AEA40F200DED568 /* Pay-Button-iOS in Frameworks */ = {isa = PBXBuildFile; productRef = E8BD67EB2AEA40F200DED568 /* Pay-Button-iOS */; };
 		E8BD67F02AEA474E00DED568 /* PayButtonExample.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8BD67ED2AEA474E00DED568 /* PayButtonExample.swift */; };
 		E8BD67F12AEA474E00DED568 /* PayButtonSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8BD67EE2AEA474E00DED568 /* PayButtonSettingsViewController.swift */; };
+		AA1001022AEA474E00DED568 /* IntentJSONEditorViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1001012AEA474E00DED568 /* IntentJSONEditorViewController.swift */; };
 		E8BD67F22AEA474E00DED568 /* OnSuccessViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8BD67EF2AEA474E00DED568 /* OnSuccessViewController.swift */; };
 		E8BD67F52AEA478B00DED568 /* Toast in Frameworks */ = {isa = PBXBuildFile; productRef = E8BD67F42AEA478B00DED568 /* Toast */; };
 		E8BD67F82AEA479800DED568 /* Eureka in Frameworks */ = {isa = PBXBuildFile; productRef = E8BD67F72AEA479800DED568 /* Eureka */; };
@@ -35,6 +36,7 @@
 		E8BD67E42AEA40D900DED568 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E8BD67ED2AEA474E00DED568 /* PayButtonExample.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PayButtonExample.swift; sourceTree = "<group>"; };
 		E8BD67EE2AEA474E00DED568 /* PayButtonSettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PayButtonSettingsViewController.swift; sourceTree = "<group>"; };
+		AA1001012AEA474E00DED568 /* IntentJSONEditorViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IntentJSONEditorViewController.swift; sourceTree = "<group>"; };
 		E8BD67EF2AEA474E00DED568 /* OnSuccessViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OnSuccessViewController.swift; sourceTree = "<group>"; };
 		E8BD67FB2AEA808B00DED568 /* PayButtonSDK.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PayButtonSDK.entitlements; sourceTree = "<group>"; };
 		E8C82EC72D279AE000FC56FA /* IntentRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentRequest.swift; sourceTree = "<group>"; };
@@ -81,6 +83,7 @@
 				E8BD67DA2AEA40D700DED568 /* ViewController.swift */,
 				E8BD67ED2AEA474E00DED568 /* PayButtonExample.swift */,
 				E8BD67EE2AEA474E00DED568 /* PayButtonSettingsViewController.swift */,
+				AA1001012AEA474E00DED568 /* IntentJSONEditorViewController.swift */,
 				E8BD67EF2AEA474E00DED568 /* OnSuccessViewController.swift */,
 				E8BD67DC2AEA40D700DED568 /* Main.storyboard */,
 				E8BD67DF2AEA40D900DED568 /* Assets.xcassets */,
@@ -177,6 +180,7 @@
 				E8BD67DB2AEA40D700DED568 /* ViewController.swift in Sources */,
 				E8BD67D72AEA40D700DED568 /* AppDelegate.swift in Sources */,
 				E8BD67F12AEA474E00DED568 /* PayButtonSettingsViewController.swift in Sources */,
+				AA1001022AEA474E00DED568 /* IntentJSONEditorViewController.swift in Sources */,
 				E8C82EC82D279AE000FC56FA /* IntentRequest.swift in Sources */,
 				E8BD67D92AEA40D700DED568 /* SceneDelegate.swift in Sources */,
 				E8BD67F02AEA474E00DED568 /* PayButtonExample.swift in Sources */,
