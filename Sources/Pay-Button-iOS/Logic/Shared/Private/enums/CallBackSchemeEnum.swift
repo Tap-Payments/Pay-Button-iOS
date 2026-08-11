@@ -25,5 +25,15 @@ internal enum CallBackSchemeEnum:String {
     case onChargeCreated
     /// We need to close Google pay popup
     case onClosePopup
-    
+    /// The card based button (click to pay) resized itself and wants the native view to follow
+    case onHeightChange
+    /// The card based button identified the brand of the typed card
+    case onBinIdentification
+    /// The customer asked to scan a card
+    case onScannerClick
+    /// The customer asked to read a card over NFC
+    case onNfcClick
+    /// The card form needs a 3ds page to be displayed to authenticate the customer
+    case on3dsRedirect
+
 }

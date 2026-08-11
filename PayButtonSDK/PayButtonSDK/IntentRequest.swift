@@ -7,7 +7,7 @@ import Foundation
 
 // MARK: - IntentRequest
 struct IntentRequest: Codable {
-    var scope, purpose, statementDescriptor, reference: String?
+    var scope, purpose, statementDescriptor, description, reference: String?
     var customerInitiated: Bool?
     var hashString, idempotent: String?
     var merchant: Merchant?
@@ -26,7 +26,7 @@ struct IntentRequest: Codable {
     enum CodingKeys: String, CodingKey {
         case scope, purpose
         case statementDescriptor = "statement_descriptor"
-        case reference
+        case description, reference
         case customerInitiated = "customer_initiated"
         case hashString = "hash_string"
         case idempotent, merchant, authenticate, destinations, topup, transaction, invoice, order, customer, receipt, config, domain, redirect, post, checkout
@@ -55,6 +55,7 @@ extension IntentRequest {
         scope: String?? = nil,
         purpose: String?? = nil,
         statementDescriptor: String?? = nil,
+        description: String?? = nil,
         reference: String?? = nil,
         customerInitiated: Bool?? = nil,
         hashString: String?? = nil,
@@ -78,6 +79,7 @@ extension IntentRequest {
             scope: scope ?? self.scope,
             purpose: purpose ?? self.purpose,
             statementDescriptor: statementDescriptor ?? self.statementDescriptor,
+            description: description ?? self.description,
             reference: reference ?? self.reference,
             customerInitiated: customerInitiated ?? self.customerInitiated,
             hashString: hashString ?? self.hashString,

@@ -20,10 +20,10 @@ internal class UrlBasedUtils {
     internal static var publicKey:String = ""
     /// The base url for this version when talking to the checkout mw
     internal static var checkoutMWBaseURL:String = "https://mw-sdk.dev.tap.company/v2/"
-    /// The name of the sdk when upadting the intent with the sdk info
-    internal static var sdkType:String = "button-ios"
-    /// The version of the sdk when upadting the intent with the sdk info
-    internal static var sdkVersion:String = "1.0.0"
+    /// The name of the sdk when upadting the intent with the sdk info. Same value the web pay button reports
+    internal static var sdkType:String = "button"
+    /// The version of the sdk when upadting the intent with the sdk info. Same value the web pay button reports
+    internal static var sdkVersion:String = "2.2.0"
     /// The public key to use in case of sandbox transaction
     internal static var sandboxEncryptionKey:String = """
 -----BEGIN PUBLIC KEY-----
@@ -60,6 +60,117 @@ SZhWp4Mnd6wjVgXAsQIDAQAB
     internal static var currentInentID:String = ""
     /// Currently used SDKInfo
     internal static var currentSdkInfo:SDKInfo = .init()
+    /// The CDN file holding the base url & the encryption keys our backend wants us to use
+    internal static let cdnConfigurationURL:String = "https://tap-sdks.b-cdn.net/mobile/paybutton/1.0.0/base_url.json"
+
+    /// Loads the base url & the encryption keys from the CDN, then calls back regardless of the result
+    /// as the embedded defaults are used as a fallback
+    /// - Parameter completion: Called once the CDN data has been loaded and applied
+    static func loadCDNConfiguration(completion: @escaping () -> Void = {}) {
+        guard let url:URL = URL(string: cdnConfigurationURL) else {
+            // Use the default embedded values as a fallback
+            completion()
+            return
+        }
+        var cdnRequest = URLRequest(url: url)
+        cdnRequest.timeoutInterval = 2
+        cdnRequest.cachePolicy = .reloadIgnoringLocalAndRemoteCacheData
+        URLSession.shared.dataTask(with: cdnRequest) { data, response, error in
+            applyCDNConfiguration(data: data)
+            completion()
+        }.resume()
+    }
+
+    /// Saves the data loaded from the CDN to be used afterwards
+    /// - Parameter data: The data loaded from the CDN file
+    static func applyCDNConfiguration(data: Data?) {
+        guard let data = data else { return }
+        do {
+            if let cdnResponse:[String:String] = try JSONSerialization.jsonObject(with: data, options: []) as? [String: String],
+               let cdnBaseUrlString:String = cdnResponse["baseURL"], cdnBaseUrlString != "",
+               let _:URL = URL(string: cdnBaseUrlString),
+               let sandboxEncryptionKey:String = cdnResponse["testEncKey"],
+               let buttonWrapperUrlFormat:String = cdnResponse["payButtonUrlFormat"],
+               let productionEncryptionKey:String = cdnResponse["prodEncKey"],
+               let fireBaseURL:String = cdnResponse["iOSFirebaseURL"],
+               let fireBaseJS:String = cdnResponse["iOSFireBaseJS"],
+               let redirectionKeyWord:String = cdnResponse["redirectionKeyWord"] {
+                UrlBasedUtils.sandboxEncryptionKey = sandboxEncryptionKey
+                UrlBasedUtils.productionEncryptionKey = productionEncryptionKey
+                UrlBasedUtils.checkoutMWBaseURL = cdnBaseUrlString
+                UrlBasedUtils.buttonWrapperUrlFormat = buttonWrapperUrlFormat
+                UrlBasedUtils.redirectionKeyWord = redirectionKeyWord
+                // The button holds these on the main actor, and the callers hop to main right after us so the ordering holds
+                DispatchQueue.main.async {
+                    BenefitPayButton.benefitPayFireBaseURL = fireBaseURL
+                    BenefitPayButton.javaScriptCodeToSkipManInTheMiddle = fireBaseJS
+                }
+            }
+        } catch {}
+    }
+
+    ///  Creates an intent out of the passed intent configuration object. Mirrors the web sdk's create intent flow:
+    ///  the configuration is posted as is to the checkout mw and the sdk info is attached as a sibling `sdk_info` key
+    ///  - Parameter from config: The intent configuration object as passed by the merchant
+    ///  - Parameter with sdkInfo: The SDK info to attach to the created intent
+    static func createIntent(from config:[String:Any], with sdkInfo:SDKInfo, completion: @escaping (_ response:[String:Any]?, _ error:String?) -> Void = {response,error in }) throws {
+        do {
+            // Store for further reference
+            currentSdkInfo = sdkInfo
+            // The web sdk posts the configuration at the root and adds the sdk info next to it
+            var body:[String:Any] = config
+            body["sdk_info"] = sdkInfo.sdkInfo?.dictionary ?? [:]
+            let data = try JSONSerialization.data(withJSONObject: body, options: [])
+            // construct the create intent url
+            let createIntentURL = "\(checkoutMWBaseURL)intent"
+
+            var request = URLRequest(url: URL(string: createIntentURL)!)
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.setValue("application/json", forHTTPHeaderField: "Accept")
+            request.httpMethod = "POST"
+            request.httpBody = data
+            // The mw authenticates the call with the merchant's public key, no secret key is needed
+            request.setValue(sdkInfo.sdkInfo?.authorization ?? "", forHTTPHeaderField: "Authorization")
+            request.setValue(sdkInfo.sdkInfo?.mdn ?? "", forHTTPHeaderField: "mdn")
+            request.setValue(sdkInfo.sdkInfo?.application ?? "", forHTTPHeaderField: "application")
+
+            let task = URLSession.shared.dataTask(with: request) { data, response, error in
+                guard
+                    let data = data,
+                    let response = response as? HTTPURLResponse,
+                    error == nil
+                else {                                                               // check for fundamental networking error
+                    completion(nil,"network error \(error?.localizedDescription ?? URLError(.badServerResponse).localizedDescription)")
+                    return
+                }
+
+                guard (200 ... 299) ~= response.statusCode else {                    // check for http errors
+                    completion(nil,"api error \(String(data: data, encoding: .utf8) ?? "status code \(response.statusCode)")")
+                    return
+                }
+
+                do {
+                    let jsonObject = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
+                    // Keep the created intent id around, the button url is built out of it
+                    if let intentID:String = jsonObject?["id"] as? String, !intentID.isEmpty {
+                        currentInentID = intentID
+                        UrlBasedUtils.intentID = intentID
+                    }
+                    completion(jsonObject, nil)
+                } catch {
+                    if let responseString = String(data: data, encoding: .utf8) {
+                        completion(nil, "response error \(responseString) \(error)")
+                    } else {
+                        completion(nil, "response error \(error)")
+                    }
+                }
+            }
+
+            task.resume()
+        }catch {
+            throw error
+        }
+    }
     ///  Updates the intent with the required device data. Called before using the intent
     ///  - Parameter for intentID: The id of the intent
     ///  - Parameter with sdkInfo: The SDK info to update the intent with
@@ -68,8 +179,8 @@ SZhWp4Mnd6wjVgXAsQIDAQAB
             // Store for further reference
             currentSdkInfo = sdkInfo
             currentInentID = intentID
-            // Convert the sdk class into a json data
-            let data = try sdkInfo.jsonData()
+            // The web sdk puts the sdk info fields at the root of the body, not wrapped inside an `sdk_info` key
+            let data = try sdkInfo.sdkInfo?.jsonData() ?? Data()
             // construct the update sdkinfo intent url
             let updateSDKInfoURL = "\(checkoutMWBaseURL)intent/\(intentID)/sdk"
             
@@ -203,13 +314,25 @@ SZhWp4Mnd6wjVgXAsQIDAQAB
     
     //MARK: - Network's headers
     
+    /// The value reported as the mdn. The backend validates it against the domains registered for the public key,
+    /// the same way it validates the page origin the web pay button reports.
+    /// Defaults to the app's bundle identifier, which is what a mobile integration should register.
+    internal static var mdnDomain:String? = nil
+
+    /// The value we identify this integration with .. the registered domain if the merchant set one, the bundle id otherwise
+    internal static var mdnValue:String {
+        if let mdnDomain = mdnDomain, !mdnDomain.isEmpty {
+            return mdnDomain
+        }
+        return TapApplicationPlistInfo.shared.bundleIdentifier ?? ""
+    }
+
     /// Generates the mdn & the application required headers
     /// - Parameter headersEncryptionPublicKey: The encryption key to be used
     static func generateApplicationHeader(headersEncryptionPublicKey:String) -> [String:String] {
         return [
             Constants.HTTPHeaderKey.application: applicationHeaderValue(headersEncryptionPublicKey: headersEncryptionPublicKey),
-            //Constants.HTTPHeaderKey.mdn: Crypter.encrypt("https://demo.dev.tap.company", using: headersEncryptionPublicKey) ?? ""
-            Constants.HTTPHeaderKey.mdn: Crypter.encrypt(TapApplicationPlistInfo.shared.bundleIdentifier ?? "", using: headersEncryptionPublicKey) ?? ""
+            Constants.HTTPHeaderKey.mdn: Crypter.encrypt(mdnValue, using: headersEncryptionPublicKey) ?? ""
         ]
     }
     
@@ -259,18 +382,20 @@ SZhWp4Mnd6wjVgXAsQIDAQAB
         let osName = UIDevice.current.systemName
         let osVersion = UIDevice.current.systemVersion
         let deviceName = UIDevice.current.name
-        let deviceNameFiltered =  deviceName.tap_byRemovingAllCharactersExcept("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789")
+        let deviceNameFiltered =  deviceName.tap_byRemovingAllCharactersExcept("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789 ()")
         let deviceType = UIDevice.current.model
-        let deviceModel = UIDevice.current.localizedModel
+        // The hardware identifier ex: iPhone15,2 .. not the localised marketing name
+        let deviceModel = getDeviceCode() ?? ""
+        let deviceID = UIDevice.current.identifierForVendor?.uuidString ?? ""
         var simNetWorkName:String? = ""
         var simCountryISO:String? = ""
-        
+
         if providers?.values.count ?? 0 > 0, let carrier:CTCarrier = providers?.values.first {
             simNetWorkName = carrier.carrierName
             simCountryISO = carrier.isoCountryCode
         }
-        
-        
+
+
         let result: [String: String] = [
             Constants.HTTPHeaderValueKey.appID: Crypter.encrypt(bundleID, using: headersEncryptionPublicKey) ?? "",
             Constants.HTTPHeaderValueKey.requirer: Crypter.encrypt(Constants.HTTPHeaderValueKey.requirerValue, using: headersEncryptionPublicKey) ?? "",
@@ -281,10 +406,24 @@ SZhWp4Mnd6wjVgXAsQIDAQAB
             Constants.HTTPHeaderValueKey.requirerDeviceType: Crypter.encrypt(deviceType, using: headersEncryptionPublicKey) ?? "",
             Constants.HTTPHeaderValueKey.requirerDeviceModel: Crypter.encrypt(deviceModel, using: headersEncryptionPublicKey) ?? "",
             Constants.HTTPHeaderValueKey.requirerSimNetworkName: Crypter.encrypt(simNetWorkName ?? "", using: headersEncryptionPublicKey) ?? "",
-            Constants.HTTPHeaderValueKey.requirerSimCountryIso: Crypter.encrypt(simCountryISO ?? "", using: headersEncryptionPublicKey) ?? ""
+            Constants.HTTPHeaderValueKey.requirerSimCountryIso: Crypter.encrypt(simCountryISO ?? "", using: headersEncryptionPublicKey) ?? "",
+            Constants.HTTPHeaderValueKey.deviceID: Crypter.encrypt(deviceID, using: headersEncryptionPublicKey) ?? "",
+            Constants.HTTPHeaderValueKey.appType: Crypter.encrypt("app", using: headersEncryptionPublicKey) ?? ""
         ]
-        
+
         return result
+    }
+
+    /// The hardware identifier of the device ex: iPhone15,2
+    static func getDeviceCode() -> String? {
+        var systemInfo = utsname()
+        uname(&systemInfo)
+        let modelCode = withUnsafePointer(to: &systemInfo.machine) {
+            $0.withMemoryRebound(to: CChar.self, capacity: 1) {
+                ptr in String.init(validatingUTF8: ptr)
+            }
+        }
+        return modelCode
     }
     
     
@@ -315,7 +454,7 @@ SZhWp4Mnd6wjVgXAsQIDAQAB
             fileprivate static let appID                    = "cu"
             fileprivate static let appLocale                = "al"
             fileprivate static let appType                  = "at"
-            fileprivate static let deviceID                 = "device_id"
+            fileprivate static let deviceID                 = "di"
             fileprivate static let requirer                 = "aid"
             fileprivate static let requirerOS               = "ro"
             fileprivate static let requirerOSVersion        = "rov"

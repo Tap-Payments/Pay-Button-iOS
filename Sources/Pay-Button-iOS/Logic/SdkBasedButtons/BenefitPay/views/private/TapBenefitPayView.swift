@@ -94,6 +94,7 @@ internal class BenefitPayButton: PayButtonBaseView {
         configuration.defaultWebpagePreferences.preferredContentMode = .desktop
         
         webView = WKWebView(frame: .zero, configuration: configuration)
+        webView.tap_allowInspectionInDebugBuilds()
         // Let us make sure it is of a clear background and opaque, not to interfer with the merchant's app background
         webView.isOpaque = false
         webView.backgroundColor = UIColor.clear

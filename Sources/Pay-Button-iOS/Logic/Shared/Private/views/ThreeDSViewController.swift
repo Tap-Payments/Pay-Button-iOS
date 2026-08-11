@@ -197,6 +197,7 @@ extension ThreeDSView: WKUIDelegate {
     //MARK: Creating new webView for popup
     func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
         popupWebView = WKWebView(frame: view.bounds, configuration: configuration)
+        popupWebView!.tap_allowInspectionInDebugBuilds()
         popupWebView!.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         popupWebView!.navigationDelegate = self
         popupWebView!.uiDelegate = self

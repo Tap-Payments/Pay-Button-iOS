@@ -11,6 +11,10 @@ internal class RedirectionPayButton: PayButtonBaseView {
     internal var currentlyLoadedConfigurations:[String:Any]?
     /// The view that will present full screen 3ds flow
     internal var threeDsView:ThreeDSView?
+    /// The minimum height a pay button is allowed to take
+    internal static let minimumButtonHeight:CGFloat = 48
+    /// Kept around so the card based buttons (click to pay) can grow the view while the customer fills the form
+    internal var heightConstraint:NSLayoutConstraint?
     
     //MARK: - Init methods
     override public init(frame: CGRect) {
@@ -54,6 +58,7 @@ internal class RedirectionPayButton: PayButtonBaseView {
         // Creates needed configuration for the web view
         let config = WKWebViewConfiguration()
         webView = WKWebView(frame: .zero, configuration: config)
+        webView.tap_allowInspectionInDebugBuilds()
         // Let us make sure it is of a clear background and opaque, not to interfer with the merchant's app background
         webView.isOpaque = false
         webView.backgroundColor = UIColor.clear
@@ -75,14 +80,26 @@ internal class RedirectionPayButton: PayButtonBaseView {
         let left = webView.leftAnchor.constraint(equalTo: self.leftAnchor)
         let right = webView.rightAnchor.constraint(equalTo: self.rightAnchor)
         let bottom = webView.bottomAnchor.constraint(equalTo: self.bottomAnchor)
-        let buttonHeight = self.heightAnchor.constraint(greaterThanOrEqualToConstant: 48)
+        let buttonHeight = self.heightAnchor.constraint(greaterThanOrEqualToConstant: RedirectionPayButton.minimumButtonHeight)
+        heightConstraint = buttonHeight
         // SWIPE let buttonHeight = self.heightAnchor.constraint(greaterThanOrEqualToConstant: 48)
-        
+
         // Activate the constraints
         NSLayoutConstraint.activate([left, right, top, bottom, buttonHeight])
         webView.layoutIfNeeded()
         webView.updateConstraints()
         self.layoutIfNeeded()
+    }
+
+    /// Grows or shrinks the button to the height the web sdk asks for.
+    /// The card based buttons (click to pay) render a form that resizes while the customer types.
+    /// - Parameter to height: The height in points the web sdk reported
+    internal func updateHeight(to height:CGFloat) {
+        DispatchQueue.main.async {
+            self.heightConstraint?.constant = max(RedirectionPayButton.minimumButtonHeight, height)
+            self.superview?.layoutIfNeeded()
+            self.layoutIfNeeded()
+        }
     }
     
     

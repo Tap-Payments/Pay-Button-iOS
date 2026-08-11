@@ -29,7 +29,12 @@ import Foundation
     case ApplePay
     /// The button will work to show payment in form of DEEMA
     case DEEMA
-    
+    /// The button will work to show payment in form of click to pay.
+    /// Appended last on purpose, the raw values of the cases above are part of the objc facing api
+    case Click2Pay
+    /// The button will work to show payment in form of a card form
+    case Card
+
     /// A string representation of the payment type
     public func toString() -> String {
         switch self {
@@ -53,6 +58,10 @@ import Foundation
             return "CAREEMPAY"
         case .DEEMA:
             return "DEEMA"
+        case .Click2Pay:
+            return "CLICK2PAY"
+        case .Card:
+            return "CARD"
         }
     }
     
@@ -84,5 +93,10 @@ import Foundation
     /// The string that we will use to tell the backend which url it should redirect to upin finishing a redirection based payment
     internal func tapRedirectionSchemeUrl() -> String {
         return "tapredirectionwebsdk://"
+    }
+
+    /// The scheme the card based buttons (click to pay) use to fire their own events on top of the shared ones
+    internal func cardWebSdkScheme() -> String {
+        return "tapCardWebSDK://"
     }
 }

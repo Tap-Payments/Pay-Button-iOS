@@ -1,0 +1,16 @@
+# macOS
+.DS_Store
+
+# Swift Package Manager build output
+.build/
+Packages/
+# Package.resolved is intentionally kept - it pins the dependency versions
+
+# Xcode / SwiftPM local IDE state
+.swiftpm/
+xcuserdata/
+*.xcuserstate
+DerivedData/
+
+# Local tooling
+.serena/

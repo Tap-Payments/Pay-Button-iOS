@@ -24,7 +24,10 @@ extension RedirectionPayButton:WKNavigationDelegate {
         
         guard let url = navigationAction.request.url else { return }
         
-        if url.absoluteString.hasPrefix(payButtonType.webSdkScheme()) {
+        // The scheme is the only part a url parser is allowed to case fold, so match it case insensitively
+        let isCardWebSdkCallback:Bool = url.absoluteString.lowercased().hasPrefix(payButtonType.cardWebSdkScheme().lowercased())
+
+        if url.absoluteString.hasPrefix(payButtonType.webSdkScheme()) || isCardWebSdkCallback {
             print("navigationAction", url.absoluteString)
             action = .cancel
         }else{
@@ -57,8 +60,42 @@ extension RedirectionPayButton:WKNavigationDelegate {
             default:
                 break
             }
+        }else if isCardWebSdkCallback {
+            // The card based buttons (click to pay) fire their own events on a separate scheme
+            self.handleCardWebSdkCallback(url: url)
         }else if url.absoluteString.hasPrefix(payButtonType.tapRedirectionSchemeUrl()) {
-            
+
+        }
+    }
+
+    /// Handles the events fired by the card based buttons (click to pay) over the `tapCardWebSDK://` scheme
+    /// - Parameter url: The url the web sdk tried to navigate to
+    internal func handleCardWebSdkCallback(url:URL) {
+        switch url.absoluteString {
+        case _ where url.absoluteString.contains(CallBackSchemeEnum.onHeightChange.rawValue):
+            // The height comes as a plain number, not as a base64 encoded json
+            let reportedHeight:String = tap_extractDataFromUrl(url, for: "data", shouldBase64Decode: false)
+            guard let height:Double = Double(reportedHeight) else { break }
+            // Resize ourselves, then let the merchant adjust his own layout if he pinned us to a fixed height
+            updateHeight(to: CGFloat(height))
+            delegate?.onHeightChange?(height: height)
+            break
+        case _ where url.absoluteString.contains(CallBackSchemeEnum.onBinIdentification.rawValue):
+            delegate?.onBinIdentification?(data: tap_extractDataFromUrl(url, for: "data", shouldBase64Decode: true))
+            break
+        case _ where url.absoluteString.contains(CallBackSchemeEnum.onScannerClick.rawValue):
+            delegate?.onScannerClick?()
+            break
+        case _ where url.absoluteString.contains(CallBackSchemeEnum.onNfcClick.rawValue):
+            delegate?.onNfcClick?()
+            break
+        case _ where url.absoluteString.contains(CallBackSchemeEnum.on3dsRedirect.rawValue):
+            // Only reported for now. The card form owns the page it wants displayed and the web sdk
+            // has not settled yet on how the native side hands the result back, so do not present it blindly
+            delegate?.onThreeDSRedirect?(data: tap_extractDataFromUrl(url, for: "data", shouldBase64Decode: true))
+            break
+        default:
+            break
         }
     }
     

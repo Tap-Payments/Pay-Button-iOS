@@ -62,6 +62,12 @@ import UIKit
             (buttonView as? RedirectionPayButton)?.updateType(to: .Tabby)
         case .GooglePay:
             buttonView = GooglePayButton()
+        case .Click2Pay:
+            buttonView = RedirectionPayButton()
+            (buttonView as? RedirectionPayButton)?.updateType(to: .Click2Pay)
+        case .Card:
+            buttonView = RedirectionPayButton()
+            (buttonView as? RedirectionPayButton)?.updateType(to: .Card)
         case .CareemPay:
             buttonView = RedirectionPayButton()
             (buttonView as? RedirectionPayButton)?.updateType(to: .CareemPay)
@@ -111,48 +117,13 @@ import UIKit
             UrlBasedUtils.publicKey = publicKey
             // Then we need to load base url and encryption keys from cdn
             // We will first need to try to load the latest base url from the CDN to make sure our backend doesn't want us to look somewhere else
-            if let url = URL(string: "https://tap-sdks.b-cdn.net/mobile/paybutton/1.0.0/base_url.json") {
-                var cdnRequest = URLRequest(url: url)
-                cdnRequest.timeoutInterval = 2
-                cdnRequest.cachePolicy = .reloadIgnoringLocalAndRemoteCacheData
-                URLSession.shared.dataTask(with: cdnRequest) { data, response, error in
-                    self.setLoadedDataFromCDN(data: data)
-                    // we need to update the intent with the sdk info
-                    self.postLoadingFromCDN(configDict: configDict, delegate: delegate)
-                  }.resume()
-            }else{
-                // Use the default embedded values as a fallback of all we need to update the intent with the sdk info
-                postLoadingFromCDN(configDict: configDict, delegate: delegate)
+            UrlBasedUtils.loadCDNConfiguration {
+                // we need to update the intent with the sdk info
+                self.postLoadingFromCDN(configDict: configDict, delegate: delegate)
             }
         }
     }
-    
-    /// Saves the data loaded from the CDN to be used afterwards
-    /// - Parameter data: The data loaded from the CDN file
-    internal func setLoadedDataFromCDN(data: Data?) {
-        if let data = data {
-            do {
-                if let cdnResponse:[String:String] = try JSONSerialization.jsonObject(with: data, options: []) as? [String: String],
-                   let cdnBaseUrlString:String = cdnResponse["baseURL"], cdnBaseUrlString != "",
-                   let cdnBaseUrl:URL = URL(string: cdnBaseUrlString),
-                   let sandboxEncryptionKey:String = cdnResponse["testEncKey"],
-                   let buttonWrapperUrlFormat:String = cdnResponse["payButtonUrlFormat"],
-                   let productionEncryptionKey:String = cdnResponse["prodEncKey"],
-                   let fireBaseURL:String = cdnResponse["iOSFirebaseURL"],
-                   let fireBaseJS:String = cdnResponse["iOSFireBaseJS"],
-                   let redirectionKeyWord:String = cdnResponse["redirectionKeyWord"] {
-                    UrlBasedUtils.sandboxEncryptionKey = sandboxEncryptionKey
-                    UrlBasedUtils.productionEncryptionKey = productionEncryptionKey
-                    UrlBasedUtils.checkoutMWBaseURL = cdnBaseUrlString
-                    UrlBasedUtils.buttonWrapperUrlFormat = buttonWrapperUrlFormat
-                    UrlBasedUtils.redirectionKeyWord = redirectionKeyWord
-                    BenefitPayButton.benefitPayFireBaseURL = fireBaseURL
-                    BenefitPayButton.javaScriptCodeToSkipManInTheMiddle = fireBaseJS
-                }
-            } catch {}
-         }
-    }
-    
+
     /// Performs the needed logic after getting base url, encryption keys from the CDN
     /// - Parameter configDict: The button configs passed from merchant
     /// - Parameter delegate: The pay button delegate
