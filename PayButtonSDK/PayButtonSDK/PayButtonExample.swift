@@ -319,7 +319,7 @@ class PayButtonExample: UIViewController {
     }
   },
   "domain": {
-    "url": "https://demo.dev.tap.company"
+    "url": "demo.tap.PayButtonSDK"
   },
   "redirect": {
     "url": "demo.com"

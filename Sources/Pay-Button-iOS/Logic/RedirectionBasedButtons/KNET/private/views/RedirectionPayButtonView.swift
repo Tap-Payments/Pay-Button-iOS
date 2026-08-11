@@ -11,6 +11,9 @@ internal class RedirectionPayButton: PayButtonBaseView {
     internal var currentlyLoadedConfigurations:[String:Any]?
     /// The view that will present full screen 3ds flow
     internal var threeDsView:ThreeDSView?
+    /// Holds the window the card form opened with `window.open`, ex the click to pay identity flow,
+    /// so it can be dismissed again once the page closes it
+    internal var popupViewController:PayButtonPopupViewController?
     /// The minimum height a pay button is allowed to take
     internal static let minimumButtonHeight:CGFloat = 48
     /// Kept around so the card based buttons (click to pay) can grow the view while the customer fills the form
@@ -71,7 +74,13 @@ internal class RedirectionPayButton: PayButtonBaseView {
     private func setupWebView() {
         // Creates needed configuration for the web view
         let config = WKWebViewConfiguration()
+        // Click to pay runs its identity flow in a window the card form opens with `window.open`,
+        // so let the page open one and take the callback that hands it to us
+        let preferences = WKPreferences()
+        preferences.javaScriptCanOpenWindowsAutomatically = true
+        config.preferences = preferences
         webView = WKWebView(frame: .zero, configuration: config)
+        webView.uiDelegate = self
         webView.tap_allowInspectionInDebugBuilds()
         // Let us make sure it is of a clear background and opaque, not to interfer with the merchant's app background
         webView.isOpaque = false
