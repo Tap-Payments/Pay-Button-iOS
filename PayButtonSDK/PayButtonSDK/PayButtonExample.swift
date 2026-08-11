@@ -534,10 +534,6 @@ extension PayButtonExample: PayButtonDelegate {
             return
         }
 
-        // Report the same domain the web demo reports as its page origin. The bundle id `demo.tap.PayButtonSDK`
-        // is not registered against this public key yet, and the backend answers `7022 MDN validation failed` for it
-        PayButtonIntent.domain = "https://demo.dev.tap.company"
-
         // The sdk creates the intent against the checkout mw using the public key, so no secret key is embedded in the app
         PayButtonIntent.create(config: intentConfig, publicKey: PayButtonExample.examplePublicKey) { intentResponse, error in
             if let error = error {

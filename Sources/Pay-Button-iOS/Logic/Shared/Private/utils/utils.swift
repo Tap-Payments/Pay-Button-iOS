@@ -314,16 +314,8 @@ SZhWp4Mnd6wjVgXAsQIDAQAB
     
     //MARK: - Network's headers
     
-    /// The value reported as the mdn. The backend validates it against the domains registered for the public key,
-    /// the same way it validates the page origin the web pay button reports.
-    /// Defaults to the app's bundle identifier, which is what a mobile integration should register.
-    internal static var mdnDomain:String? = nil
-
-    /// The value we identify this integration with .. the registered domain if the merchant set one, the bundle id otherwise
+    /// The value we identify this integration with .. the app's bundle identifier
     internal static var mdnValue:String {
-        if let mdnDomain = mdnDomain, !mdnDomain.isEmpty {
-            return mdnDomain
-        }
         return TapApplicationPlistInfo.shared.bundleIdentifier ?? ""
     }
 
