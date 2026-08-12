@@ -63,11 +63,6 @@ Hj+N6UWFOYK98Xi+sQIDAQAB
     internal static var currentInentID:String = ""
     /// Currently used SDKInfo
     internal static var currentSdkInfo:SDKInfo = .init()
-    /// The id of the intent this sdk created itself, the cached response below belongs to it
-    internal static var createdIntentID:String? = nil
-    /// The response of the intent this sdk created itself. `createIntent` already sends the sdk info and
-    /// already reads back the configuration, so the button has no reason to ask for either a second time
-    internal static var createdIntentResponse:[String:Any]? = nil
     /// The CDN file holding the base url & the encryption keys our backend wants us to use
     internal static let cdnConfigurationURL:String = "https://tap-sdks.b-cdn.net/mobile/paybutton/1.0.0/base_url.json"
 
@@ -163,9 +158,6 @@ Hj+N6UWFOYK98Xi+sQIDAQAB
                     if let intentID:String = jsonObject?["id"] as? String, !intentID.isEmpty {
                         currentInentID = intentID
                         UrlBasedUtils.intentID = intentID
-                        // Remember what came back, the button reuses it instead of updating the sdk info again
-                        createdIntentID = intentID
-                        createdIntentResponse = jsonObject
                     }
                     completion(jsonObject, nil)
                 } catch {
