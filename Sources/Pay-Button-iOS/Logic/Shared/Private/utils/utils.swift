@@ -182,8 +182,9 @@ Hj+N6UWFOYK98Xi+sQIDAQAB
             // Store for further reference
             currentSdkInfo = sdkInfo
             currentInentID = intentID
-            // The web sdk puts the sdk info fields at the root of the body, not wrapped inside an `sdk_info` key
-            let data = try sdkInfo.sdkInfo?.jsonData() ?? Data()
+            // Wrapped inside an `sdk_info` key, the same shape the create intent call sends
+            let body:[String:Any] = ["sdk_info": sdkInfo.sdkInfo?.dictionary ?? [:]]
+            let data = try JSONSerialization.data(withJSONObject: body, options: [])
             // construct the update sdkinfo intent url
             let updateSDKInfoURL = "\(checkoutMWBaseURL)intent/\(intentID)/sdk"
             
