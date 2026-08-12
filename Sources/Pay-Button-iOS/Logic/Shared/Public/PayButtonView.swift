@@ -60,6 +60,9 @@ import UIKit
         case .Tabby:
             buttonView = RedirectionPayButton()
             (buttonView as? RedirectionPayButton)?.updateType(to: .Tabby)
+        case .TAMARA:
+            buttonView = RedirectionPayButton()
+            (buttonView as? RedirectionPayButton)?.updateType(to: .TAMARA)
         case .GooglePay:
             // Google pay is rendered by the web page like any other redirection based method.
             // The backend reports it as `google_pay`, which lands on the default branch below anyway

@@ -34,6 +34,9 @@ import Foundation
     case Click2Pay
     /// The button will work to show payment in form of a card form
     case Card
+    /// The button will work to show payment in form of TAMARA.
+    /// Appended last on purpose, the raw values of the cases above are part of the objc facing api
+    case TAMARA
 
     /// A string representation of the payment type
     public func toString() -> String {
@@ -62,6 +65,8 @@ import Foundation
             return "CLICK2PAY"
         case .Card:
             return "CARD"
+        case .TAMARA:
+            return "TAMARA"
         }
     }
     

@@ -93,6 +93,7 @@ public enum PayButtonConfig {
         case qpay        = "QPAY"
         case tabby       = "TABBY"
         case deema       = "DEEMA"
+        case tamara      = "TAMARA"
         case card        = "CARD"
     }
 
