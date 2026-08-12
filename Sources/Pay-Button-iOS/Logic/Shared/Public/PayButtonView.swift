@@ -145,45 +145,63 @@ import UIKit
     /// Update the intent with the sdk info
     internal func UpdateSDKInfo(configDict: [String : Any],completion: @escaping (_ detectedPayButtonEnum:PayButtonTypeEnum?) -> Void = {detectedPayButtonEnum in }) {
         // Make sure we got the minimum required data
-        if let intentModel:[String:String] = configDict["intent"] as? [String:String],
-           let intentID:String = intentModel["id"],
-           let operatorModel:[String:String] = configDict["operator"] as? [String:String],
-           let publicKey:String = operatorModel["publicKey"] {
-            do {
-                // We first need to call update sdk info api with the device & sdk details
-                try UrlBasedUtils.updateSDKInfo(for: intentID, with: UrlBasedUtils.generateSDKINFO(for: publicKey)) {response, error  in
-                    // Now let us see if any error happened or not
-                    if let nonNullError = error {
-                        DispatchQueue.main.async {
-                            self.delegate?.onError?(data: "{error:\(error)}")
-                            completion(nil)
-                        }
-                    }else{
-                        // let us know if it is a special type (in this case BenefitPay)
-                        if let  configs:[String:Any] = response?["config"] as? [String : Any],
-                           let  acceptance:[String:Any] = configs["acceptance"] as? [String : Any],
-                           let  supportedPaymentMethods:[String] = acceptance["supported_payment_methods"] as? [String],
-                           supportedPaymentMethods.count > 0,
-                           let paymentMethod:String = supportedPaymentMethods.first?.lowercased() {
-                            // Check if it is benefitpay
-                            if(paymentMethod.contains("benefit") && paymentMethod.contains("pay")) {
-                                completion(.BenefitPay)
-                            }// Check if it is careempay to adjust the user agent of the webview
-                            else if(paymentMethod.contains("careem") && paymentMethod.contains("pay")) {
-                                completion(.CareemPay)
-                            }else{
-                                completion(.Knet)
-                            }
-                        }
-                    }
-                }
-            }catch {
-                self.delegate?.onError?(data: "{error:\(error.localizedDescription)}")
-                completion(nil)
-            }
-        }else{
+        guard let intentModel:[String:String] = configDict["intent"] as? [String:String],
+              let intentID:String = intentModel["id"],
+              let operatorModel:[String:String] = configDict["operator"] as? [String:String],
+              let publicKey:String = operatorModel["publicKey"] else {
             self.delegate?.onError?(data: "{error:Please make sure to pass at least the following data: public key and intent id.}")
             completion(nil)
+            return
         }
+
+        // This sdk created this very intent a moment ago, so the sdk info went out with the create call and the
+        // configuration came back with it. Asking for both again only delays the button
+        if intentID == UrlBasedUtils.createdIntentID,
+           let createdIntentResponse:[String:Any] = UrlBasedUtils.createdIntentResponse {
+            UrlBasedUtils.publicKey = publicKey
+            UrlBasedUtils.currentInentID = intentID
+            completion(detectPayButtonType(from: createdIntentResponse))
+            return
+        }
+
+        do {
+            // The intent was created elsewhere, ex the merchant's backend, so it still has to be stamped
+            // with this device's details before it can be used
+            try UrlBasedUtils.updateSDKInfo(for: intentID, with: UrlBasedUtils.generateSDKINFO(for: publicKey)) {response, error  in
+                DispatchQueue.main.async {
+                    // Now let us see if any error happened or not
+                    if let error = error {
+                        self.delegate?.onError?(data: "{error:\(error)}")
+                        completion(nil)
+                        return
+                    }
+                    completion(self.detectPayButtonType(from: response))
+                }
+            }
+        }catch {
+            self.delegate?.onError?(data: "{error:\(error.localizedDescription)}")
+            completion(nil)
+        }
+    }
+
+    /// Reads which button to render out of an intent's configuration.
+    /// Returns nil when the response does not carry one, the caller falls back to the redirection button
+    /// - Parameter from response: The intent as the backend returned it, either from create or from the sdk update
+    internal func detectPayButtonType(from response:[String:Any]?) -> PayButtonTypeEnum? {
+        guard let configs:[String:Any] = response?["config"] as? [String : Any],
+              let acceptance:[String:Any] = configs["acceptance"] as? [String : Any],
+              let supportedPaymentMethods:[String] = acceptance["supported_payment_methods"] as? [String],
+              let paymentMethod:String = supportedPaymentMethods.first?.lowercased() else {
+            return nil
+        }
+        // Check if it is benefitpay
+        if paymentMethod.contains("benefit") && paymentMethod.contains("pay") {
+            return .BenefitPay
+        }
+        // Check if it is careempay to adjust the user agent of the webview
+        if paymentMethod.contains("careem") && paymentMethod.contains("pay") {
+            return .CareemPay
+        }
+        return .Knet
     }
 }
