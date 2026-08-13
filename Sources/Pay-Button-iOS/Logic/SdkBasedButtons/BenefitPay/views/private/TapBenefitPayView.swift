@@ -44,7 +44,8 @@ internal class BenefitPayButton: PayButtonBaseView {
     /// Used as a consolidated method to do all the needed steps upon creating the view
     private func commonInit() {
         // Set the button type
-        payButtonType = .BenefitPay
+        // The `.BenefitPay` case is commented out for now, and nothing builds this view while it is
+        //payButtonType = .BenefitPay
         // Setuo the web view contais the web sdk
         setupWebView()
         // setup the constraint to put each view in its correct positiob

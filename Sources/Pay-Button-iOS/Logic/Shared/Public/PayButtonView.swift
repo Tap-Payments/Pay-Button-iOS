@@ -37,8 +37,8 @@ import UIKit
         // let us remove if it was there before
         buttonView.removeFromSuperview()
         switch payButtonType {
-        case .BenefitPay:
-            buttonView = BenefitPayButton()
+        //case .BenefitPay:
+        //    buttonView = BenefitPayButton()
         case .Knet:
             buttonView = RedirectionPayButton()
             (buttonView as? RedirectionPayButton)?.updateType(to: .Knet)
@@ -48,9 +48,9 @@ import UIKit
         case .ApplePay:
             buttonView = RedirectionPayButton()
             (buttonView as? RedirectionPayButton)?.updateType(to: .ApplePay)
-        case .Fawry:
-            buttonView = RedirectionPayButton()
-            (buttonView as? RedirectionPayButton)?.updateType(to: .Fawry)
+        //case .Fawry:
+        //    buttonView = RedirectionPayButton()
+        //    (buttonView as? RedirectionPayButton)?.updateType(to: .Fawry)
         case .Benefit:
             buttonView = RedirectionPayButton()
             (buttonView as? RedirectionPayButton)?.updateType(to: .Benefit)
@@ -74,10 +74,10 @@ import UIKit
         case .Card:
             buttonView = RedirectionPayButton()
             (buttonView as? RedirectionPayButton)?.updateType(to: .Card)
-        case .CareemPay:
-            buttonView = RedirectionPayButton()
-            (buttonView as? RedirectionPayButton)?.updateType(to: .CareemPay)
-            (buttonView as? RedirectionPayButton)?.webView.customUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2.1 Safari/605.1.15"
+        //case .CareemPay:
+        //    buttonView = RedirectionPayButton()
+        //    (buttonView as? RedirectionPayButton)?.updateType(to: .CareemPay)
+        //    (buttonView as? RedirectionPayButton)?.webView.customUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2.1 Safari/605.1.15"
         }
         // Add the view now to the screen
         addSubview(buttonView)
@@ -169,14 +169,14 @@ import UIKit
                            supportedPaymentMethods.count > 0,
                            let paymentMethod:String = supportedPaymentMethods.first?.lowercased() {
                             // Check if it is benefitpay
-                            if(paymentMethod.contains("benefit") && paymentMethod.contains("pay")) {
-                                completion(.BenefitPay)
-                            }// Check if it is careempay to adjust the user agent of the webview
-                            else if(paymentMethod.contains("careem") && paymentMethod.contains("pay")) {
-                                completion(.CareemPay)
-                            }else{
+                            //if(paymentMethod.contains("benefit") && paymentMethod.contains("pay")) {
+                            //    completion(.BenefitPay)
+                            //}// Check if it is careempay to adjust the user agent of the webview
+                            //else if(paymentMethod.contains("careem") && paymentMethod.contains("pay")) {
+                            //    completion(.CareemPay)
+                            //}else{
                                 completion(.Knet)
-                            }
+                            //}
                         }
                     }
                 }
