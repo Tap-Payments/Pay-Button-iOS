@@ -17,6 +17,9 @@ internal class RedirectionPayButton: PayButtonBaseView {
     /// Runs a passkey authentication in the system browser. Held for the lifetime of the process,
     /// letting go of it early dismisses the browser
     internal var threeDSAuthSession:ThreeDSAuthSession?
+    /// The last redirection the card form announced, kept for its return url. A passkey challenge
+    /// that arrives as a plain navigation carries no details of its own
+    internal var lastCardRedirection:CardRedirection?
     /// The minimum height a pay button is allowed to take
     internal static let minimumButtonHeight:CGFloat = 48
     /// Kept around so the card based buttons (click to pay) can grow the view while the customer fills the form

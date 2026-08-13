@@ -26,12 +26,13 @@ extension RedirectionPayButton:WKNavigationDelegate {
         
         // The scheme is the only part a url parser is allowed to case fold, so match it case insensitively
         let isCardWebSdkCallback:Bool = url.absoluteString.lowercased().hasPrefix(payButtonType.cardWebSdkScheme().lowercased())
-
+        
         if url.absoluteString.hasPrefix(payButtonType.webSdkScheme()) || isCardWebSdkCallback {
             print("navigationAction", url.absoluteString)
             action = .cancel
         }else{
             print("navigationAction", url.absoluteString)
+            
         }
         // Let us see if the web sdk is telling us something
         if( url.absoluteString.contains(payButtonType.webSdkScheme())) {
@@ -64,10 +65,16 @@ extension RedirectionPayButton:WKNavigationDelegate {
             // The card based buttons (click to pay) fire their own events on a separate scheme
             self.handleCardWebSdkCallback(url: url)
         }else if url.absoluteString.hasPrefix(payButtonType.tapRedirectionSchemeUrl()) {
-
+            
+        }else if RedirectionPayButton.requiresSystemBrowser(threeDsUrl: url.absoluteString),
+                       threeDSAuthSession == nil {
+            action = .cancel
+            startFidoAuthentication(threeDsUrl: url.absoluteString,
+                                    redirectUrl: lastCardRedirection?.redirectUrl)
+            return
         }
     }
-
+    
     /// Handles the events fired by the card based buttons (click to pay) over the `tapCardWebSDK://` scheme
     /// - Parameter url: The url the web sdk tried to navigate to
     internal func handleCardWebSdkCallback(url:URL) {
@@ -164,7 +171,7 @@ extension RedirectionPayButton:WKNavigationDelegate {
     internal func handleCardRedirection(data:String) {
         // Let the merchant see it either way, some integrators drive their own ui from it
         delegate?.onThreeDSRedirect?(data: data)
-
+        
         // Make sure we have what it takes to run the process
         guard let cardRedirection:CardRedirection = try? CardRedirection(data),
               let threeDsUrl:String = cardRedirection.threeDsUrl, !threeDsUrl.isEmpty,
@@ -172,14 +179,17 @@ extension RedirectionPayButton:WKNavigationDelegate {
             delegate?.onError?(data: "{\"error\":\"Failed to start authentication process\"}")
             return
         }
-
+        
+        // Kept so a passkey that arrives later as a plain navigation still knows the return url
+        lastCardRedirection = cardRedirection
+        
         // An ACS that asks for a passkey can not run in a web view, it has no navigator.credentials.
         // Hand the whole process over to the system browser instead, the same way Card-iOS does
         if RedirectionPayButton.requiresSystemBrowser(threeDsUrl: threeDsUrl) {
             startFidoAuthentication(with: cardRedirection)
             return
         }
-
+        
         threeDsView = .init()
         threeDsView?.isModalInPresentation = true
         threeDsView?.redirectionData = .init(url: threeDsUrl, id: nil, powered: cardRedirection.powered, stopRedirection: false)
@@ -207,7 +217,7 @@ extension RedirectionPayButton:WKNavigationDelegate {
         }
         threeDsView?.startLoading()
     }
-
+    
     /// Tells the card form the payer finished authenticating.
     ///
     /// The button page wraps the card in an iframe, and its own `window.loadAuthentication` posts through
@@ -237,7 +247,7 @@ extension RedirectionPayButton:WKNavigationDelegate {
             print("loadAuthentication handled by: \(result ?? "nil") \(error?.localizedDescription ?? "")")
         }
     }
-
+    
     /// Decides whether the authentication has to leave the web view. An ACS url that advertises a
     /// passkey challenge can not run inside `WKWebView`, it does not expose `navigator.credentials`
     /// - Parameter threeDsUrl: The ACS page coming from the redirection details
@@ -246,22 +256,31 @@ extension RedirectionPayButton:WKNavigationDelegate {
         guard let threeDsUrl:String = threeDsUrl else { return false }
         return threeDsUrl.lowercased().contains("passkey")
     }
-
+    
     /// Runs the authentication inside the system browser, which unlike `WKWebView` can execute
     /// `navigator.credentials` and therefore serve a passkey challenge
     /// - Parameter cardRedirection: The validated redirection details
     internal func startFidoAuthentication(with cardRedirection:CardRedirection) {
+        startFidoAuthentication(threeDsUrl: cardRedirection.threeDsUrl,
+                                redirectUrl: cardRedirection.redirectUrl)
+    }
+    
+    /// Runs the authentication inside the system browser
+    /// - Parameter threeDsUrl: The acs page to load
+    /// - Parameter redirectUrl: The https return url the callback is mapped back onto. Nil when the
+    /// challenge arrived as a plain navigation and no `on3dsRedirect` announced it first
+    internal func startFidoAuthentication(threeDsUrl:String?, redirectUrl:String?) {
         let authSession:ThreeDSAuthSession = .init()
         authSession.delegate = self
         threeDSAuthSession = authSession
-
-        authSession.start(threeDsUrl: cardRedirection.threeDsUrl,
-                          redirectUrl: cardRedirection.redirectUrl,
+        
+        authSession.start(threeDsUrl: threeDsUrl,
+                          redirectUrl: redirectUrl,
                           callback: PayButtonView.threeDSCallback,
                           ephemeral: PayButtonView.threeDSPrefersEphemeralSession,
                           in: window)
     }
-
+    
     /// The payer backed out of the 3ds page
     internal func handleCardAuthenticationCanceled() {
         delegate?.onCanceled?()
@@ -280,7 +299,7 @@ extension RedirectionPayButton:WKNavigationDelegate {
         """
         webView.evaluateJavaScript(javaScript)
     }
-
+    
     func handleOnSuccess(url:URL) {
         self.delegate?.onSuccess?(data: tap_extractDataFromUrl(url, for: "data", shouldBase64Decode: true))
         //self.openUrl(url: self.currentlyLoadedConfigurations)
@@ -300,19 +319,19 @@ extension RedirectionPayButton:WKNavigationDelegate {
 
 /// Receives the outcome of a passkey authentication that ran in the system browser
 extension RedirectionPayButton: ThreeDSAuthSessionDelegate {
-
+    
     /// The browser came back with the return url, hand it over to the card form
     func threeDSAuthSession(_ session: ThreeDSAuthSession, didSucceedWith redirectionUrl: String) {
         threeDSAuthSession = nil
         passCardAuthenticationToSDK(redirectionUrl: redirectionUrl)
     }
-
+    
     /// The payer dismissed the browser before finishing the authentication
     func threeDSAuthSessionDidCancel(_ session: ThreeDSAuthSession) {
         threeDSAuthSession = nil
         handleCardAuthenticationCanceled()
     }
-
+    
     /// The process could not be completed
     func threeDSAuthSession(_ session: ThreeDSAuthSession, didFailWith error: Error) {
         threeDSAuthSession = nil
@@ -322,7 +341,7 @@ extension RedirectionPayButton: ThreeDSAuthSessionDelegate {
 
 /// Serves the windows the card web sdk opens with `window.open`, ex the click to pay identity flow
 extension RedirectionPayButton:WKUIDelegate {
-
+    
     /// The card form asked for a new window.
     ///
     /// The web view has to be built out of the `configuration` WebKit passed us and handed back, that is what
@@ -335,13 +354,13 @@ extension RedirectionPayButton:WKUIDelegate {
             webView.load(navigationAction.request)
             return nil
         }
-
+        
         let popupWebView:WKWebView = .init(frame: .zero, configuration: configuration)
         popupWebView.tap_allowInspectionInDebugBuilds()
         // The popup fires the same web sdk callbacks and can open windows of its own
         popupWebView.navigationDelegate = self
         popupWebView.uiDelegate = self
-
+        
         // The button itself is only as tall as the form, the identity flow needs the whole screen
         let popupViewController:PayButtonPopupViewController = .init(popupWebView: popupWebView)
         popupViewController.selectedLocale = currentlyLoadedConfigurations?.getButtonLocale() ?? "en"
@@ -350,14 +369,14 @@ extension RedirectionPayButton:WKUIDelegate {
             self?.delegate?.onCanceled?()
         }
         self.popupViewController = popupViewController
-
+        
         DispatchQueue.main.async {
             UIApplication.shared.topViewController()?.present(popupViewController, animated: true)
         }
-
+        
         return popupWebView
     }
-
+    
     /// The page closed the window it opened, ex click to pay finished and handed its result to the form
     public func webViewDidClose(_ webView: WKWebView) {
         guard webView === popupViewController?.popupWebView else { return }
