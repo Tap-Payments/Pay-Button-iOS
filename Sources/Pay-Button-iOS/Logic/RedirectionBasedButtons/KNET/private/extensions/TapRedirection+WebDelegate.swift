@@ -174,10 +174,9 @@ extension RedirectionPayButton:WKNavigationDelegate {
         }
 
         // An ACS that asks for a passkey can not run in a web view, it has no navigator.credentials.
-        // Card-iOS hands those over to the system browser, we do not have that path yet so say so
-        // rather than showing a page that can never complete
-        if threeDsUrl.lowercased().contains("passkey") {
-            delegate?.onError?(data: "{\"error\":\"This authentication needs a passkey, which a web view can not serve\"}")
+        // Hand the whole process over to the system browser instead, the same way Card-iOS does
+        if RedirectionPayButton.requiresSystemBrowser(threeDsUrl: threeDsUrl) {
+            startFidoAuthentication(with: cardRedirection)
             return
         }
 
@@ -239,6 +238,30 @@ extension RedirectionPayButton:WKNavigationDelegate {
         }
     }
 
+    /// Decides whether the authentication has to leave the web view. An ACS url that advertises a
+    /// passkey challenge can not run inside `WKWebView`, it does not expose `navigator.credentials`
+    /// - Parameter threeDsUrl: The ACS page coming from the redirection details
+    /// - Returns: True when the process belongs in the system browser
+    internal static func requiresSystemBrowser(threeDsUrl:String?) -> Bool {
+        guard let threeDsUrl:String = threeDsUrl else { return false }
+        return threeDsUrl.lowercased().contains("passkey")
+    }
+
+    /// Runs the authentication inside the system browser, which unlike `WKWebView` can execute
+    /// `navigator.credentials` and therefore serve a passkey challenge
+    /// - Parameter cardRedirection: The validated redirection details
+    internal func startFidoAuthentication(with cardRedirection:CardRedirection) {
+        let authSession:ThreeDSAuthSession = .init()
+        authSession.delegate = self
+        threeDSAuthSession = authSession
+
+        authSession.start(threeDsUrl: cardRedirection.threeDsUrl,
+                          redirectUrl: cardRedirection.redirectUrl,
+                          callback: PayButtonView.threeDSCallback,
+                          ephemeral: PayButtonView.threeDSPrefersEphemeralSession,
+                          in: window)
+    }
+
     /// The payer backed out of the 3ds page
     internal func handleCardAuthenticationCanceled() {
         delegate?.onCanceled?()
@@ -272,6 +295,28 @@ extension RedirectionPayButton:WKNavigationDelegate {
     func handleOnError(data:String) {
         self.delegate?.onError?(data:data)
         //self.openUrl(url: self.currentlyLoadedConfigurations)
+    }
+}
+
+/// Receives the outcome of a passkey authentication that ran in the system browser
+extension RedirectionPayButton: ThreeDSAuthSessionDelegate {
+
+    /// The browser came back with the return url, hand it over to the card form
+    func threeDSAuthSession(_ session: ThreeDSAuthSession, didSucceedWith redirectionUrl: String) {
+        threeDSAuthSession = nil
+        passCardAuthenticationToSDK(redirectionUrl: redirectionUrl)
+    }
+
+    /// The payer dismissed the browser before finishing the authentication
+    func threeDSAuthSessionDidCancel(_ session: ThreeDSAuthSession) {
+        threeDSAuthSession = nil
+        handleCardAuthenticationCanceled()
+    }
+
+    /// The process could not be completed
+    func threeDSAuthSession(_ session: ThreeDSAuthSession, didFailWith error: Error) {
+        threeDSAuthSession = nil
+        delegate?.onError?(data: "{\"error\":\"\(error.localizedDescription)\"}")
     }
 }
 

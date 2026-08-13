@@ -14,6 +14,9 @@ internal class RedirectionPayButton: PayButtonBaseView {
     /// Holds the window the card form opened with `window.open`, ex the click to pay identity flow,
     /// so it can be dismissed again once the page closes it
     internal var popupViewController:PayButtonPopupViewController?
+    /// Runs a passkey authentication in the system browser. Held for the lifetime of the process,
+    /// letting go of it early dismisses the browser
+    internal var threeDSAuthSession:ThreeDSAuthSession?
     /// The minimum height a pay button is allowed to take
     internal static let minimumButtonHeight:CGFloat = 48
     /// Kept around so the card based buttons (click to pay) can grow the view while the customer fills the form

@@ -21,7 +21,7 @@ class PayButtonExample: UIViewController {
   "customer_initiated": true,
   "idempotent": "",
   "merchant": {
-    "id": "",
+    "id": "1124340",
     "terminal": {
       "id": "",
       "terminal_device": {
@@ -319,7 +319,7 @@ class PayButtonExample: UIViewController {
     }
   },
   "domain": {
-    "url": "demo.tap.PayButtonSDK"
+    "url": "tap.PayButtonSDK.demo"
   },
   "redirect": {
     "url": "demo.com"
@@ -337,7 +337,7 @@ class PayButtonExample: UIViewController {
 }
 """)
 
-    static var examplePublicKey:String = "pk_test_Vlk842B1EA7tDN5QbrfGjYzh"
+    static var examplePublicKey:String = "pk_test_YhUjg9PNT8oDlKJ1aE2fMRz7"
     static var exampleIntentId:String = "intent_rzgd5725539UhQ713R0a869"
     
     @IBOutlet weak var payButton: PayButtonView!

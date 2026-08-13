@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AA1001022AEA474E00DED568 /* IntentJSONEditorViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1001012AEA474E00DED568 /* IntentJSONEditorViewController.swift */; };
 		E88462742AEEA4EE000040C3 /* Pay-Button-iOS in Frameworks */ = {isa = PBXBuildFile; productRef = E88462732AEEA4EE000040C3 /* Pay-Button-iOS */; };
 		E8BD67D72AEA40D700DED568 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8BD67D62AEA40D700DED568 /* AppDelegate.swift */; };
 		E8BD67D92AEA40D700DED568 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8BD67D82AEA40D700DED568 /* SceneDelegate.swift */; };
@@ -17,7 +18,6 @@
 		E8BD67EC2AEA40F200DED568 /* Pay-Button-iOS in Frameworks */ = {isa = PBXBuildFile; productRef = E8BD67EB2AEA40F200DED568 /* Pay-Button-iOS */; };
 		E8BD67F02AEA474E00DED568 /* PayButtonExample.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8BD67ED2AEA474E00DED568 /* PayButtonExample.swift */; };
 		E8BD67F12AEA474E00DED568 /* PayButtonSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8BD67EE2AEA474E00DED568 /* PayButtonSettingsViewController.swift */; };
-		AA1001022AEA474E00DED568 /* IntentJSONEditorViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1001012AEA474E00DED568 /* IntentJSONEditorViewController.swift */; };
 		E8BD67F22AEA474E00DED568 /* OnSuccessViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8BD67EF2AEA474E00DED568 /* OnSuccessViewController.swift */; };
 		E8BD67F52AEA478B00DED568 /* Toast in Frameworks */ = {isa = PBXBuildFile; productRef = E8BD67F42AEA478B00DED568 /* Toast */; };
 		E8BD67F82AEA479800DED568 /* Eureka in Frameworks */ = {isa = PBXBuildFile; productRef = E8BD67F72AEA479800DED568 /* Eureka */; };
@@ -26,6 +26,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		AA1001012AEA474E00DED568 /* IntentJSONEditorViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IntentJSONEditorViewController.swift; sourceTree = "<group>"; };
 		E8BD67D32AEA40D700DED568 /* PayButtonSDK.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PayButtonSDK.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E8BD67D62AEA40D700DED568 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		E8BD67D82AEA40D700DED568 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -36,7 +37,6 @@
 		E8BD67E42AEA40D900DED568 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E8BD67ED2AEA474E00DED568 /* PayButtonExample.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PayButtonExample.swift; sourceTree = "<group>"; };
 		E8BD67EE2AEA474E00DED568 /* PayButtonSettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PayButtonSettingsViewController.swift; sourceTree = "<group>"; };
-		AA1001012AEA474E00DED568 /* IntentJSONEditorViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IntentJSONEditorViewController.swift; sourceTree = "<group>"; };
 		E8BD67EF2AEA474E00DED568 /* OnSuccessViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OnSuccessViewController.swift; sourceTree = "<group>"; };
 		E8BD67FB2AEA808B00DED568 /* PayButtonSDK.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PayButtonSDK.entitlements; sourceTree = "<group>"; };
 		E8C82EC72D279AE000FC56FA /* IntentRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentRequest.swift; sourceTree = "<group>"; };
@@ -350,7 +350,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = demo.tap.PayButtonSDK;
+				PRODUCT_BUNDLE_IDENTIFIER = tap.PayButtonSDK.demo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -379,7 +379,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = demo.tap.PayButtonSDK;
+				PRODUCT_BUNDLE_IDENTIFIER = tap.PayButtonSDK.demo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;

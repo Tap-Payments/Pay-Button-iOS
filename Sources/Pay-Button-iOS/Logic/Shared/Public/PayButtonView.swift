@@ -13,6 +13,17 @@ import UIKit
     internal var delegate:PayButtonDelegate?
     /// The reference to the pay button view itself
     internal var buttonView:PayButtonBaseView = .init()
+
+    /// How the system browser hands control back once a passkey authentication finishes.
+    /// The scheme does not have to be registered in your Info.plist, the session intercepts it,
+    /// but the page served at the https return url has to bounce to it carrying the same query string
+    public static var threeDSCallback:ThreeDSCallback = .scheme("tapcardsdk")
+
+    /// Whether the system browser runs as a private session during a passkey authentication.
+    /// A private session drops the "<app> wants to use <domain> to sign in" consent alert, at the
+    /// cost of Safari's shared cookies, so the issuer can not honour "remember this device".
+    /// Passkeys themselves come from the platform authenticator and are unaffected either way
+    public static var threeDSPrefersEphemeralSession:Bool = true
     
     //MARK: - Init methods
     override public init(frame: CGRect) {
