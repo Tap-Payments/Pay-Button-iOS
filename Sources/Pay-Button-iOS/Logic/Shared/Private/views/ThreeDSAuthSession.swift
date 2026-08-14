@@ -156,7 +156,18 @@ final class ThreeDSAuthSession: NSObject {
 
         session = created
 
+        NSLog("ThreeDSAuthSession: anchor \(window == nil ? "not supplied by the button, falling back to the app's key window" : "supplied by the button")")
+        if #available(iOS 13.4, *) {
+            NSLog("ThreeDSAuthSession: canStart \(created.canStart)")
+        } else {
+            // Fallback on earlier versions
+        }
+
         guard created.start() else {
+            // With an https callback this is what a missing association looks like. The session
+            // refuses rather than opening a browser it could never get a callback from
+            NSLog("ThreeDSAuthSession: the browser refused to start")
+            NSLog("ThreeDSAuthSession: with an https callback that usually means webcredentials is not provisioned for this build, or the host serves no apple-app-site-association. Fall back to .scheme(\"tapcardsdk\") until it is")
             session = nil
             report(.failure(ThreeDSAuthSessionError.failedToStart))
             return
@@ -234,6 +245,25 @@ extension ThreeDSAuthSession {
 // MARK: - Presentation anchor
 extension ThreeDSAuthSession: ASWebAuthenticationPresentationContextProviding {
     func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
-        anchor ?? ASPresentationAnchor()
+        if let anchor: UIWindow = anchor {
+            NSLog("ThreeDSAuthSession: presenting from the button's own window")
+            return anchor
+        }
+        // The button had no window, ex it was asked for a passkey while off screen. Returning a
+        // fresh ASPresentationAnchor here hands the session an empty window that was never on
+        // screen, and nothing appears, so go and find the one the app is actually showing
+        if let keyWindow: UIWindow = ThreeDSAuthSession.foregroundKeyWindow() {
+            NSLog("ThreeDSAuthSession: the button had no window, presenting from the app's key window")
+            return keyWindow
+        }
+        NSLog("ThreeDSAuthSession: no window anywhere, the browser will not be able to present")
+        return ASPresentationAnchor()
+    }
+
+    /// The window the app is currently showing, or nil when there is none
+    internal static func foregroundKeyWindow() -> UIWindow? {
+        let scenes: [UIWindowScene] = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+        let active: UIWindowScene? = scenes.first { $0.activationState == .foregroundActive } ?? scenes.first
+        return active?.windows.first { $0.isKeyWindow } ?? active?.windows.first
     }
 }

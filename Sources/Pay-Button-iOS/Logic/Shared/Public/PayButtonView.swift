@@ -25,6 +25,10 @@ import UIKit
     /// three things together: ios 17.4, `webcredentials:<host>` in your Associated Domains, and the
     /// host serving an `apple-app-site-association` that names this app. Miss any of them and the
     /// session simply never comes back, there is no error to catch
+    ///
+    /// The https callback needs sdk.dev.tap.company to serve an apple-app-site-association with a
+    /// webcredentials section naming `G46S76PUH4.tap.PayButtonSDK.demo`. Until it does, the session
+    /// refuses to start and the browser never appears .. fall back to `.scheme("tapcardsdk")`
     public static var threeDSCallback:ThreeDSCallback = .https(host: "sdk.dev.tap.company", path: "/")
 
     /// Whether the system browser runs as a private session during a passkey authentication.
