@@ -254,7 +254,7 @@ extension RedirectionPayButton:WKNavigationDelegate {
     /// - Returns: True when the process belongs in the system browser
     internal static func requiresSystemBrowser(threeDsUrl:String?) -> Bool {
         guard let threeDsUrl:String = threeDsUrl else { return false }
-        return threeDsUrl.lowercased().contains("passkey")
+        return threeDsUrl.contains("passkey")
     }
     
     /// Runs the authentication inside the system browser, which unlike `WKWebView` can execute

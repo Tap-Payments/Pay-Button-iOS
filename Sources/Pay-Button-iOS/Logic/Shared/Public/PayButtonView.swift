@@ -15,9 +15,17 @@ import UIKit
     internal var buttonView:PayButtonBaseView = .init()
 
     /// How the system browser hands control back once a passkey authentication finishes.
-    /// The scheme does not have to be registered in your Info.plist, the session intercepts it,
-    /// but the page served at the https return url has to bounce to it carrying the same query string
-    public static var threeDSCallback:ThreeDSCallback = .scheme("tapcardsdk")
+    ///
+    /// `.scheme("tapcardsdk")` needs nothing declared for the `authenticationSession` presentation,
+    /// it intercepts the scheme itself, but the page served at the https return url has to bounce to
+    /// `tapcardsdk://` carrying the same query string. The `safariViewController` presentation also
+    /// wants the scheme in your Info.plist, since ios opens the app with it rather than handing it back.
+    ///
+    /// `.https(host:path:)` skips the bounce, the real return url completes the session. It needs
+    /// three things together: ios 17.4, `webcredentials:<host>` in your Associated Domains, and the
+    /// host serving an `apple-app-site-association` that names this app. Miss any of them and the
+    /// session simply never comes back, there is no error to catch
+    public static var threeDSCallback:ThreeDSCallback = .https(host: "sdk.dev.tap.company", path: "/")
 
     /// Whether the system browser runs as a private session during a passkey authentication.
     /// A private session drops the "<app> wants to use <domain> to sign in" consent alert, at the

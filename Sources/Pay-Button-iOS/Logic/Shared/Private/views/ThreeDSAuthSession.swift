@@ -129,11 +129,20 @@ final class ThreeDSAuthSession: NSObject {
                                                  completionHandler: handler)
         case .https(let host, let path):
             guard #available(iOS 17.4, *) else {
+                NSLog("ThreeDSAuthSession: an https callback needs iOS 17.4, this device can not serve it")
                 report(.failure(ThreeDSAuthSessionError.httpsCallbackUnavailable))
                 return
             }
+            NSLog("ThreeDSAuthSession: waiting for the callback on https://\(host)\(path)")
+            NSLog("ThreeDSAuthSession: that needs webcredentials:\(host) in Associated Domains and an apple-app-site-association naming this app")
+            let httpsCallback: ASWebAuthenticationSession.Callback = .https(host: host, path: path)
+            // The return url has to match the callback or the session waits forever, so say up front
+            // whether the shape the acs comes back with would be accepted
+            if let sample: URL = URL(string: "https://\(host)\(path)?auth_payer=sample") {
+                NSLog("ThreeDSAuthSession: \(sample.absoluteString) would match: \(httpsCallback.matchesURL(sample))")
+            }
             created = ASWebAuthenticationSession(url: url,
-                                                 callback: .https(host: host, path: path),
+                                                 callback: httpsCallback,
                                                  completionHandler: handler)
         }
 
