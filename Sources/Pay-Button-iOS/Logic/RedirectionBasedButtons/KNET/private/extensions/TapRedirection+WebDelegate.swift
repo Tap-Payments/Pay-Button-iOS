@@ -243,8 +243,11 @@ extension RedirectionPayButton:WKNavigationDelegate {
             return 'none';
         })()
         """
+        NSLog("PayButton: handing the card form \(redirectionUrl)")
         webView.evaluateJavaScript(javaScript) { result, error in
-            print("loadAuthentication handled by: \(result ?? "nil") \(error?.localizedDescription ?? "")")
+            // `none` means the page has neither function, ex the button page reloaded and took the
+            // card iframe with it, so there is nobody left to finish the authentication
+            NSLog("PayButton: loadAuthentication handled by \(result ?? "nil") \(error?.localizedDescription ?? "")")
         }
     }
     
