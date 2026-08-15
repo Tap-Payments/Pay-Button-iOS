@@ -228,21 +228,21 @@ extension ThreeDSSafariSession: SFSafariViewControllerDelegate {
 
         guard isReturnUrl(URL) else { return }
 
-        // Landing on the return url is not the same as being answered. The configured return url is
-        // often the bare root of a host, and anything the acs passes through on its way out matches
-        // that .. the launcher page navigating, an error page, the payer being sent back untouched.
-        // What separates a real return from all of those is the acs naming the authentication in the
-        // query, so a match that says nothing is watched rather than taken
-        guard carriesAnAnswer(URL) else {
-            NSLog("ThreeDSSafariSession: that redirect is the return url but carries no query, so it answers nothing")
-            NSLog("ThreeDSSafariSession: staying open, the payer has not been sent back with a result yet")
-            return
+        NSLog("ThreeDSSafariSession: that redirect is the return url, the authentication is home")
+
+        // The acs can send the payer back to the bare return url, naming nothing. The card form has
+        // to be given an authentication to look up either way, so rebuild the query out of the
+        // keyword and the identifier this authentication was given when the acs supplied none
+        var finished: URL = URL
+        if !carriesAnAnswer(URL), let assumed: URL = assumedReturnUrl() {
+            NSLog("ThreeDSSafariSession: it carries no query, so it names no authentication")
+            NSLog("ThreeDSSafariSession: rebuilding it out of the keyword and the identifier instead")
+            finished = assumed
         }
 
-        NSLog("ThreeDSSafariSession: that redirect is the return url, the authentication is home")
-        ThreeDSSafariSession.printReturnUrl(URL)
+        ThreeDSSafariSession.printReturnUrl(finished)
         dismissBrowser {
-            self.report(.success(URL))
+            self.report(.success(finished))
         }
     }
 
