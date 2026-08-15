@@ -48,16 +48,18 @@ internal enum TapBrowserChrome {
 
     /// Puts the web view and the bar on screen, pinned the same way in every page.
     ///
-    /// The bar goes on last so it sits in front, covering the top of the page rather than being
-    /// covered by it, and both hang off the safe area .. which is the top of the sheet
+    /// The bar goes on first so the page sits in front of it. The bar is 56 tall and the page starts
+    /// 44 down, so the page covers the bottom 12 of the bar .. which is what leaves 44 of bar showing
+    /// with the page beginning right at its edge, no seam and nothing of the page hidden underneath.
+    /// Putting the bar in front instead costs the page its top 12 points and reads as a taller bar
     /// - Parameter webView: The page to show
-    /// - Parameter bar: The bar to show over it
+    /// - Parameter bar: The bar to show above it
     /// - Parameter controller: The page hosting both
     internal static func install(webView: UIView, bar: PoweredByTapView, in controller: UIViewController) {
         let container: UIView = controller.view
 
-        container.addSubview(webView)
         container.addSubview(bar)
+        container.addSubview(webView)
 
         webView.translatesAutoresizingMaskIntoConstraints = false
         bar.translatesAutoresizingMaskIntoConstraints = false
