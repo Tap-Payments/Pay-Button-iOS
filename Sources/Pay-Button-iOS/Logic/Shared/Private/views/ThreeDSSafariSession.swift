@@ -2,8 +2,8 @@
 //  ThreeDSSafariSession.swift
 //  Pay-Button-iOS
 //
-//  The same 3DS/ACS challenge as `ThreeDSAuthSession`, run in `SFSafariViewController`
-//  instead of `ASWebAuthenticationSession`.
+//  Runs the 3DS/ACS challenge in `SFSafariViewController`, which unlike `WKWebView` exposes
+//  `navigator.credentials` and can therefore serve a passkey.
 //
 //  Safari hands an app exactly one url, through `initialLoadDidRedirectTo`, and Apple is
 //  precise about when: every redirect the page performs *without user interaction*, which
@@ -50,13 +50,13 @@ final class ThreeDSSafariSession: NSObject {
         guard let threeDsUrlString: String = threeDsUrl,
               let url: URL = URL(string: threeDsUrlString) else {
             NSLog("ThreeDSSafariSession: could not parse the three ds url \(threeDsUrl ?? "nil")")
-            report(.failure(ThreeDSAuthSessionError.invalidThreeDSUrl))
+            report(.failure(ThreeDSSessionError.invalidThreeDSUrl))
             return
         }
 
         guard let presenter: UIViewController = presenter ?? UIApplication.shared.topViewController() else {
             NSLog("ThreeDSSafariSession: no view controller to present from")
-            report(.failure(ThreeDSAuthSessionError.failedToStart))
+            report(.failure(ThreeDSSessionError.failedToStart))
             return
         }
 
@@ -72,7 +72,7 @@ final class ThreeDSSafariSession: NSObject {
         guard redirectUrl != nil else {
             NSLog("ThreeDSSafariSession: no return url to watch for, there is nothing to recognise")
             NSLog("ThreeDSSafariSession: set PayButtonView.threeDSCallback to .https(host:path:) naming the return url")
-            report(.failure(ThreeDSAuthSessionError.httpsCallbackUnavailable))
+            report(.failure(ThreeDSSessionError.returnUrlUnavailable))
             return
         }
 
@@ -177,13 +177,13 @@ final class ThreeDSSafariSession: NSObject {
                 NSLog("ThreeDSSafariSession: -> delegate threeDSSafariSession(didReachRedirect:)")
                 self.delegate?.threeDSSafariSession(self, didReachRedirect: callbackUrl)
                 let answered: URL = self.answering(callbackUrl)
-                let redirectionUrl: String = ThreeDSAuthSession.restoreRedirection(from: answered,
+                let redirectionUrl: String = ThreeDSSafariSession.restoreRedirection(from: answered,
                                                                                   using: self.redirectUrl)
                 NSLog("ThreeDSSafariSession: handing the card form \(redirectionUrl)")
                 NSLog("ThreeDSSafariSession: -> delegate threeDSSafariSession(didSucceedWith:)")
                 self.delegate?.threeDSSafariSession(self, didSucceedWith: redirectionUrl)
             case .failure(let error):
-                if case ThreeDSAuthSessionError.canceledByUser = error {
+                if case ThreeDSSessionError.canceledByUser = error {
                     NSLog("ThreeDSSafariSession: -> delegate threeDSSafariSessionDidCancel()")
                     self.delegate?.threeDSSafariSessionDidCancel(self)
                 } else {
@@ -202,6 +202,31 @@ final class ThreeDSSafariSession: NSObject {
         } else {
             DispatchQueue.main.async(execute: deliver)
         }
+    }
+}
+
+// MARK: - Return url mapping
+extension ThreeDSSafariSession {
+    /// Maps the url the authentication came back on onto the https redirection url the card web sdk
+    /// is expecting, keeping the query and fragment the acs sent
+    /// - Parameter callbackUrl: The url the browser came back on
+    /// - Parameter redirectUrl: The https redirection url from the redirection details
+    /// - Returns: The url to hand over to the web sdk
+    internal static func restoreRedirection(from callbackUrl: URL, using redirectUrl: String?) -> String {
+        // An https url is already what the web sdk wants
+        let scheme: String = callbackUrl.scheme?.lowercased() ?? ""
+        guard scheme != "http", scheme != "https" else { return callbackUrl.absoluteString }
+
+        guard let redirectUrl: String = redirectUrl,
+              var components: URLComponents = URLComponents(string: redirectUrl) else {
+            return callbackUrl.absoluteString
+        }
+
+        let callbackComponents: URLComponents? = URLComponents(url: callbackUrl, resolvingAgainstBaseURL: false)
+        components.percentEncodedQuery = callbackComponents?.percentEncodedQuery
+        components.percentEncodedFragment = callbackComponents?.percentEncodedFragment
+
+        return components.url?.absoluteString ?? callbackUrl.absoluteString
     }
 }
 
@@ -263,7 +288,7 @@ extension ThreeDSSafariSession: SFSafariViewControllerDelegate {
             return
         }
 
-        report(.failure(ThreeDSAuthSessionError.canceledByUser))
+        report(.failure(ThreeDSSessionError.canceledByUser))
     }
 
     /// Rebuilds the url the acs would have landed on, from the return url this authentication was

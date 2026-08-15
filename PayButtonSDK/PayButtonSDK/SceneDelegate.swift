@@ -21,10 +21,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         connectionOptions.urlContexts.forEach { print("SceneDelegate launched with \($0.url.absoluteString)") }
     }
 
-    /// Nothing in a passkey authentication comes back through the app any more. The safari
-    /// presentation recognises the return url among the redirects safari reports, and the
-    /// `ASWebAuthenticationSession` one takes its callback internally. Logged only, in case a url
-    /// arrives from somewhere else
+    /// Nothing in a passkey authentication comes back through the app any more, the sdk recognises
+    /// the return url among the redirects safari reports. Logged only, in case a url arrives from
+    /// somewhere else
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
         URLContexts.forEach { print("SceneDelegate opened with \($0.url.absoluteString)") }
     }

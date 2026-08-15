@@ -14,56 +14,22 @@ import UIKit
     /// The reference to the pay button view itself
     internal var buttonView:PayButtonBaseView = .init()
 
-    /// Which browser a passkey authentication runs in.
-    ///
-    /// `authenticationSession` needs nothing from the host app, it intercepts the callback itself,
-    /// but an `.https` callback additionally needs Associated Domains and an apple-app-site-association.
-    /// `safariViewController` needs neither of those and no ios 17.4 either, it recognises the return
-    /// url among the redirects safari reports
-    public enum ThreeDSPresentation {
-        /// `ASWebAuthenticationSession`, silent between opening and the callback
-        case authenticationSession
-        /// `SFSafariViewController`, watching the redirects it reports for the return url
-        case safariViewController
-    }
-
-    /// Which browser a passkey authentication runs in
-    public static var threeDSPresentation:ThreeDSPresentation = .safariViewController
-
     /// Whether closing safari is taken as the authentication having finished.
     ///
     /// Safari never says what page it ended on, so a payer who authenticated and one who gave up
     /// look the same from here. With this on, closing the browser hands the card form the return url
     /// rebuilt from the details the acs was given, and the backend decides whether the authentication
     /// actually passed. Turn it off to treat every dismissal as a cancel, which is stricter but
-    /// leaves a completed passkey with no way home unless the return page bounces to the scheme.
-    ///
-    /// Only affects the `safariViewController` presentation
+    /// leaves a completed passkey with no way home unless safari reported the return url first
     public static var threeDSAssumesReturnOnDismiss:Bool = true
 
-    /// How the system browser hands control back once a passkey authentication finishes.
+    /// The url a finished passkey authentication comes back on.
     ///
-    /// `.scheme("tapcardsdk")` needs nothing declared for the `authenticationSession` presentation,
-    /// it intercepts the scheme itself, but the page served at the https return url has to bounce to
-    /// `tapcardsdk://` carrying the same query string. The `safariViewController` presentation also
-    /// wants the scheme in your Info.plist, since ios opens the app with it rather than handing it back.
-    ///
-    /// `.https(host:path:)` skips the bounce, the real return url completes the session. It needs
-    /// three things together: ios 17.4, `webcredentials:<host>` in your Associated Domains, and the
-    /// host serving an `apple-app-site-association` that names this app. Miss any of them and the
-    /// session simply never comes back, there is no error to catch
-    ///
-    /// The https callback needs sdk.dev.tap.company to serve an apple-app-site-association with a
-    /// webcredentials section naming `G46S76PUH4.tap.PayButtonSDK.demo`. Until it does, the session
-    /// refuses to start and the browser never appears .. fall back to `.scheme("tapcardsdk")`
+    /// The acs is given this as its return url, and the sdk watches the redirects safari reports
+    /// for it. Host and path are matched, never the query, since the query is the acs's answer.
+    /// Nothing has to be declared in the host app for this .. no scheme, no Associated Domains
     public static var threeDSCallback:ThreeDSCallback = .https(host: "sdk.dev.tap.company", path: "/")
 
-    /// Whether the system browser runs as a private session during a passkey authentication.
-    /// A private session drops the "<app> wants to use <domain> to sign in" consent alert, at the
-    /// cost of Safari's shared cookies, so the issuer can not honour "remember this device".
-    /// Passkeys themselves come from the platform authenticator and are unaffected either way
-    public static var threeDSPrefersEphemeralSession:Bool = true
-    
     //MARK: - Init methods
     override public init(frame: CGRect) {
         super.init(frame: frame)

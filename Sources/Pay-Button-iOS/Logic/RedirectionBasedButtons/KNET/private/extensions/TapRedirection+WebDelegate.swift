@@ -67,7 +67,7 @@ extension RedirectionPayButton:WKNavigationDelegate {
         }else if url.absoluteString.hasPrefix(payButtonType.tapRedirectionSchemeUrl()) {
             
         }else if RedirectionPayButton.requiresSystemBrowser(threeDsUrl: url.absoluteString),
-                       threeDSAuthSession == nil {
+                       threeDSSafariSession == nil {
             action = .cancel
             startFidoAuthentication(threeDsUrl: url.absoluteString,
                                     redirectUrl: lastCardRedirection?.redirectUrl)
@@ -273,32 +273,17 @@ extension RedirectionPayButton:WKNavigationDelegate {
     /// - Parameter redirectUrl: The https return url the callback is mapped back onto. Nil when the
     /// challenge arrived as a plain navigation and no `on3dsRedirect` announced it first
     internal func startFidoAuthentication(threeDsUrl:String?, redirectUrl:String?) {
-        switch PayButtonView.threeDSPresentation {
-        case .authenticationSession:
-            NSLog("PayButton: running the passkey in ASWebAuthenticationSession")
-            let authSession:ThreeDSAuthSession = .init()
-            authSession.delegate = self
-            threeDSAuthSession = authSession
+        NSLog("PayButton: running the passkey in SFSafariViewController")
+        let safariSession:ThreeDSSafariSession = .init()
+        safariSession.delegate = self
+        threeDSSafariSession = safariSession
 
-            authSession.start(threeDsUrl: threeDsUrl,
-                              redirectUrl: redirectUrl,
-                              callback: PayButtonView.threeDSCallback,
-                              ephemeral: PayButtonView.threeDSPrefersEphemeralSession,
-                              in: window)
-
-        case .safariViewController:
-            NSLog("PayButton: running the passkey in SFSafariViewController")
-            let safariSession:ThreeDSSafariSession = .init()
-            safariSession.delegate = self
-            threeDSSafariSession = safariSession
-
-            // A passkey that arrived as a bare navigation carries no redirection details, so fall
-            // back to the return url the configured https callback already names
-            safariSession.start(threeDsUrl: threeDsUrl,
-                                redirectUrl: redirectUrl ?? PayButtonView.threeDSCallback.httpsReturnUrl,
-                                keyword: lastCardRedirection?.keyword,
-                                from: UIApplication.shared.topViewController())
-        }
+        // A passkey that arrived as a bare navigation carries no redirection details, so fall
+        // back to the return url the configured callback already names
+        safariSession.start(threeDsUrl: threeDsUrl,
+                            redirectUrl: redirectUrl ?? PayButtonView.threeDSCallback.httpsReturnUrl,
+                            keyword: lastCardRedirection?.keyword,
+                            from: UIApplication.shared.topViewController())
     }
     
     /// The payer backed out of the 3ds page
@@ -334,28 +319,6 @@ extension RedirectionPayButton:WKNavigationDelegate {
     func handleOnError(data:String) {
         self.delegate?.onError?(data:data)
         //self.openUrl(url: self.currentlyLoadedConfigurations)
-    }
-}
-
-/// Receives the outcome of a passkey authentication that ran in the system browser
-extension RedirectionPayButton: ThreeDSAuthSessionDelegate {
-    
-    /// The browser came back with the return url, hand it over to the card form
-    func threeDSAuthSession(_ session: ThreeDSAuthSession, didSucceedWith redirectionUrl: String) {
-        threeDSAuthSession = nil
-        passCardAuthenticationToSDK(redirectionUrl: redirectionUrl)
-    }
-    
-    /// The payer dismissed the browser before finishing the authentication
-    func threeDSAuthSessionDidCancel(_ session: ThreeDSAuthSession) {
-        threeDSAuthSession = nil
-        handleCardAuthenticationCanceled()
-    }
-    
-    /// The process could not be completed
-    func threeDSAuthSession(_ session: ThreeDSAuthSession, didFailWith error: Error) {
-        threeDSAuthSession = nil
-        delegate?.onError?(data: "{\"error\":\"\(error.localizedDescription)\"}")
     }
 }
 

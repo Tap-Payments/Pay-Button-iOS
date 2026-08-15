@@ -14,10 +14,8 @@ internal class RedirectionPayButton: PayButtonBaseView {
     /// Holds the window the card form opened with `window.open`, ex the click to pay identity flow,
     /// so it can be dismissed again once the page closes it
     internal var popupViewController:PayButtonPopupViewController?
-    /// Runs a passkey authentication in the system browser. Held for the lifetime of the process,
-    /// letting go of it early dismisses the browser
-    internal var threeDSAuthSession:ThreeDSAuthSession?
-    /// The safari variant of the same, used when `PayButtonView.threeDSPresentation` asks for it
+    /// Runs a passkey authentication in safari. Held for the lifetime of the process, letting go
+    /// of it early dismisses the browser
     internal var threeDSSafariSession:ThreeDSSafariSession?
     /// The last redirection the card form announced, kept for its return url. A passkey challenge
     /// that arrives as a plain navigation carries no details of its own
