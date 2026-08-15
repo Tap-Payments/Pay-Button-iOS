@@ -56,44 +56,44 @@ import UIKit
         //case .BenefitPay:
         //    buttonView = BenefitPayButton()
         case .Knet:
-            buttonView = RedirectionPayButton()
-            (buttonView as? RedirectionPayButton)?.updateType(to: .Knet)
+            buttonView = PayButtonSdk()
+            (buttonView as? PayButtonSdk)?.updateType(to: .Knet)
         case .DEEMA:
-            buttonView = RedirectionPayButton()
-            (buttonView as? RedirectionPayButton)?.updateType(to: .DEEMA)
+            buttonView = PayButtonSdk()
+            (buttonView as? PayButtonSdk)?.updateType(to: .DEEMA)
         case .ApplePay:
-            buttonView = RedirectionPayButton()
-            (buttonView as? RedirectionPayButton)?.updateType(to: .ApplePay)
+            buttonView = PayButtonSdk()
+            (buttonView as? PayButtonSdk)?.updateType(to: .ApplePay)
         //case .Fawry:
-        //    buttonView = RedirectionPayButton()
-        //    (buttonView as? RedirectionPayButton)?.updateType(to: .Fawry)
+        //    buttonView = PayButtonSdk()
+        //    (buttonView as? PayButtonSdk)?.updateType(to: .Fawry)
         case .Benefit:
-            buttonView = RedirectionPayButton()
-            (buttonView as? RedirectionPayButton)?.updateType(to: .Benefit)
+            buttonView = PayButtonSdk()
+            (buttonView as? PayButtonSdk)?.updateType(to: .Benefit)
         case .Paypal:
-            buttonView = RedirectionPayButton()
-            (buttonView as? RedirectionPayButton)?.updateType(to: .Paypal)
+            buttonView = PayButtonSdk()
+            (buttonView as? PayButtonSdk)?.updateType(to: .Paypal)
         case .Tabby:
-            buttonView = RedirectionPayButton()
-            (buttonView as? RedirectionPayButton)?.updateType(to: .Tabby)
+            buttonView = PayButtonSdk()
+            (buttonView as? PayButtonSdk)?.updateType(to: .Tabby)
         case .TAMARA:
-            buttonView = RedirectionPayButton()
-            (buttonView as? RedirectionPayButton)?.updateType(to: .TAMARA)
+            buttonView = PayButtonSdk()
+            (buttonView as? PayButtonSdk)?.updateType(to: .TAMARA)
         case .GooglePay:
             // Google pay is rendered by the web page like any other redirection based method.
             // The backend reports it as `google_pay`, which lands on the default branch below anyway
-            buttonView = RedirectionPayButton()
-            (buttonView as? RedirectionPayButton)?.updateType(to: .GooglePay)
+            buttonView = PayButtonSdk()
+            (buttonView as? PayButtonSdk)?.updateType(to: .GooglePay)
         case .Click2Pay:
-            buttonView = RedirectionPayButton()
-            (buttonView as? RedirectionPayButton)?.updateType(to: .Click2Pay)
+            buttonView = PayButtonSdk()
+            (buttonView as? PayButtonSdk)?.updateType(to: .Click2Pay)
         case .Card:
-            buttonView = RedirectionPayButton()
-            (buttonView as? RedirectionPayButton)?.updateType(to: .Card)
+            buttonView = PayButtonSdk()
+            (buttonView as? PayButtonSdk)?.updateType(to: .Card)
         //case .CareemPay:
-        //    buttonView = RedirectionPayButton()
-        //    (buttonView as? RedirectionPayButton)?.updateType(to: .CareemPay)
-        //    (buttonView as? RedirectionPayButton)?.webView.customUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2.1 Safari/605.1.15"
+        //    buttonView = PayButtonSdk()
+        //    (buttonView as? PayButtonSdk)?.updateType(to: .CareemPay)
+        //    (buttonView as? PayButtonSdk)?.webView.customUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2.1 Safari/605.1.15"
         }
         // Add the view now to the screen
         addSubview(buttonView)

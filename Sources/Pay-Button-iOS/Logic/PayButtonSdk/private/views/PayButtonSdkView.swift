@@ -3,9 +3,11 @@ import UIKit
 import WebKit
 import SharedDataModels_iOS
 
-/// The custom view that provides an interface for the  knet button
-internal class RedirectionPayButton: PayButtonBaseView {
-    /// The web view used to render the knet button
+/// Hosts the tap web sdk in a web view, which is what every button type is except benefit pay ..
+/// knet, benefit, paypal, tabby, google pay, apple pay, deema, tamara, click to pay and the card
+/// form all render as a page here. The type only decides which page is loaded
+internal class PayButtonSdk: PayButtonBaseView {
+    /// The web view the tap web sdk is rendered in
     internal var webView: WKWebView = .init()
     /// keeps a hold of the loaded web sdk configurations url
     internal var currentlyLoadedConfigurations:[String:Any]?
@@ -109,7 +111,7 @@ internal class RedirectionPayButton: PayButtonBaseView {
         let left = webView.leftAnchor.constraint(equalTo: self.leftAnchor)
         let right = webView.rightAnchor.constraint(equalTo: self.rightAnchor)
         let bottom = webView.bottomAnchor.constraint(equalTo: self.bottomAnchor)
-        let buttonHeight = self.heightAnchor.constraint(greaterThanOrEqualToConstant: RedirectionPayButton.minimumButtonHeight)
+        let buttonHeight = self.heightAnchor.constraint(greaterThanOrEqualToConstant: PayButtonSdk.minimumButtonHeight)
         heightConstraint = buttonHeight
         // SWIPE let buttonHeight = self.heightAnchor.constraint(greaterThanOrEqualToConstant: 48)
 
@@ -128,14 +130,14 @@ internal class RedirectionPayButton: PayButtonBaseView {
     /// - Parameter to height: The height in points the web sdk reported
     internal func updateHeight(to height:CGFloat) {
         DispatchQueue.main.async {
-            self.pendingHeight = max(RedirectionPayButton.minimumButtonHeight, height)
+            self.pendingHeight = max(PayButtonSdk.minimumButtonHeight, height)
             // Let the newest report replace the one still waiting to fire
             self.heightSettleWorkItem?.cancel()
             let settleWorkItem:DispatchWorkItem = .init { [weak self] in
                 self?.applyPendingHeight()
             }
             self.heightSettleWorkItem = settleWorkItem
-            DispatchQueue.main.asyncAfter(deadline: .now() + RedirectionPayButton.heightSettleDelay, execute: settleWorkItem)
+            DispatchQueue.main.asyncAfter(deadline: .now() + PayButtonSdk.heightSettleDelay, execute: settleWorkItem)
         }
     }
 
@@ -158,7 +160,7 @@ internal class RedirectionPayButton: PayButtonBaseView {
 
         // beginFromCurrentState picks up from wherever a running animation got to,
         // instead of snapping back to the old height and starting over
-        UIView.animate(withDuration: RedirectionPayButton.heightAnimationDuration,
+        UIView.animate(withDuration: PayButtonSdk.heightAnimationDuration,
                        delay: 0,
                        options: [.beginFromCurrentState, .curveEaseOut, .allowUserInteraction]) {
             self.superview?.layoutIfNeeded()
@@ -177,9 +179,9 @@ internal class RedirectionPayButton: PayButtonBaseView {
     }
     
     
-    ///  configures the knet button with the needed configurations for it to work
+    ///  configures the button with the needed configurations for it to work
     ///  - Parameter config: The configurations dctionary. Recommended, as it will make you able to customly add models without updating
-    ///  - Parameter delegate:A protocol that allows integrators to get notified from events fired from knet button
+    ///  - Parameter delegate:A protocol that allows integrators to get notified from events fired from the button
     override
     internal func initPayButton(configDict: [String : Any], delegate: PayButtonDelegate? = nil) {
         self.delegate = delegate
