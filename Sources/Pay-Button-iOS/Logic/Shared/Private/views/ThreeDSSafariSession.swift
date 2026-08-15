@@ -127,15 +127,51 @@ final class ThreeDSSafariSession: NSObject {
 
     //MARK: - Private methods
 
-    /// Takes the browser off screen, then runs the block
+    /// Takes the browser off screen, then runs the block.
+    ///
+    /// Two things make this less obvious than it looks. `dismiss` sent to a view controller takes
+    /// down whatever *it* is presenting first, and only asks its presenter when it is presenting
+    /// nothing .. a browser showing a sheet of its own would swallow the call and stay up. And a
+    /// dismissal asked for while the presentation is still animating is dropped by uikit, so the
+    /// completion runs, the delegate is told, and the browser is still on screen
+    /// - Parameter block: Run once the browser is off screen, or straight away if there is none
     private func dismissBrowser(then block: @escaping () -> Void) {
-        guard let safari = safari else {
-            block()
-            return
+        let onMain: (@escaping () -> Void) -> Void = { work in
+            if Thread.isMainThread { work() } else { DispatchQueue.main.async(execute: work) }
         }
-        self.safari = nil
-        safari.dismiss(animated: true) {
-            block()
+
+        onMain { [weak self] in
+            guard let self = self, let browser: SFSafariViewController = self.safari else {
+                NSLog("ThreeDSSafariSession: no browser to take down")
+                block()
+                return
+            }
+            self.safari = nil
+
+            let takeDown: () -> Void = {
+                // Ask the presenter, not the browser, so a browser presenting something of its own
+                // does not take that down instead of itself
+                guard let presenter: UIViewController = browser.presentingViewController else {
+                    NSLog("ThreeDSSafariSession: the browser is not presented by anything, nothing to take down")
+                    block()
+                    return
+                }
+                NSLog("ThreeDSSafariSession: taking the browser down")
+                presenter.dismiss(animated: true) {
+                    if browser.view.window != nil {
+                        NSLog("ThreeDSSafariSession: the browser is still on screen after being dismissed")
+                    }
+                    block()
+                }
+            }
+
+            // Still animating on or off screen, so wait for that to settle before asking
+            if let coordinator = browser.transitionCoordinator {
+                NSLog("ThreeDSSafariSession: the browser is mid transition, waiting for it to settle")
+                coordinator.animate(alongsideTransition: nil) { _ in takeDown() }
+            } else {
+                takeDown()
+            }
         }
     }
 
