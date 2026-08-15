@@ -47,8 +47,7 @@ class ThreeDSView: UIViewController {
     private func commonInit() {
         themeController()
         themeWebView()
-        webViewConstraints()
-        poweredByTapViewConstraints()
+        TapBrowserChrome.install(webView: webView!, bar: poweredByTapView, in: self)
         poweredByTapView.backButtonClicked = {
             self.threeDSCanceled()
         }
@@ -67,9 +66,7 @@ class ThreeDSView: UIViewController {
 extension ThreeDSView {
     /// Applies theme on controller level
     func themeController() {
-        // Opaque, like the popup. A clear controller view lets whatever is behind the sheet show
-        // through any strip the bar and the page do not cover between them
-        view.backgroundColor = .white
+        TapBrowserChrome.applyBackground(to: self)
     }
     
     /// Applies theme on web view level
@@ -84,62 +81,12 @@ extension ThreeDSView {
         
         // Let us theme the web view
         webView = .init(frame: .zero, configuration: configuration)
-        webView?.isOpaque = false
-        webView?.backgroundColor = UIColor.white
-        webView?.scrollView.backgroundColor = UIColor.clear
-        webView?.scrollView.bounces = false
-        webView?.layer.cornerRadius = 0
-        webView?.clipsToBounds = true
+        TapBrowserChrome.style(webView!)
         
         // Let set the delegates
         webView?.scrollView.delegate = self
         webView?.navigationDelegate = self
         webView?.uiDelegate = self
-    }
-    /// Applies constrains to correctly size and position the web view
-    func webViewConstraints() {
-        view.addSubview(webView!)
-        webView?.translatesAutoresizingMaskIntoConstraints = false
-        
-        let constraints = [
-            webView!.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
-            webView!.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
-            // The bar sits at the top of the safe area and overlaps the page by 12, same as the popup
-            webView!.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor, constant: 44),
-            webView!.bottomAnchor.constraint(equalTo: self.view.bottomAnchor)
-        ]
-        
-        NSLayoutConstraint.activate(constraints)
-        
-        DispatchQueue.main.async {
-            self.webView?.setNeedsLayout()
-            self.webView?.updateConstraints()
-            self.view.setNeedsLayout()
-        }
-    }
-    
-    
-    /// Applies constrains to correctly size and position the web view
-    func poweredByTapViewConstraints() {
-        view.addSubview(poweredByTapView)
-        poweredByTapView.translatesAutoresizingMaskIntoConstraints = false
-        
-        let constraints = [
-            poweredByTapView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
-            poweredByTapView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
-            poweredByTapView.heightAnchor.constraint(equalToConstant: 56),
-            // The safe area is the top of the sheet here and sits below the status bar when the same
-            // bar is shown full screen, which is what keeps the two looking alike
-            poweredByTapView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor)
-        ]
-        
-        NSLayoutConstraint.activate(constraints)
-        
-        DispatchQueue.main.async {
-            self.poweredByTapView.setNeedsLayout()
-            self.poweredByTapView.updateConstraints()
-            self.view.setNeedsLayout()
-        }
     }
 }
 

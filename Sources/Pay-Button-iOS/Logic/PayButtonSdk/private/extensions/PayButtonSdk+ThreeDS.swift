@@ -20,7 +20,7 @@ extension PayButtonSdk {
     func showRedirectionView(for redirection:Redirection) {
         // This means we are ok to start the authentication process
         threeDsView = .init()
-        threeDsView?.isModalInPresentation = true
+        TapBrowserChrome.applyPresentation(to: threeDsView!)
         // Set to web view the needed urls
         /// The redirect url scheme
         threeDsView?.redirectUrl = payButtonType.tapRedirectionSchemeUrl()
@@ -83,7 +83,7 @@ extension PayButtonSdk {
         }
         
         threeDsView = .init()
-        threeDsView?.isModalInPresentation = true
+        TapBrowserChrome.applyPresentation(to: threeDsView!)
         threeDsView?.redirectionData = .init(url: threeDsUrl, id: nil, powered: cardRedirection.powered, stopRedirection: false)
         // Watch for the card sdk's own keyword instead of the shared redirection one
         threeDsView?.cardRedirectionKeyword = cardRedirection.keyword
