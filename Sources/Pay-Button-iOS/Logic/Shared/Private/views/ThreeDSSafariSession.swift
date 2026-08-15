@@ -70,9 +70,11 @@ final class ThreeDSSafariSession: NSObject {
 
         self.redirectUrl = redirectUrl
         self.callbackScheme = callbackScheme
-        self.keyword = keyword
         // The acs names the authentication in the last part of its own path
         self.authenticationIdentifier = url.pathComponents.last
+        // `auth_payer_sneBZ46...` is the keyword and the id joined, so the keyword can be read back
+        // out of it when no redirection details arrived to tell us
+        self.keyword = keyword ?? ThreeDSSafariSession.keyword(from: self.authenticationIdentifier)
 
         // Safari can not take an https callback back for us the way Associated Domains lets
         // ASWebAuthenticationSession do it. A scheme is the reliable way home, but an https return
@@ -126,6 +128,17 @@ final class ThreeDSSafariSession: NSObject {
             self.report(.success(url))
         }
         return true
+    }
+
+    /// Reads the query key back out of an acs identifier, ex `auth_payer_sneBZ46...` gives
+    /// `auth_payer`. The last underscore separated part is the id itself
+    /// - Parameter identifier: The identifier the acs carries in its path
+    /// - Returns: The keyword, or nil when the identifier has no underscore to split on
+    internal static func keyword(from identifier: String?) -> String? {
+        guard let identifier = identifier else { return nil }
+        let parts: [Substring] = identifier.split(separator: "_")
+        guard parts.count > 1 else { return nil }
+        return parts.dropLast().joined(separator: "_")
     }
 
     /// Prints the callback url taken apart, so what the acs sent back is readable

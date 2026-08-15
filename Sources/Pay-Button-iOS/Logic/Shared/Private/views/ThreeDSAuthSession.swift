@@ -37,6 +37,15 @@ public enum ThreeDSCallback {
         case .https: return nil
         }
     }
+
+    /// The https return url this callback describes, nil for a scheme one. Used as the return url
+    /// when a passkey arrives as a bare navigation and no redirection details came with it
+    var httpsReturnUrl: String? {
+        switch self {
+        case .scheme: return nil
+        case .https(let host, let path): return "https://\(host)\(path)"
+        }
+    }
 }
 
 /// Errors surfaced while running the 3ds process inside the system browser
