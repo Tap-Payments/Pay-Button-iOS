@@ -67,7 +67,9 @@ class ThreeDSView: UIViewController {
 extension ThreeDSView {
     /// Applies theme on controller level
     func themeController() {
-        view.backgroundColor = .clear
+        // Opaque, like the popup. A clear controller view lets whatever is behind the sheet show
+        // through any strip the bar and the page do not cover between them
+        view.backgroundColor = .white
     }
     
     /// Applies theme on web view level
@@ -102,9 +104,9 @@ extension ThreeDSView {
         let constraints = [
             webView!.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
             webView!.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
-            // The powered by tap bar sits at the very top and overlaps the page by 12, so start right under it
-            webView!.topAnchor.constraint(equalTo: self.view.topAnchor, constant: 44),
-            webView!.bottomAnchor.constraint(equalTo: self.view.bottomAnchor, constant: 40)
+            // The bar sits at the top of the safe area and overlaps the page by 12, same as the popup
+            webView!.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor, constant: 44),
+            webView!.bottomAnchor.constraint(equalTo: self.view.bottomAnchor)
         ]
         
         NSLayoutConstraint.activate(constraints)
@@ -120,16 +122,15 @@ extension ThreeDSView {
     /// Applies constrains to correctly size and position the web view
     func poweredByTapViewConstraints() {
         view.addSubview(poweredByTapView)
-        view.sendSubviewToBack(poweredByTapView)
         poweredByTapView.translatesAutoresizingMaskIntoConstraints = false
         
         let constraints = [
             poweredByTapView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
             poweredByTapView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
             poweredByTapView.heightAnchor.constraint(equalToConstant: 56),
-            // Anchored to the top of the sheet. Hanging it off the web view instead left the 56 above it
-            // empty, and the controller's view is clear, so the app behind showed through as a white band
-            poweredByTapView.topAnchor.constraint(equalTo: self.view.topAnchor)
+            // The safe area is the top of the sheet here and sits below the status bar when the same
+            // bar is shown full screen, which is what keeps the two looking alike
+            poweredByTapView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor)
         ]
         
         NSLayoutConstraint.activate(constraints)
