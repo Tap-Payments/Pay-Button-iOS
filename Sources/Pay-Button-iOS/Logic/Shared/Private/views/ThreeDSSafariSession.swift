@@ -103,14 +103,14 @@ final class ThreeDSSafariSession: NSObject {
         return parts.dropLast().joined(separator: "_")
     }
 
-    /// Prints the url taken apart, so what the acs sent back is readable
+    /// Prints the url taken apart, so what the acs answered with is readable
     /// - Parameter url: The url the authentication came back on
-    internal static func printCallback(_ url: URL) {
-        NSLog("ThreeDSSafariSession: callback \(url.absoluteString)")
+    internal static func printReturnUrl(_ url: URL) {
+        NSLog("ThreeDSSafariSession: return url \(url.absoluteString)")
         let components: URLComponents? = URLComponents(url: url, resolvingAgainstBaseURL: false)
         let queryItems: [URLQueryItem] = components?.queryItems ?? []
         if queryItems.isEmpty {
-            NSLog("ThreeDSSafariSession: callback carries no query, the acs sent nothing back")
+            NSLog("ThreeDSSafariSession: it carries no query, the acs answered with nothing")
         } else {
             for item in queryItems {
                 NSLog("ThreeDSSafariSession:     \(item.name) = \(item.value ?? "")")
@@ -139,28 +139,6 @@ final class ThreeDSSafariSession: NSObject {
         }
     }
 
-    /// Makes sure the url going to the card form actually names this authentication.
-    ///
-    /// A url that arrives with no query names nothing, and the card form has no id to look up. The
-    /// acs can hand one over that way, ex it lands on the bare return url, so rebuild the query out
-    /// of the keyword and the identifier this authentication was given whenever it is missing
-    /// - Parameter url: The url the authentication came back on
-    /// - Returns: The same url when it already answers, the rebuilt one when it does not
-    private func answering(_ url: URL) -> URL {
-        let carriesNoAnswer: Bool = (URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems ?? []).isEmpty
-        guard carriesNoAnswer else { return url }
-
-        guard let assumed: URL = assumedReturnUrl() else {
-            NSLog("ThreeDSSafariSession: \(url.absoluteString) names no authentication, and there is not enough to rebuild one")
-            NSLog("ThreeDSSafariSession: the card form will be handed a url with nothing to look up")
-            return url
-        }
-
-        NSLog("ThreeDSSafariSession: \(url.absoluteString) carries no query, so it names no authentication")
-        NSLog("ThreeDSSafariSession: rebuilding it out of the keyword and the identifier instead")
-        return assumed
-    }
-
     /// Fans the outcome out to the delegate, always on the main thread and only once
     private func report(_ result: Result<URL, Error>) {
         guard !hasReported else {
@@ -172,13 +150,11 @@ final class ThreeDSSafariSession: NSObject {
         let deliver: () -> Void = { [weak self] in
             guard let self = self else { return }
             switch result {
-            case .success(let callbackUrl):
-                NSLog("ThreeDSSafariSession: redirection reached \(callbackUrl.absoluteString)")
-                NSLog("ThreeDSSafariSession: -> delegate threeDSSafariSession(didReachRedirect:)")
-                self.delegate?.threeDSSafariSession(self, didReachRedirect: callbackUrl)
-                let answered: URL = self.answering(callbackUrl)
-                let redirectionUrl: String = ThreeDSSafariSession.restoreRedirection(from: answered,
-                                                                                  using: self.redirectUrl)
+            case .success(let returnUrl):
+                NSLog("ThreeDSSafariSession: the authentication came home on \(returnUrl.absoluteString)")
+                NSLog("ThreeDSSafariSession: -> delegate threeDSSafariSession(didReachReturnUrl:)")
+                self.delegate?.threeDSSafariSession(self, didReachReturnUrl: returnUrl)
+                let redirectionUrl: String = returnUrl.absoluteString
                 NSLog("ThreeDSSafariSession: handing the card form \(redirectionUrl)")
                 NSLog("ThreeDSSafariSession: -> delegate threeDSSafariSession(didSucceedWith:)")
                 self.delegate?.threeDSSafariSession(self, didSucceedWith: redirectionUrl)
@@ -205,31 +181,6 @@ final class ThreeDSSafariSession: NSObject {
     }
 }
 
-// MARK: - Return url mapping
-extension ThreeDSSafariSession {
-    /// Maps the url the authentication came back on onto the https redirection url the card web sdk
-    /// is expecting, keeping the query and fragment the acs sent
-    /// - Parameter callbackUrl: The url the browser came back on
-    /// - Parameter redirectUrl: The https redirection url from the redirection details
-    /// - Returns: The url to hand over to the web sdk
-    internal static func restoreRedirection(from callbackUrl: URL, using redirectUrl: String?) -> String {
-        // An https url is already what the web sdk wants
-        let scheme: String = callbackUrl.scheme?.lowercased() ?? ""
-        guard scheme != "http", scheme != "https" else { return callbackUrl.absoluteString }
-
-        guard let redirectUrl: String = redirectUrl,
-              var components: URLComponents = URLComponents(string: redirectUrl) else {
-            return callbackUrl.absoluteString
-        }
-
-        let callbackComponents: URLComponents? = URLComponents(url: callbackUrl, resolvingAgainstBaseURL: false)
-        components.percentEncodedQuery = callbackComponents?.percentEncodedQuery
-        components.percentEncodedFragment = callbackComponents?.percentEncodedFragment
-
-        return components.url?.absoluteString ?? callbackUrl.absoluteString
-    }
-}
-
 // MARK: - The redirects safari is willing to show us
 extension ThreeDSSafariSession: SFSafariViewControllerDelegate {
 
@@ -241,15 +192,26 @@ extension ThreeDSSafariSession: SFSafariViewControllerDelegate {
 
         guard isReturnUrl(URL) else { return }
 
+        // Landing on the return url is not the same as being answered. The configured return url is
+        // often the bare root of a host, and anything the acs passes through on its way out matches
+        // that .. the launcher page navigating, an error page, the payer being sent back untouched.
+        // What separates a real return from all of those is the acs naming the authentication in the
+        // query, so a match that says nothing is watched rather than taken
+        guard carriesAnAnswer(URL) else {
+            NSLog("ThreeDSSafariSession: that redirect is the return url but carries no query, so it answers nothing")
+            NSLog("ThreeDSSafariSession: staying open, the payer has not been sent back with a result yet")
+            return
+        }
+
         NSLog("ThreeDSSafariSession: that redirect is the return url, the authentication is home")
-        ThreeDSSafariSession.printCallback(URL)
+        ThreeDSSafariSession.printReturnUrl(URL)
         dismissBrowser {
             self.report(.success(URL))
         }
     }
 
     /// Whether the url is the https return url this authentication was given, host and path only.
-    /// The query is where the acs puts its answer, so it is deliberately not compared
+    /// The query is compared separately, by `carriesAnAnswer`
     /// - Parameter url: A url safari redirected to
     private func isReturnUrl(_ url: URL) -> Bool {
         guard let redirectUrl: String = redirectUrl,
@@ -261,6 +223,13 @@ extension ThreeDSSafariSession: SFSafariViewControllerDelegate {
         let expectedPath: String = expected.path.isEmpty ? "/" : expected.path
         let path: String = url.path.isEmpty ? "/" : url.path
         return host == expectedHost && path == expectedPath
+    }
+
+    /// Whether the url names an authentication for the card form to look up, ie whether the acs put
+    /// anything in the query at all
+    /// - Parameter url: A url that already matched the return url
+    private func carriesAnAnswer(_ url: URL) -> Bool {
+        return !(URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems ?? []).isEmpty
     }
 
     /// The acs page itself finished loading. Redirects can still be reported after this, as long as
@@ -283,7 +252,7 @@ extension ThreeDSSafariSession: SFSafariViewControllerDelegate {
         if PayButtonView.threeDSAssumesReturnOnDismiss, let assumed: URL = assumedReturnUrl() {
             NSLog("ThreeDSSafariSession: safari does not say where it ended up, assuming the return url")
             NSLog("ThreeDSSafariSession: the backend decides whether this authentication passed, not us")
-            ThreeDSSafariSession.printCallback(assumed)
+            ThreeDSSafariSession.printReturnUrl(assumed)
             report(.success(assumed))
             return
         }
@@ -308,8 +277,8 @@ extension ThreeDSSafariSession: SFSafariViewControllerDelegate {
 
 /// Reports the progress of a 3ds process running in `SFSafariViewController`
 protocol ThreeDSSafariSessionDelegate: AnyObject {
-    /// A redirect the process went through, or the return url itself
-    func threeDSSafariSession(_ session: ThreeDSSafariSession, didReachRedirect callbackUrl: URL)
+    /// The return url the authentication came home on, before it reaches the card form
+    func threeDSSafariSession(_ session: ThreeDSSafariSession, didReachReturnUrl returnUrl: URL)
     /// The process completed, carrying the redirection url the card web sdk expects
     func threeDSSafariSession(_ session: ThreeDSSafariSession, didSucceedWith redirectionUrl: String)
     /// The payer closed the browser before finishing
@@ -320,5 +289,5 @@ protocol ThreeDSSafariSessionDelegate: AnyObject {
 
 // Only the outcome has to be adopted
 extension ThreeDSSafariSessionDelegate {
-    func threeDSSafariSession(_ session: ThreeDSSafariSession, didReachRedirect callbackUrl: URL) {}
+    func threeDSSafariSession(_ session: ThreeDSSafariSession, didReachReturnUrl returnUrl: URL) {}
 }

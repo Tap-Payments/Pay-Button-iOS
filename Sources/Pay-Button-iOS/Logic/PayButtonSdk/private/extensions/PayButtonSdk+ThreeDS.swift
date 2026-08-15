@@ -200,9 +200,9 @@ extension PayButtonSdk {
 
 extension PayButtonSdk: ThreeDSSafariSessionDelegate {
 
-    /// A redirect the acs page's initial load went through
-    func threeDSSafariSession(_ session: ThreeDSSafariSession, didReachRedirect callbackUrl: URL) {
-        NSLog("PayButton: safari saw a redirect to \(callbackUrl.absoluteString)")
+    /// The return url the authentication came home on
+    func threeDSSafariSession(_ session: ThreeDSSafariSession, didReachReturnUrl returnUrl: URL) {
+        NSLog("PayButton: safari reached the return url \(returnUrl.absoluteString)")
     }
 
     /// Safari came back with the return url, hand it over to the card form
