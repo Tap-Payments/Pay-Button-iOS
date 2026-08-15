@@ -291,14 +291,11 @@ extension RedirectionPayButton:WKNavigationDelegate {
             let safariSession:ThreeDSSafariSession = .init()
             safariSession.delegate = self
             threeDSSafariSession = safariSession
-            // Safari can not hand the callback back itself, the app forwards it through this
-            PayButtonView.runningSafariSession = safariSession
 
             // A passkey that arrived as a bare navigation carries no redirection details, so fall
             // back to the return url the configured https callback already names
             safariSession.start(threeDsUrl: threeDsUrl,
                                 redirectUrl: redirectUrl ?? PayButtonView.threeDSCallback.httpsReturnUrl,
-                                callbackScheme: PayButtonView.threeDSCallback.scheme,
                                 keyword: lastCardRedirection?.keyword,
                                 from: UIApplication.shared.topViewController())
         }
