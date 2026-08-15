@@ -65,19 +65,26 @@ final class ThreeDSSafariSession: NSObject {
         self.redirectUrl = redirectUrl
         self.callbackScheme = callbackScheme
 
-        // Safari can not take an https callback back for us, that is exactly what Associated Domains
-        // buys ASWebAuthenticationSession. With no scheme to watch for, nothing could ever complete
-        guard let callbackScheme = callbackScheme, !callbackScheme.isEmpty else {
-            NSLog("ThreeDSSafariSession: no callback scheme to wait for")
-            NSLog("ThreeDSSafariSession: this presentation needs PayButtonView.threeDSCallback set to .scheme(\"tapcardsdk\"), an .https callback only works with authenticationSession")
+        // Safari can not take an https callback back for us the way Associated Domains lets
+        // ASWebAuthenticationSession do it. A scheme is the reliable way home, but an https return
+        // url is still worth presenting for, it is caught while the acs page is still loading
+        let hasScheme: Bool = !(callbackScheme?.isEmpty ?? true)
+        guard hasScheme || redirectUrl != nil else {
+            NSLog("ThreeDSSafariSession: nothing to watch for, neither a callback scheme nor a return url")
+            NSLog("ThreeDSSafariSession: set PayButtonView.threeDSCallback to .scheme(\"tapcardsdk\")")
             report(.failure(ThreeDSAuthSessionError.httpsCallbackUnavailable))
             return
+        }
+
+        if !hasScheme {
+            NSLog("ThreeDSSafariSession: no callback scheme, watching for the https return url instead")
+            NSLog("ThreeDSSafariSession: that only catches a return that happens while the acs page loads. Once the payer authenticates, safari has no way back .. set .scheme(\"tapcardsdk\") and bounce to it")
         }
 
         NSLog("ThreeDSSafariSession: starting")
         NSLog("ThreeDSSafariSession: three ds url \(url.absoluteString)")
         NSLog("ThreeDSSafariSession: redirect url \(redirectUrl ?? "nil, the callback will be handed over as it arrives")")
-        NSLog("ThreeDSSafariSession: waiting for \(callbackScheme ?? "no"):// to be forwarded from the app")
+        NSLog("ThreeDSSafariSession: waiting for \(callbackScheme.map { "\($0)://" } ?? "the https return url")")
 
         let configuration: SFSafariViewController.Configuration = .init()
         configuration.entersReaderIfAvailable = false
@@ -204,7 +211,35 @@ extension ThreeDSSafariSession: SFSafariViewControllerDelegate {
         if let scheme: String = URL.scheme?.lowercased(), scheme == (callbackScheme?.lowercased() ?? "") {
             NSLog("ThreeDSSafariSession: that redirect is the callback")
             handleCallback(url: URL)
+            return
         }
+
+        // The acs can also land straight on the https return url itself, again only when nothing
+        // was asked of the payer. Safari will not hand that back to the app, but we are looking at
+        // it right here, so take it. Once the payer touches the page this stops firing and the
+        // return has to come back through the scheme
+        if isReturnUrl(URL) {
+            NSLog("ThreeDSSafariSession: that redirect is the https return url, taking it without waiting for a bounce")
+            ThreeDSSafariSession.printCallback(URL)
+            dismissBrowser {
+                self.report(.success(URL))
+            }
+        }
+    }
+
+    /// Whether the url is the https return url this authentication was given, host and path only.
+    /// The query is where the acs puts its answer, so it is deliberately not compared
+    /// - Parameter url: A url safari redirected to
+    private func isReturnUrl(_ url: URL) -> Bool {
+        guard let redirectUrl: String = redirectUrl,
+              let expected: URLComponents = URLComponents(string: redirectUrl),
+              let expectedHost: String = expected.host?.lowercased(),
+              let host: String = url.host?.lowercased(),
+              url.scheme?.lowercased() == "https" else { return false }
+
+        let expectedPath: String = expected.path.isEmpty ? "/" : expected.path
+        let path: String = url.path.isEmpty ? "/" : url.path
+        return host == expectedHost && path == expectedPath
     }
 
     /// The acs page itself finished loading, everything after this is the payer's doing
