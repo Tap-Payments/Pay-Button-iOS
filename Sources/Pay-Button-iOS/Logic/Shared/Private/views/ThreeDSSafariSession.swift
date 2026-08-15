@@ -34,6 +34,10 @@ final class ThreeDSSafariSession: NSObject {
     private var redirectUrl: String?
     /// The scheme the return page bounces to, matched against whatever the app forwards us
     private var callbackScheme: String?
+    /// The query key the card form watches for, ex `auth_payer`
+    private var keyword: String?
+    /// The identifier the acs page carries in its own path, ex `auth_payer_sSMda29...`
+    private var authenticationIdentifier: String?
     /// Set once an outcome has been reported, so a dismissal that follows a success is not
     /// mistaken for the payer walking away
     private var hasReported: Bool = false
@@ -43,10 +47,12 @@ final class ThreeDSSafariSession: NSObject {
     /// - Parameter redirectUrl: The https return url, used to rebuild what the card web sdk
     /// expects when the callback comes back through a custom scheme
     /// - Parameter callbackScheme: The scheme the return page bounces to, ex `tapcardsdk`
+    /// - Parameter keyword: The query key the card form watches for, ex `auth_payer`
     /// - Parameter presenter: The view controller to present the browser from
     func start(threeDsUrl: String?,
                redirectUrl: String?,
                callbackScheme: String?,
+               keyword: String?,
                from presenter: UIViewController?) {
 
         guard let threeDsUrlString: String = threeDsUrl,
@@ -64,6 +70,9 @@ final class ThreeDSSafariSession: NSObject {
 
         self.redirectUrl = redirectUrl
         self.callbackScheme = callbackScheme
+        self.keyword = keyword
+        // The acs names the authentication in the last part of its own path
+        self.authenticationIdentifier = url.pathComponents.last
 
         // Safari can not take an https callback back for us the way Associated Domains lets
         // ASWebAuthenticationSession do it. A scheme is the reliable way home, but an https return
@@ -254,7 +263,33 @@ extension ThreeDSSafariSession: SFSafariViewControllerDelegate {
     func safariViewControllerDidFinish(_ controller: SFSafariViewController) {
         NSLog("ThreeDSSafariSession: the payer closed the browser")
         safari = nil
+
+        // Safari never tells us what page it was on, so a payer who authenticated and a payer who
+        // gave up look identical from here. When we can work out the return url ourselves, hand it
+        // over and let the backend be the one to say whether the authentication actually passed
+        if PayButtonView.threeDSAssumesReturnOnDismiss, let assumed: URL = assumedReturnUrl() {
+            NSLog("ThreeDSSafariSession: safari does not say where it ended up, assuming the return url")
+            NSLog("ThreeDSSafariSession: the backend decides whether this authentication passed, not us")
+            ThreeDSSafariSession.printCallback(assumed)
+            report(.success(assumed))
+            return
+        }
+
         report(.failure(ThreeDSAuthSessionError.canceledByUser))
+    }
+
+    /// Rebuilds the url the acs would have landed on, from the return url this authentication was
+    /// given, the keyword the card form watches for, and the identifier the acs carries in its path
+    /// - Returns: The return url, or nil when there is not enough to build one
+    private func assumedReturnUrl() -> URL? {
+        guard let redirectUrl: String = redirectUrl,
+              var components: URLComponents = URLComponents(string: redirectUrl),
+              let keyword: String = keyword, !keyword.isEmpty,
+              let identifier: String = authenticationIdentifier, !identifier.isEmpty else {
+            return nil
+        }
+        components.queryItems = [URLQueryItem(name: keyword, value: identifier)]
+        return components.url
     }
 }
 

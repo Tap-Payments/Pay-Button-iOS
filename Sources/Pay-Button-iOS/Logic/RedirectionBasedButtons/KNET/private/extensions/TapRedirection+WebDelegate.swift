@@ -294,6 +294,7 @@ extension RedirectionPayButton:WKNavigationDelegate {
             safariSession.start(threeDsUrl: threeDsUrl,
                                 redirectUrl: redirectUrl,
                                 callbackScheme: PayButtonView.threeDSCallback.scheme,
+                                keyword: lastCardRedirection?.keyword,
                                 from: UIApplication.shared.topViewController())
         }
     }

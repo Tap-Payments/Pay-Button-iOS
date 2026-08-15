@@ -28,7 +28,18 @@ import UIKit
     }
 
     /// Which browser a passkey authentication runs in
-    public static var threeDSPresentation:ThreeDSPresentation = .authenticationSession
+    public static var threeDSPresentation:ThreeDSPresentation = .safariViewController
+
+    /// Whether closing safari is taken as the authentication having finished.
+    ///
+    /// Safari never says what page it ended on, so a payer who authenticated and one who gave up
+    /// look the same from here. With this on, closing the browser hands the card form the return url
+    /// rebuilt from the details the acs was given, and the backend decides whether the authentication
+    /// actually passed. Turn it off to treat every dismissal as a cancel, which is stricter but
+    /// leaves a completed passkey with no way home unless the return page bounces to the scheme.
+    ///
+    /// Only affects the `safariViewController` presentation
+    public static var threeDSAssumesReturnOnDismiss:Bool = true
 
     /// Hands the sdk a url the app was opened with, so a passkey running in `SFSafariViewController`
     /// can finish. Call it from your scene or app delegate.
