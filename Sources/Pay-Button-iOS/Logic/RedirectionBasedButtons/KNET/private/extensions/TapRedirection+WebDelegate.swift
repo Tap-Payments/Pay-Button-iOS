@@ -270,15 +270,32 @@ extension RedirectionPayButton:WKNavigationDelegate {
     /// - Parameter redirectUrl: The https return url the callback is mapped back onto. Nil when the
     /// challenge arrived as a plain navigation and no `on3dsRedirect` announced it first
     internal func startFidoAuthentication(threeDsUrl:String?, redirectUrl:String?) {
-        let authSession:ThreeDSAuthSession = .init()
-        authSession.delegate = self
-        threeDSAuthSession = authSession
-        
-        authSession.start(threeDsUrl: threeDsUrl,
-                          redirectUrl: redirectUrl,
-                          callback: PayButtonView.threeDSCallback,
-                          ephemeral: PayButtonView.threeDSPrefersEphemeralSession,
-                          in: window)
+        switch PayButtonView.threeDSPresentation {
+        case .authenticationSession:
+            NSLog("PayButton: running the passkey in ASWebAuthenticationSession")
+            let authSession:ThreeDSAuthSession = .init()
+            authSession.delegate = self
+            threeDSAuthSession = authSession
+
+            authSession.start(threeDsUrl: threeDsUrl,
+                              redirectUrl: redirectUrl,
+                              callback: PayButtonView.threeDSCallback,
+                              ephemeral: PayButtonView.threeDSPrefersEphemeralSession,
+                              in: window)
+
+        case .safariViewController:
+            NSLog("PayButton: running the passkey in SFSafariViewController")
+            let safariSession:ThreeDSSafariSession = .init()
+            safariSession.delegate = self
+            threeDSSafariSession = safariSession
+            // Safari can not hand the callback back itself, the app forwards it through this
+            PayButtonView.runningSafariSession = safariSession
+
+            safariSession.start(threeDsUrl: threeDsUrl,
+                                redirectUrl: redirectUrl,
+                                callbackScheme: PayButtonView.threeDSCallback.scheme,
+                                from: UIApplication.shared.topViewController())
+        }
     }
     
     /// The payer backed out of the 3ds page
@@ -385,5 +402,32 @@ extension RedirectionPayButton:WKUIDelegate {
         DispatchQueue.main.async {
             closingPopup?.dismiss(animated: true)
         }
+    }
+}
+
+/// Receives the outcome of a passkey authentication that ran in safari
+extension RedirectionPayButton: ThreeDSSafariSessionDelegate {
+
+    /// A redirect the acs page's initial load went through
+    func threeDSSafariSession(_ session: ThreeDSSafariSession, didReachRedirect callbackUrl: URL) {
+        NSLog("PayButton: safari saw a redirect to \(callbackUrl.absoluteString)")
+    }
+
+    /// Safari came back with the return url, hand it over to the card form
+    func threeDSSafariSession(_ session: ThreeDSSafariSession, didSucceedWith redirectionUrl: String) {
+        threeDSSafariSession = nil
+        passCardAuthenticationToSDK(redirectionUrl: redirectionUrl)
+    }
+
+    /// The payer closed safari before finishing the authentication
+    func threeDSSafariSessionDidCancel(_ session: ThreeDSSafariSession) {
+        threeDSSafariSession = nil
+        delegate?.onError?(data: "Payer canceled three ds process")
+    }
+
+    /// The process could not be completed, treat it the same as a failed start
+    func threeDSSafariSession(_ session: ThreeDSSafariSession, didFailWith error: Error) {
+        threeDSSafariSession = nil
+        delegate?.onError?(data: "Failed to start authentication process")
     }
 }

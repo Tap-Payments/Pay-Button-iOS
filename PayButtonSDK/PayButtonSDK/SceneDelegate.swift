@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Pay_Button_iOS
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
@@ -17,6 +18,22 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
         guard let _ = (scene as? UIWindowScene) else { return }
+        // The app can be opened cold by the 3ds callback, ex when it was evicted while the payer
+        // was authenticating in safari
+        connectionOptions.urlContexts.forEach { handleThreeDS(url: $0.url) }
+    }
+
+    /// A passkey authentication running in `SFSafariViewController` comes back as the app being
+    /// opened with `tapcardsdk://`, so hand every url the sdk is given a chance to claim it.
+    /// The `ASWebAuthenticationSession` path never gets here, it takes its callback internally
+    func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+        URLContexts.forEach { handleThreeDS(url: $0.url) }
+    }
+
+    /// Offers a url to the sdk and says whether it was taken
+    private func handleThreeDS(url:URL) {
+        let handled:Bool = PayButtonView.handleThreeDSCallback(url: url)
+        print("SceneDelegate opened with \(url.absoluteString), the sdk \(handled ? "took it" : "did not want it")")
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {

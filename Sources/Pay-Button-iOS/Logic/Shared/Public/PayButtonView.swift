@@ -14,6 +14,36 @@ import UIKit
     /// The reference to the pay button view itself
     internal var buttonView:PayButtonBaseView = .init()
 
+    /// Which browser a passkey authentication runs in.
+    ///
+    /// `authenticationSession` needs nothing from the host app, it intercepts the callback itself,
+    /// but an `.https` callback additionally needs Associated Domains and an apple-app-site-association.
+    /// `safariViewController` needs neither of those and no ios 17.4 either, at the cost of the app
+    /// having to declare the scheme and forward the url through `handleThreeDSCallback(url:)`
+    public enum ThreeDSPresentation {
+        /// `ASWebAuthenticationSession`, silent between opening and the callback
+        case authenticationSession
+        /// `SFSafariViewController`, reports the redirects of the acs page's initial load
+        case safariViewController
+    }
+
+    /// Which browser a passkey authentication runs in
+    public static var threeDSPresentation:ThreeDSPresentation = .authenticationSession
+
+    /// Hands the sdk a url the app was opened with, so a passkey running in `SFSafariViewController`
+    /// can finish. Call it from your scene or app delegate.
+    ///
+    /// Not needed with `authenticationSession`, that one never lets the url reach the app
+    /// - Parameter url: The url ios opened the app with
+    /// - Returns: True when the sdk recognised the url and took it
+    @discardableResult
+    @objc public static func handleThreeDSCallback(url:URL) -> Bool {
+        return PayButtonView.runningSafariSession?.handleCallback(url: url) ?? false
+    }
+
+    /// The safari session waiting for a callback, if one is running
+    internal static weak var runningSafariSession:ThreeDSSafariSession?
+
     /// How the system browser hands control back once a passkey authentication finishes.
     ///
     /// `.scheme("tapcardsdk")` needs nothing declared for the `authenticationSession` presentation,

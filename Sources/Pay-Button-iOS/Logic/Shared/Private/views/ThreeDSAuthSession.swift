@@ -28,6 +28,15 @@ public enum ThreeDSCallback {
     /// host app to declare `webcredentials:<host>` and the domain to serve a
     /// matching `apple-app-site-association`. iOS 17.4 and later only.
     case https(host: String, path: String)
+
+    /// The custom scheme this callback waits on, nil for an https one. The safari presentation
+    /// needs it to recognise the url the app is opened with
+    var scheme: String? {
+        switch self {
+        case .scheme(let scheme): return scheme
+        case .https: return nil
+        }
+    }
 }
 
 /// Errors surfaced while running the 3ds process inside the system browser
