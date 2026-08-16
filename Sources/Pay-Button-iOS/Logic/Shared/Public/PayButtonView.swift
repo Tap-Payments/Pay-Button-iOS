@@ -50,6 +50,9 @@ import UIKit
     /// This creates and sets the internal type based on the passed button type
     /// - Parameter with payButtonType: The needed button to be rendered
     private func generateTheView(with payButtonType:PayButtonTypeEnum) {
+        // The button being replaced may have a 3ds page, a popup or a browser of its own still on
+        // screen. Taking the view out from under them would leave them there with nothing behind
+        (buttonView as? PayButtonSdk)?.teardown()
         // let us remove if it was there before
         buttonView.removeFromSuperview()
         switch payButtonType {

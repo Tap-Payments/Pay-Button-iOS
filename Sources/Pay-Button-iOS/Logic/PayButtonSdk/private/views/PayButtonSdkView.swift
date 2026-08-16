@@ -170,6 +170,47 @@ internal class PayButtonSdk: PayButtonBaseView {
     }
     
     
+    //MARK: - Reset
+
+    /// Takes down everything the running payment put on screen and forgets what it left behind,
+    /// without touching the button page itself.
+    ///
+    /// A payment that ended, however it ended, leaves things that must not be inherited by the next
+    /// one .. a 3ds page still presented, a popup window, a passkey running in safari, and the
+    /// redirection details a later challenge would read the return url out of
+    internal func teardown() {
+        let work:() -> Void = { [weak self] in
+            guard let self = self else { return }
+
+            if let threeDsView:ThreeDSView = self.threeDsView {
+                self.threeDsView = nil
+                // Ask the presenter, a page presenting something of its own would take that down instead
+                threeDsView.presentingViewController?.dismiss(animated: false)
+            }
+
+            if let popup:PayButtonPopupViewController = self.popupViewController {
+                self.popupViewController = nil
+                popup.presentingViewController?.dismiss(animated: false)
+            }
+
+            // Dismisses the browser without telling the delegate, the payment it belonged to is over
+            self.threeDSSafariSession?.cancel()
+            self.threeDSSafariSession = nil
+
+            self.lastCardRedirection = nil
+        }
+
+        if Thread.isMainThread { work() } else { DispatchQueue.main.async(execute: work) }
+    }
+
+    /// Puts the button back to how it started .. nothing of the last payment on screen, nothing of it
+    /// remembered, and the page loaded again from scratch
+    internal func reset() {
+        teardown()
+        NSLog("PayButton: resetting, loading the button page again")
+        openUrl(url: URL(string: UrlBasedUtils.buttonWrapperUrl))
+    }
+
     /// Tells the web sdk the process is finished with the data from backend
     /// - Parameter rediectionUrl: The url with the needed data coming from back end at the end of the currently running process
     internal func passRedirectionDataToSDK(rediectionUrl:String) {
@@ -185,9 +226,10 @@ internal class PayButtonSdk: PayButtonBaseView {
     override
     internal func initPayButton(configDict: [String : Any], delegate: PayButtonDelegate? = nil) {
         self.delegate = delegate
-        // Let us render the button
+        // New configurations describe a different payment, so nothing of whatever came before is
+        // allowed to survive into it
         DispatchQueue.main.async {
-            self.openUrl(url: URL(string: UrlBasedUtils.buttonWrapperUrl)!)
+            self.reset()
         }
         
         /*do {

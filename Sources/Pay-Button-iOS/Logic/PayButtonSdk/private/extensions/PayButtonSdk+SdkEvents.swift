@@ -33,19 +33,26 @@ extension PayButtonSdk {
         }
     }
 
+    /// The payment went through. The merchant hears about it, then the button goes back to how it
+    /// started .. this payment is over and nothing of it belongs to the next one
     func handleOnSuccess(url:URL) {
         self.delegate?.onSuccess?(data: tap_extractDataFromUrl(url, for: "data", shouldBase64Decode: true))
-        //self.openUrl(url: self.currentlyLoadedConfigurations)
+        reset()
     }
-    
+
+    /// The payer backed out. The web sdk is told first, since reloading the page takes the window
+    /// that call is made on with it
     func handleOnCancel() {
         self.delegate?.onCanceled?()
-        self.webView.evaluateJavaScript("window.cancel()")
+        self.webView.evaluateJavaScript("window.cancel()") { [weak self] _, _ in
+            self?.reset()
+        }
     }
-    
-    
+
+    /// The payment failed. Same as a success as far as the button is concerned, it is over and the
+    /// next one starts on a clean page
     func handleOnError(data:String) {
         self.delegate?.onError?(data:data)
-        //self.openUrl(url: self.currentlyLoadedConfigurations)
+        reset()
     }
 }
