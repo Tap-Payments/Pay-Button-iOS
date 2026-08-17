@@ -168,23 +168,29 @@ extension PayButtonSdk {
         // One authentication, one browser. The card form can announce the same challenge more than
         // once, and starting a second session would put a second safari over the first .. finishing
         // then takes only the newest one down and leaves the payer looking at the one underneath
-        guard threeDSSafariSession == nil else {
-            NSLog("PayButton: a passkey is already running in safari, ignoring this one")
+        guard threeDSPasskeySession == nil else {
+            NSLog("PayButton: a passkey is already running, ignoring this one")
             NSLog("PayButton: it was for \(threeDsUrl ?? "nil")")
             return
         }
 
-        NSLog("PayButton: running the passkey in SFSafariViewController")
-        let safariSession:ThreeDSSafariSession = .init()
-        safariSession.delegate = self
-        threeDSSafariSession = safariSession
+        NSLog("PayButton: running the passkey in ASWebAuthenticationSession")
+        let passkeySession:ThreeDSPasskeySession = .init()
+        passkeySession.delegate = self
+        threeDSPasskeySession = passkeySession
+
+        // The session claims the scheme itself, so nothing is declared in the host app. The return
+        // page has to bounce to it, ex tapCardWebSDK://onPasskeyRedirect?data=...
+        let callbackScheme:String = payButtonType.cardWebSdkScheme()
+            .replacingOccurrences(of: "://", with: "")
 
         // A passkey that arrived as a bare navigation carries no redirection details, so fall
         // back to the return url the configured callback already names
-        safariSession.start(threeDsUrl: threeDsUrl,
-                            redirectUrl: redirectUrl ?? PayButtonView.threeDSCallback.httpsReturnUrl,
-                            keyword: lastCardRedirection?.keyword,
-                            from: UIApplication.shared.topViewController())
+        passkeySession.start(threeDsUrl: threeDsUrl,
+                             redirectUrl: redirectUrl ?? PayButtonView.threeDSCallback.httpsReturnUrl,
+                             callbackScheme: callbackScheme,
+                             keyword: lastCardRedirection?.keyword,
+                             in: window)
     }
 
     /// The payer backed out of the 3ds page
@@ -207,28 +213,29 @@ extension PayButtonSdk {
     }
 }
 
-extension PayButtonSdk: ThreeDSSafariSessionDelegate {
+/// Receives the outcome of a passkey authentication that ran in the system browser
+extension PayButtonSdk: ThreeDSPasskeySessionDelegate {
 
-    /// The return url the authentication came home on
-    func threeDSSafariSession(_ session: ThreeDSSafariSession, didReachReturnUrl returnUrl: URL) {
-        NSLog("PayButton: safari reached the return url \(returnUrl.absoluteString)")
+    /// The callback the browser came back on, before anything is read out of it
+    func threeDSPasskeySession(_ session: ThreeDSPasskeySession, didReachCallback callbackUrl: URL) {
+        NSLog("PayButton: the passkey came back on \(callbackUrl.absoluteString)")
     }
 
-    /// Safari came back with the return url, hand it over to the card form
-    func threeDSSafariSession(_ session: ThreeDSSafariSession, didSucceedWith redirectionUrl: String) {
-        threeDSSafariSession = nil
+    /// The browser came back, hand the url over to the card form
+    func threeDSPasskeySession(_ session: ThreeDSPasskeySession, didSucceedWith redirectionUrl: String) {
+        threeDSPasskeySession = nil
         passCardAuthenticationToSDK(redirectionUrl: redirectionUrl)
     }
 
-    /// The payer closed safari before finishing the authentication
-    func threeDSSafariSessionDidCancel(_ session: ThreeDSSafariSession) {
-        threeDSSafariSession = nil
+    /// The payer closed the browser before finishing the authentication
+    func threeDSPasskeySessionDidCancel(_ session: ThreeDSPasskeySession) {
+        threeDSPasskeySession = nil
         delegate?.onError?(data: "Payer canceled three ds process")
     }
 
     /// The process could not be completed, treat it the same as a failed start
-    func threeDSSafariSession(_ session: ThreeDSSafariSession, didFailWith error: Error) {
-        threeDSSafariSession = nil
+    func threeDSPasskeySession(_ session: ThreeDSPasskeySession, didFailWith error: Error) {
+        threeDSPasskeySession = nil
         delegate?.onError?(data: "Failed to start authentication process")
     }
 }

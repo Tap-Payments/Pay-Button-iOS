@@ -67,7 +67,7 @@ extension PayButtonSdk:WKNavigationDelegate {
         }else if url.absoluteString.hasPrefix(payButtonType.tapRedirectionSchemeUrl()) {
             
         }else if PayButtonSdk.requiresSystemBrowser(threeDsUrl: url.absoluteString),
-                       threeDSSafariSession == nil {
+                       threeDSPasskeySession == nil {
             action = .cancel
             startFidoAuthentication(threeDsUrl: url.absoluteString,
                                     redirectUrl: lastCardRedirection?.redirectUrl)

@@ -23,6 +23,12 @@ import UIKit
     /// leaves a completed passkey with no way home unless safari reported the return url first
     public static var threeDSAssumesReturnOnDismiss:Bool = true
 
+    /// Whether the system browser runs as a private session during a passkey authentication.
+    /// A private session drops the "<app> wants to use <domain> to sign in" alert, at the cost of
+    /// safari's shared cookies, so the issuer can not honour "remember this device". Passkeys come
+    /// from the platform authenticator and are unaffected either way
+    public static var threeDSPrefersEphemeralSession:Bool = true
+
     /// The url a finished passkey authentication comes back on.
     ///
     /// The acs is given this as its return url, and the sdk watches the redirects safari reports

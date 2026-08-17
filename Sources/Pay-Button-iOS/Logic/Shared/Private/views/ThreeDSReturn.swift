@@ -3,7 +3,7 @@
 //  Pay-Button-iOS
 //
 //  What a finished 3ds authentication is expected to come back on, and what can go wrong on
-//  the way there. Both belong to `ThreeDSSafariSession`, which is the only thing that runs a
+//  the way there. Both belong to `ThreeDSPasskeySession`, which is the only thing that runs a
 //  passkey now.
 //
 

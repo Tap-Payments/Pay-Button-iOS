@@ -35,6 +35,12 @@ extension PayButtonSdk {
         case _ where url.absoluteString.contains(CallBackSchemeEnum.onNfcClick.rawValue):
             delegate?.onNfcClick?()
             break
+        case _ where url.absoluteString.contains(CallBackSchemeEnum.onPasskeyRedirect.rawValue):
+            // The browser normally takes this one, the session claims the scheme and never lets it
+            // reach the web view. It lands here when the page bounces to it from inside the form
+            NSLog("PayButton: a passkey callback arrived in the web view, \(url.absoluteString)")
+            threeDSPasskeySession?.handleCallback(url: url)
+            break
         case _ where url.absoluteString.contains(CallBackSchemeEnum.on3dsRedirect.rawValue):
             handleCardRedirection(data: tap_extractDataFromUrl(url, for: "data", shouldBase64Decode: true))
             break

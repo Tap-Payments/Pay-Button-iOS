@@ -35,5 +35,7 @@ internal enum CallBackSchemeEnum:String {
     case onNfcClick
     /// The card form needs a 3ds page to be displayed to authenticate the customer
     case on3dsRedirect
+    /// A passkey authentication finished and the return page is handing the answer back
+    case onPasskeyRedirect
 
 }
