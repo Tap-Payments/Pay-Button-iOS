@@ -158,10 +158,26 @@ final class ThreeDSSafariSession: NSObject {
                 }
                 NSLog("ThreeDSSafariSession: taking the browser down")
                 presenter.dismiss(animated: true) {
-                    if browser.view.window != nil {
-                        NSLog("ThreeDSSafariSession: the browser is still on screen after being dismissed")
+                    // uikit reports a dismissal it did not perform in more ways than it admits to,
+                    // so check rather than trust, and ask once more before giving up
+                    guard browser.view.window != nil else {
+                        block()
+                        return
                     }
-                    block()
+
+                    NSLog("ThreeDSSafariSession: the browser is still on screen, asking again")
+                    guard let stillPresenting: UIViewController = browser.presentingViewController else {
+                        NSLog("ThreeDSSafariSession: and it has no presenter now, it is on screen without one")
+                        block()
+                        return
+                    }
+
+                    stillPresenting.dismiss(animated: false) {
+                        if browser.view.window != nil {
+                            NSLog("ThreeDSSafariSession: the browser will not go, something else is holding it up")
+                        }
+                        block()
+                    }
                 }
             }
 

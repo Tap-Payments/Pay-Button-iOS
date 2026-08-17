@@ -165,6 +165,15 @@ extension PayButtonSdk {
     /// - Parameter redirectUrl: The https return url the callback is mapped back onto. Nil when the
     /// challenge arrived as a plain navigation and no `on3dsRedirect` announced it first
     internal func startFidoAuthentication(threeDsUrl:String?, redirectUrl:String?) {
+        // One authentication, one browser. The card form can announce the same challenge more than
+        // once, and starting a second session would put a second safari over the first .. finishing
+        // then takes only the newest one down and leaves the payer looking at the one underneath
+        guard threeDSSafariSession == nil else {
+            NSLog("PayButton: a passkey is already running in safari, ignoring this one")
+            NSLog("PayButton: it was for \(threeDsUrl ?? "nil")")
+            return
+        }
+
         NSLog("PayButton: running the passkey in SFSafariViewController")
         let safariSession:ThreeDSSafariSession = .init()
         safariSession.delegate = self

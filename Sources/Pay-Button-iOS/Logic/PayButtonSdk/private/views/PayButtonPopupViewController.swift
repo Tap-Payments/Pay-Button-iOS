@@ -31,7 +31,7 @@ internal class PayButtonPopupViewController: UIViewController {
         }
     }
 
-    //MARK: - Init methods
+    //MARK: - Init method
     internal init(popupWebView:WKWebView) {
         self.popupWebView = popupWebView
         super.init(nibName: nil, bundle: nil)
