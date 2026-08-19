@@ -353,11 +353,6 @@ class PayButtonExample: UIViewController {
     /// Which of the two the demo runs
     static var intentSource:IntentSource = .sdk
 
-    /// Whether the demo starts over once a payment ends, so the next one can be run without
-    /// reaching for refresh. An intent is spent once it is paid, so starting over means creating a
-    /// new one, not just reloading the button
-    static var resetsAfterOutcome:Bool = true
-
     /// How long the outcome is left on screen before the demo starts over
     static let resetDelay:TimeInterval = 2
 
@@ -527,6 +522,8 @@ extension PayButtonExample: PayButtonDelegate {
     
     func onCanceled() {
         eventsTextView.text = "\n\n========\n\nonCanceled\(eventsTextView.text ?? "")"
+        refreshButton.isHidden = false
+        startOver(after: "onCanceled")
     }
 
     func onHeightChange(height: Double) {
@@ -634,15 +631,17 @@ extension PayButtonExample: PayButtonDelegate {
         }.resume()
     }
 
-    /// Starts the demo over once a payment ended.
+    /// Starts the demo over once a payment ended, however it ended.
     ///
     /// The sdk resets itself already, but the intent it was configured with is spent, so a second
     /// payment needs a second intent .. that is what this does, whichever way the demo is set to
-    /// create them. An outcome that arrives while a reset is already on its way is ignored, since
-    /// a failure that happens during the creation would otherwise start over forever
+    /// create them. Refresh does exactly the same thing by hand, for starting over sooner or after
+    /// something that ended nothing.
+    ///
+    /// An outcome that arrives while a start over is already on its way is ignored, since a failure
+    /// during the creation would otherwise report an error, start over, fail again and never stop
     /// - Parameter outcome: The callback that ended the payment, for the log
     private func startOver(after outcome:String) {
-        guard PayButtonExample.resetsAfterOutcome else { return }
         guard !isStartingOver else {
             eventsTextView.text += "\n\n========\n\nAlready starting over, ignoring \(outcome)"
             return
