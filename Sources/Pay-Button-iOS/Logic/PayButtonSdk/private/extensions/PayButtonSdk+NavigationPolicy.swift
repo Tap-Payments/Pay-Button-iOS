@@ -23,7 +23,7 @@ extension PayButtonSdk:WKNavigationDelegate {
         }
         
         guard let url = navigationAction.request.url else { return }
-        
+        print("webactionsent",url.absoluteString)
         // The scheme is the only part a url parser is allowed to case fold, so match it case insensitively
         let isCardWebSdkCallback:Bool = url.absoluteString.lowercased().hasPrefix(payButtonType.cardWebSdkScheme().lowercased())
         
@@ -66,12 +66,6 @@ extension PayButtonSdk:WKNavigationDelegate {
             self.handleCardWebSdkCallback(url: url)
         }else if url.absoluteString.hasPrefix(payButtonType.tapRedirectionSchemeUrl()) {
             
-        }else if PayButtonSdk.requiresSystemBrowser(threeDsUrl: url.absoluteString),
-                       threeDSPasskeySession == nil {
-            action = .cancel
-            startFidoAuthentication(threeDsUrl: url.absoluteString,
-                                    redirectUrl: lastCardRedirection?.redirectUrl)
-            return
         }
     }
 }

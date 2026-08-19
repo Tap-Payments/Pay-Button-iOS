@@ -77,7 +77,7 @@ extension PayButtonSdk {
         
         // An ACS that asks for a passkey can not run in a web view, it has no navigator.credentials.
         // Hand the whole process over to the system browser instead, the same way Card-iOS does
-        if PayButtonSdk.requiresSystemBrowser(threeDsUrl: threeDsUrl) {
+        if PayButtonSdk.requiresSystemBrowser(threeDsUrl: threeDsUrl, key: cardRedirection.keyword)  {
             startFidoAuthentication(with: cardRedirection)
             return
         }
@@ -147,9 +147,10 @@ extension PayButtonSdk {
     /// passkey challenge can not run inside `WKWebView`, it does not expose `navigator.credentials`
     /// - Parameter threeDsUrl: The ACS page coming from the redirection details
     /// - Returns: True when the process belongs in the system browser
-    internal static func requiresSystemBrowser(threeDsUrl:String?) -> Bool {
+    internal static func requiresSystemBrowser(threeDsUrl:String?, key: String?) -> Bool {
         guard let threeDsUrl:String = threeDsUrl else { return false }
-        return threeDsUrl.contains("passkey")
+        guard let key:String = key else { return false }
+        return threeDsUrl.contains("passkey") && key == "auth_payer"
     }
 
     /// Runs the authentication inside the system browser, which unlike `WKWebView` can execute

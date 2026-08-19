@@ -353,6 +353,14 @@ class PayButtonExample: UIViewController {
     /// Which of the two the demo runs
     static var intentSource:IntentSource = .sdk
 
+    /// Whether the demo starts over once a payment ends, so the next one can be run without
+    /// reaching for refresh. An intent is spent once it is paid, so starting over means creating a
+    /// new one, not just reloading the button
+    static var resetsAfterOutcome:Bool = true
+
+    /// How long the outcome is left on screen before the demo starts over
+    static let resetDelay:TimeInterval = 2
+
     /// Where the app posts its own intent when it is the one creating it. A real integrator posts
     /// this from their backend with their secret key, not from the app
     static let merchantIntentEndpoint:String = "https://mw-sdk.dev.tap.company/v2/intent"
@@ -361,6 +369,9 @@ class PayButtonExample: UIViewController {
     @IBOutlet weak var eventsTextView: UITextView!
     
     @IBOutlet weak var refreshButton: UIButton!
+
+    /// Set while a start over is waiting to run, so a burst of outcomes only causes one
+    private var isStartingOver:Bool = false
         
     var dictConfig:[String:Any]  {
         return ["operator": ["publicKey": PayButtonExample.examplePublicKey],
@@ -474,6 +485,7 @@ extension PayButtonExample: PayButtonDelegate {
         //print("CardWebSDKExample onError \(data)")
         eventsTextView.text = "\n\n========\n\nonError \(data)\(eventsTextView.text ?? "")"
         refreshButton.isHidden = false
+        startOver(after: "onError")
     }
     
     func onSuccess(data: String) {
@@ -490,6 +502,7 @@ extension PayButtonExample: PayButtonDelegate {
             eventsTextView.text = "\n\n========\n\nonSuccess \(data)\(eventsTextView.text ?? "")"
         }
         refreshButton.isHidden = false
+        startOver(after: "onSuccess")
     }
     
     func onOrderCreated(data: String) {
@@ -619,6 +632,30 @@ extension PayButtonExample: PayButtonDelegate {
                 self.payButton.initPayButton(configDict: self.dictConfig, delegate: self)
             }
         }.resume()
+    }
+
+    /// Starts the demo over once a payment ended.
+    ///
+    /// The sdk resets itself already, but the intent it was configured with is spent, so a second
+    /// payment needs a second intent .. that is what this does, whichever way the demo is set to
+    /// create them. An outcome that arrives while a reset is already on its way is ignored, since
+    /// a failure that happens during the creation would otherwise start over forever
+    /// - Parameter outcome: The callback that ended the payment, for the log
+    private func startOver(after outcome:String) {
+        guard PayButtonExample.resetsAfterOutcome else { return }
+        guard !isStartingOver else {
+            eventsTextView.text += "\n\n========\n\nAlready starting over, ignoring \(outcome)"
+            return
+        }
+
+        isStartingOver = true
+        eventsTextView.text += "\n\n========\n\n\(outcome) ended the payment, starting over in \(Int(PayButtonExample.resetDelay))s..."
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + PayButtonExample.resetDelay) { [weak self] in
+            guard let self = self else { return }
+            self.isStartingOver = false
+            self.setupPayButton()
+        }
     }
 
     /// Falls back to the intent id already configured, so the demo still runs when the app could

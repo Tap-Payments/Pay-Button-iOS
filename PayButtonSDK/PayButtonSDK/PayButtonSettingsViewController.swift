@@ -33,6 +33,14 @@ class PayButtonSettingsViewController: FormViewController {
             }
         }
 
+        <<< SwitchRow("intent.resetAfterOutcome"){ row in
+            row.title = "Start over when a payment ends"
+            row.value = PayButtonExample.resetsAfterOutcome
+            row.onChange { row in
+                PayButtonExample.resetsAfterOutcome = row.value ?? true
+            }
+        }
+
         <<< TextRow("intent.id"){ row in
             row.title = "Intent id"
             row.value = PayButtonExample.exampleIntentId
