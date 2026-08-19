@@ -339,6 +339,23 @@ class PayButtonExample: UIViewController {
 
     static var examplePublicKey:String = "pk_test_YhUjg9PNT8oDlKJ1aE2fMRz7"
     static var exampleIntentId:String = "intent_rzgd5725539UhQ713R0a869"
+
+    /// Who creates the intent the button is configured with. The sdk only ever needs its id, so
+    /// where it came from is the integrator's choice
+    enum IntentSource:String, CaseIterable {
+        /// `PayButtonIntent.create` does it, authenticated with the public key alone
+        case sdk = "the sdk creates it"
+        /// The app does it and hands the button nothing but the id, which is what an integrator
+        /// with a backend of their own does
+        case app = "the app creates it"
+    }
+
+    /// Which of the two the demo runs
+    static var intentSource:IntentSource = .sdk
+
+    /// Where the app posts its own intent when it is the one creating it. A real integrator posts
+    /// this from their backend with their secret key, not from the app
+    static let merchantIntentEndpoint:String = "https://mw-sdk.dev.tap.company/v2/intent"
     
     @IBOutlet weak var payButton: PayButtonView!
     @IBOutlet weak var eventsTextView: UITextView!
@@ -361,7 +378,10 @@ class PayButtonExample: UIViewController {
     
     func setupPayButton() {
         refreshButton.isHidden = false
-        createIntent()
+        switch PayButtonExample.intentSource {
+        case .sdk: createIntentWithTheSdk()
+        case .app: createIntentInTheApp()
+        }
     }
     
     @IBAction func optionsClicked(_ sender: Any) {
@@ -525,7 +545,9 @@ extension PayButtonExample: PayButtonDelegate {
         eventsTextView.text = "\n\n========\n\nonThreeDSRedirect \(data)\(eventsTextView.text ?? "")"
     }
     
-    func createIntent() {
+    /// The sdk creates the intent. `PayButtonIntent.create` posts it against the checkout mw with
+    /// the public key, so no secret key is embedded here, and hands back the whole intent
+    func createIntentWithTheSdk() {
         eventsTextView.text = "\n\n========\n\nCreating an intent..."
         // The sdk takes the intent configuration as a dictionary, the same way the web sdk passes the intent object
         guard let postData:Data = try? PayButtonExample.intentRequestRequest.jsonData(),
@@ -549,5 +571,62 @@ extension PayButtonExample: PayButtonDelegate {
             PayButtonExample.exampleIntentId = intentID
             self.payButton.initPayButton(configDict: self.dictConfig, delegate: self)
         }
+    }
+
+    /// The app creates the intent and hands the button nothing but its id.
+    ///
+    /// This is the shape an integrator with a backend of their own has .. the intent is created
+    /// somewhere the sdk knows nothing about, and `initPayButton` is given `intent.id` and the
+    /// public key. The call is made here rather than from a server only because a demo has no
+    /// server, a real one keeps it behind the merchant's own api with their secret key
+    func createIntentInTheApp() {
+        eventsTextView.text = "\n\n========\n\nCreating an intent in the app..."
+
+        guard let postData:Data = try? PayButtonExample.intentRequestRequest.jsonData(),
+              let url:URL = URL(string: PayButtonExample.merchantIntentEndpoint) else {
+            useTheIntentWeAlreadyHave(because: "the intent configuration could not be encoded")
+            return
+        }
+
+        var request:URLRequest = .init(url: url)
+        request.httpMethod = "POST"
+        request.httpBody = postData
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.setValue(PayButtonExample.examplePublicKey, forHTTPHeaderField: "Authorization")
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            let status:Int = (response as? HTTPURLResponse)?.statusCode ?? -1
+            let body:String = data.flatMap { String(data: $0, encoding: .utf8) } ?? ""
+
+            DispatchQueue.main.async {
+                if let error = error {
+                    self.useTheIntentWeAlreadyHave(because: "the call failed, \(error.localizedDescription)")
+                    return
+                }
+
+                guard (200...299).contains(status),
+                      let data = data,
+                      let json:[String:Any] = (try? JSONSerialization.jsonObject(with: data)) as? [String:Any],
+                      let intentID:String = json["id"] as? String, !intentID.isEmpty else {
+                    self.useTheIntentWeAlreadyHave(because: "the mw answered \(status)\n\(body)")
+                    return
+                }
+
+                self.eventsTextView.text += "\n\n========\n\nThe app created intent: \n\(intentID)"
+                self.eventsTextView.text += "\n\nThe button is given nothing but this id"
+                PayButtonExample.exampleIntentId = intentID
+                self.payButton.initPayButton(configDict: self.dictConfig, delegate: self)
+            }
+        }.resume()
+    }
+
+    /// Falls back to the intent id already configured, so the demo still runs when the app could
+    /// not create one of its own. An integrator whose backend is down has the same choice
+    /// - Parameter reason: What stopped the app from creating one
+    private func useTheIntentWeAlreadyHave(because reason:String) {
+        eventsTextView.text += "\n\n========\n\nThe app could not create an intent:\n\(reason)"
+        eventsTextView.text += "\n\nUsing the id already configured instead: \n\(PayButtonExample.exampleIntentId)"
+        payButton.initPayButton(configDict: dictConfig, delegate: self)
     }
 }

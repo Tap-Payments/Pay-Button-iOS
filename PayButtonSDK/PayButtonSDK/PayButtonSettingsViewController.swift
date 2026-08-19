@@ -21,6 +21,27 @@ class PayButtonSettingsViewController: FormViewController {
         super.viewDidLoad()
 
         // Do any additional setup after loading the view.
+        form +++ Section("intent")
+        <<< AlertRow<String>("intent.source"){ row in
+            row.title = "Created by"
+            row.options = PayButtonExample.IntentSource.allCases.map { $0.rawValue }
+            row.value = PayButtonExample.intentSource.rawValue
+            row.onChange { row in
+                guard let picked:String = row.value,
+                      let source:PayButtonExample.IntentSource = .init(rawValue: picked) else { return }
+                PayButtonExample.intentSource = source
+            }
+        }
+
+        <<< TextRow("intent.id"){ row in
+            row.title = "Intent id"
+            row.value = PayButtonExample.exampleIntentId
+            row.onChange { row in
+                // Used as it is when the app is the one creating, and as the fallback either way
+                PayButtonExample.exampleIntentId = row.value ?? ""
+            }
+        }
+
         form +++ Section("button")
         <<< AlertRow<String>("button.type"){ row in
             row.title = "Button"
