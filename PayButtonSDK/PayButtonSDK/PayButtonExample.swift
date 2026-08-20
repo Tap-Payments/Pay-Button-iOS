@@ -363,7 +363,8 @@ class PayButtonExample: UIViewController {
     /// on the sandbox merchant's local currency, so an order in anything else is refused
     static let currenciesByPaymentMethod:[String:String] = [
         "PAYPAL": PayButtonConfig.Currency.usd.rawValue,
-        "DEEMA":  PayButtonConfig.Currency.kwd.rawValue
+        "DEEMA":  PayButtonConfig.Currency.kwd.rawValue,
+        "KNET":   PayButtonConfig.Currency.kwd.rawValue
     ]
 
     /// The buttons that will not take an order with anything but a price on it. Deema refuses one
