@@ -266,7 +266,7 @@ class PayButtonExample: UIViewController {
         "AED"
       ],
       "supported_payment_methods": [
-        "CARD"
+        "KNET"
       ],
       "supported_schemes": [
         "MADA",
