@@ -580,7 +580,7 @@ extension PayButtonExample: PayButtonDelegate {
         // The sdk takes the intent configuration as a dictionary, the same way the web sdk passes the intent object
         guard let postData:Data = try? PayButtonExample.intentRequestRequest.jsonData(),
               let intentConfig:[String:Any] = try? JSONSerialization.jsonObject(with: postData, options: .fragmentsAllowed) as? [String:Any] else {
-            eventsTextView.text += "\n\n========\n\nIntent creation failed:\nCould not encode the intent configuration..."
+            eventsTextView.text = "\n\n========\n\nIntent creation failed:\nCould not encode the intent configuration...\(eventsTextView.text ?? "")"
             showLoader(false)
             return
         }
@@ -588,17 +588,17 @@ extension PayButtonExample: PayButtonDelegate {
         // The sdk creates the intent against the checkout mw using the public key, so no secret key is embedded in the app
         PayButtonIntent.create(config: intentConfig, publicKey: PayButtonExample.examplePublicKey) { intentResponse, error in
             if let error = error {
-                self.eventsTextView.text += "\n\n========\n\nIntent creation failed:\n\(error)..."
+                self.eventsTextView.text = "\n\n========\n\nIntent creation failed:\n\(error)...\(self.eventsTextView.text ?? "")"
                 self.showLoader(false)
                 return
             }
             guard let intentID:String = intentResponse?["id"] as? String,
                   !intentID.isEmpty else{
-                self.eventsTextView.text += "\n\n========\n\nIntent creation failed:\n\(String(describing: intentResponse))..."
+                self.eventsTextView.text = "\n\n========\n\nIntent creation failed:\n\(String(describing: intentResponse))...\(self.eventsTextView.text ?? "")"
                 self.showLoader(false)
                 return
             }
-            self.eventsTextView.text += "\n\n========\n\nIntent created with id: \n\(intentID)"
+            self.eventsTextView.text = "\n\n========\n\nIntent created with id: \n\(intentID)\(self.eventsTextView.text ?? "")"
             PayButtonExample.exampleIntentId = intentID
             self.payButton.initPayButton(configDict: self.dictConfig, delegate: self)
         }
@@ -619,7 +619,7 @@ extension PayButtonExample: PayButtonDelegate {
             loader.startAnimating()
             let timeout:DispatchWorkItem = .init { [weak self] in
                 guard let self = self else { return }
-                self.eventsTextView.text += "\n\n========\n\nThe button never reported ready, showing it anyway"
+                self.eventsTextView.text = "\n\n========\n\nThe button never reported ready, showing it anyway\(self.eventsTextView.text ?? "")"
                 self.showLoader(false)
             }
             loaderTimeout = timeout
@@ -640,12 +640,12 @@ extension PayButtonExample: PayButtonDelegate {
     /// - Parameter outcome: The callback that ended the payment, for the log
     private func startOver(after outcome:String) {
         guard !isStartingOver else {
-            eventsTextView.text += "\n\n========\n\nAlready starting over, ignoring \(outcome)"
+            eventsTextView.text = "\n\n========\n\nAlready starting over, ignoring \(outcome)\(eventsTextView.text ?? "")"
             return
         }
 
         isStartingOver = true
-        eventsTextView.text += "\n\n========\n\n\(outcome) ended the payment, starting over in \(Int(PayButtonExample.resetDelay))s..."
+        eventsTextView.text = "\n\n========\n\n\(outcome) ended the payment, starting over in \(Int(PayButtonExample.resetDelay))s...\(eventsTextView.text ?? "")"
 
         DispatchQueue.main.asyncAfter(deadline: .now() + PayButtonExample.resetDelay) { [weak self] in
             guard let self = self else { return }
