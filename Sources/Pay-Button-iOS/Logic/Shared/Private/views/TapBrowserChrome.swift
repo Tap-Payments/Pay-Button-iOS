@@ -38,6 +38,7 @@ internal enum TapBrowserChrome {
     /// Applies the look to a web view, whoever built it
     /// - Parameter webView: The web view the page renders in
     internal static func style(_ webView: WKWebView) {
+        webView.tap_disableZoom()
         webView.isOpaque = false
         webView.backgroundColor = .white
         webView.scrollView.backgroundColor = .clear

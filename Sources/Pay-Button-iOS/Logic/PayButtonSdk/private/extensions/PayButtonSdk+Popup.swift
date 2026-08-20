@@ -25,6 +25,8 @@ extension PayButtonSdk:WKUIDelegate {
             return nil
         }
         
+        // Webkit's own configuration, so the viewport goes on before the popup is built out of it
+        configuration.tap_disableZoom()
         let popupWebView:WKWebView = .init(frame: .zero, configuration: configuration)
         popupWebView.tap_allowInspectionInDebugBuilds()
         // The popup fires the same web sdk callbacks and can open windows of its own

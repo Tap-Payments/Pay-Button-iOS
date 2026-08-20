@@ -241,8 +241,8 @@ class PayButtonExample: UIViewController {
         "card_nfc": true
       },
       "customer_cards": {
-        "save_card": true,
-        "auto_save_card": true,
+        "save_card": false,
+        "auto_save_card": false,
         "display_saved_cards": true
       }
     },

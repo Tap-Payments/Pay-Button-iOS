@@ -23,4 +23,37 @@ internal extension WKWebView {
         }
         #endif
     }
+
+    /// Stops the payer zooming the page.
+    ///
+    /// A payment form that pinches out of shape, or that jumps when a field is double tapped, reads
+    /// as broken rather than as a feature. Two things are needed, since they are separate paths ..
+    /// the scroll view zooms on a pinch, and webkit zooms on a double tap unless the page's own
+    /// viewport says not to, which `WKWebViewConfiguration.tap_disableZoom()` handles
+    func tap_disableZoom() {
+        scrollView.pinchGestureRecognizer?.isEnabled = false
+        scrollView.minimumZoomScale = 1
+        scrollView.maximumZoomScale = 1
+        scrollView.bouncesZoom = false
+    }
+}
+
+internal extension WKWebViewConfiguration {
+
+    /// Writes a viewport the page cannot zoom out of, before anything is loaded into it.
+    ///
+    /// The pages the sdk shows are not ours to edit, so the viewport is added to them on the way
+    /// past. This is what stops a double tap zooming, which no scroll view setting reaches
+    func tap_disableZoom() {
+        let source:String = """
+        var meta = document.querySelector('meta[name=viewport]') || document.createElement('meta');
+        meta.name = 'viewport';
+        meta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
+        if (!meta.parentNode) { document.head.appendChild(meta); }
+        """
+        let script:WKUserScript = .init(source: source,
+                                        injectionTime: .atDocumentEnd,
+                                        forMainFrameOnly: true)
+        userContentController.addUserScript(script)
+    }
 }

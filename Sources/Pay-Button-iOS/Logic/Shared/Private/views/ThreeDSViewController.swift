@@ -77,6 +77,7 @@ extension ThreeDSView {
         preferences.javaScriptCanOpenWindowsAutomatically = true
         let configuration = WKWebViewConfiguration()
         configuration.preferences = preferences
+        configuration.tap_disableZoom()
 
         
         // Let us theme the web view

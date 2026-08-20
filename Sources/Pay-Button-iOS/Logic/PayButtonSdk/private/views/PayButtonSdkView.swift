@@ -87,9 +87,11 @@ internal class PayButtonSdk: PayButtonBaseView {
         let preferences = WKPreferences()
         preferences.javaScriptCanOpenWindowsAutomatically = true
         config.preferences = preferences
+        config.tap_disableZoom()
         webView = WKWebView(frame: .zero, configuration: config)
         webView.uiDelegate = self
         webView.tap_allowInspectionInDebugBuilds()
+        webView.tap_disableZoom()
         // Let us make sure it is of a clear background and opaque, not to interfer with the merchant's app background
         webView.isOpaque = false
         webView.backgroundColor = UIColor.clear
