@@ -593,6 +593,9 @@ extension PayButtonExample: PayButtonDelegate {
         // Adds to the log rather than replacing it, a start over is not a reason to lose what the
         // payment before it did
         eventsTextView.text = "\n\n========\n\nCreating an intent...\(eventsTextView.text ?? "")"
+        // Nothing to press until the intent exists, so the button waits out of sight rather than
+        // sitting there attached to nothing
+        payButton.isHidden = true
         // Deema and tamara come with a key of their own, and the merchant id has to go with it
         PayButtonExample.alignMerchantWithTheKey()
         // Paypal only takes usd
@@ -601,22 +604,26 @@ extension PayButtonExample: PayButtonDelegate {
         guard let postData:Data = try? PayButtonExample.intentRequestRequest.jsonData(),
               let intentConfig:[String:Any] = try? JSONSerialization.jsonObject(with: postData, options: .fragmentsAllowed) as? [String:Any] else {
             eventsTextView.text = "\n\n========\n\nIntent creation failed:\nCould not encode the intent configuration...\(eventsTextView.text ?? "")"
-                return
+            payButton.isHidden = false
+            return
         }
 
         // The sdk creates the intent against the checkout mw using the public key, so no secret key is embedded in the app
         PayButtonIntent.create(config: intentConfig, publicKey: PayButtonExample.examplePublicKey) { intentResponse, error in
             if let error = error {
                 self.eventsTextView.text = "\n\n========\n\nIntent creation failed:\n\(error)...\(self.eventsTextView.text ?? "")"
+                self.payButton.isHidden = false
                 return
             }
             guard let intentID:String = intentResponse?["id"] as? String,
                   !intentID.isEmpty else{
                 self.eventsTextView.text = "\n\n========\n\nIntent creation failed:\n\(String(describing: intentResponse))...\(self.eventsTextView.text ?? "")"
+                self.payButton.isHidden = false
                 return
             }
             self.eventsTextView.text = "\n\n========\n\nIntent created with id: \n\(intentID)\(self.eventsTextView.text ?? "")"
             PayButtonExample.exampleIntentId = intentID
+            self.payButton.isHidden = false
             self.payButton.initPayButton(configDict: self.dictConfig, delegate: self)
         }
     }
