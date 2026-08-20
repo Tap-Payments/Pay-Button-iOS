@@ -31,6 +31,9 @@ class PayButtonSettingsViewController: FormViewController {
                 PayButtonExample.intentRequestRequest.config?.acceptance?.supportedPaymentMethods = [selectedMethod]
                 // The token scopes belong to one wallet each, so the scope list follows the button
                 self?.refreshScopeOptions(for: selectedMethod)
+                // Deema and tamara are on merchants of their own, so the id has to go with the key
+                PayButtonExample.alignMerchantWithTheKey()
+                self?.refreshMerchantId()
             }
         }
         
@@ -509,6 +512,15 @@ class PayButtonSettingsViewController: FormViewController {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         delegate?.updateConfig()
+    }
+
+    /// Puts the merchant id row back in step with the configuration, for when picking a button
+    /// emptied it
+    private func refreshMerchantId() {
+        guard let merchantRow = form.rowBy(tag: "merchant.id") as? TextRow else { return }
+        merchantRow.value = PayButtonExample.intentRequestRequest.merchant?.id ?? ""
+        merchantRow.updateCell()
+        merchantRow.reload()
     }
 
     /// Narrows the scope picker to what the selected button can actually mint.

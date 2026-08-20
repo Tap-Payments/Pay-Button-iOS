@@ -351,8 +351,23 @@ class PayButtonExample: UIViewController {
     /// The key the currently picked button is created and configured with. Read everywhere the key
     /// is needed, so picking a button in the settings is the only thing that has to change
     static var examplePublicKey:String {
-        let paymentMethod:String = intentRequestRequest.config?.acceptance?.supportedPaymentMethods?.first?.uppercased() ?? ""
-        return publicKeysByPaymentMethod[paymentMethod] ?? defaultPublicKey
+        return publicKeysByPaymentMethod[selectedPaymentMethod] ?? defaultPublicKey
+    }
+
+    /// The method the intent is about to ask for
+    static var selectedPaymentMethod:String {
+        return intentRequestRequest.config?.acceptance?.supportedPaymentMethods?.first?.uppercased() ?? ""
+    }
+
+    /// Empties the merchant id when the button being asked for lives on a merchant of its own.
+    ///
+    /// The id in the configuration belongs to the account the default key opens, so sending it
+    /// alongside deema's or tamara's key names a merchant that key has no business with. Sent empty,
+    /// the mw resolves the merchant from the key itself
+    static func alignMerchantWithTheKey() {
+        guard publicKeysByPaymentMethod[selectedPaymentMethod] != nil else { return }
+        guard (intentRequestRequest.merchant?.id ?? "") != "" else { return }
+        intentRequestRequest.merchant?.id = ""
     }
     static var exampleIntentId:String = "intent_rzgd5725539UhQ713R0a869"
 
@@ -577,6 +592,8 @@ extension PayButtonExample: PayButtonDelegate {
         // payment before it did
         eventsTextView.text = "\n\n========\n\nCreating an intent...\(eventsTextView.text ?? "")"
         showLoader(true)
+        // Deema and tamara come with a key of their own, and the merchant id has to go with it
+        PayButtonExample.alignMerchantWithTheKey()
         // The sdk takes the intent configuration as a dictionary, the same way the web sdk passes the intent object
         guard let postData:Data = try? PayButtonExample.intentRequestRequest.jsonData(),
               let intentConfig:[String:Any] = try? JSONSerialization.jsonObject(with: postData, options: .fragmentsAllowed) as? [String:Any] else {
