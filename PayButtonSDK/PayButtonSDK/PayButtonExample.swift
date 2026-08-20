@@ -337,7 +337,23 @@ class PayButtonExample: UIViewController {
 }
 """)
 
-    static var examplePublicKey:String = "pk_test_YhUjg9PNT8oDlKJ1aE2fMRz7"
+    /// The public key most of the sandbox buttons run on
+    static let defaultPublicKey:String = "pk_test_YhUjg9PNT8oDlKJ1aE2fMRz7"
+
+    /// The methods that live on a merchant account of their own in the sandbox, and the key each
+    /// one is enabled on. Asking for one of these with the default key gets an intent the button
+    /// can not render, so the key follows the button rather than the other way round
+    static let publicKeysByPaymentMethod:[String:String] = [
+        "DEEMA":  "pk_test_KTTwK3QmcWVf9v1pRtl5EFHyXgqxS",
+        "TAMARA": "pk_test_5TkexzQXSKCM4RcWUnJPoqbH"
+    ]
+
+    /// The key the currently picked button is created and configured with. Read everywhere the key
+    /// is needed, so picking a button in the settings is the only thing that has to change
+    static var examplePublicKey:String {
+        let paymentMethod:String = intentRequestRequest.config?.acceptance?.supportedPaymentMethods?.first?.uppercased() ?? ""
+        return publicKeysByPaymentMethod[paymentMethod] ?? defaultPublicKey
+    }
     static var exampleIntentId:String = "intent_rzgd5725539UhQ713R0a869"
 
     /// Who creates the intent the button is configured with. The sdk only ever needs its id, so

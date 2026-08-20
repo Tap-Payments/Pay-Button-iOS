@@ -181,9 +181,9 @@ import UIKit
                 // We first need to call update sdk info api with the device & sdk details
                 try UrlBasedUtils.updateSDKInfo(for: intentID, with: UrlBasedUtils.generateSDKINFO(for: publicKey)) {response, error  in
                     // Now let us see if any error happened or not
-                    if let nonNullError = error {
+                    if let nonNullError:String = error {
                         DispatchQueue.main.async {
-                            self.delegate?.onError?(data: "{error:\(error)}")
+                            self.delegate?.onError?(data: "{error:\(nonNullError)}")
                             completion(nil)
                         }
                     }else{
@@ -202,6 +202,13 @@ import UIKit
                             //}else{
                                 completion(.Knet)
                             //}
+                        } else {
+                            // The mw answered without naming a payment method. The page renders
+                            // whatever the intent says either way, so carry on .. returning here
+                            // without calling back leaves the button never built, and a config
+                            // that was changed never taking effect, with nothing said about it
+                            NSLog("PayButton: the intent named no payment method, rendering it as it comes")
+                            completion(.Knet)
                         }
                     }
                 }
