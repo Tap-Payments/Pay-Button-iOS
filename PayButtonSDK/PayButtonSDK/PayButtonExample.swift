@@ -573,7 +573,9 @@ extension PayButtonExample: PayButtonDelegate {
     /// The sdk creates the intent. `PayButtonIntent.create` posts it against the checkout mw with
     /// the public key, so no secret key is embedded here, and hands back the whole intent
     func createIntentWithTheSdk() {
-        eventsTextView.text = "\n\n========\n\nCreating an intent..."
+        // Adds to the log rather than replacing it, a start over is not a reason to lose what the
+        // payment before it did
+        eventsTextView.text = "\n\n========\n\nCreating an intent...\(eventsTextView.text ?? "")"
         showLoader(true)
         // The sdk takes the intent configuration as a dictionary, the same way the web sdk passes the intent object
         guard let postData:Data = try? PayButtonExample.intentRequestRequest.jsonData(),
