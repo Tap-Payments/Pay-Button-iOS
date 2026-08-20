@@ -407,23 +407,6 @@ class PayButtonExample: UIViewController {
 
     /// Set while a start over is waiting to run, so a burst of outcomes only causes one
     private var isStartingOver:Bool = false
-
-    /// Shown where the button goes while there is no button worth showing .. the intent is still
-    /// being created, or it exists and the page has not rendered yet
-    private lazy var loader:UIActivityIndicatorView = {
-        let loader:UIActivityIndicatorView = .init(style: .medium)
-        loader.hidesWhenStopped = true
-        loader.translatesAutoresizingMaskIntoConstraints = false
-        payButton.superview?.addSubview(loader)
-        NSLayoutConstraint.activate([
-            loader.centerXAnchor.constraint(equalTo: payButton.centerXAnchor),
-            loader.centerYAnchor.constraint(equalTo: payButton.centerYAnchor)
-        ])
-        return loader
-    }()
-
-    /// Stops the loader spinning forever when the page never reports itself ready
-    private var loaderTimeout:DispatchWorkItem?
         
     var dictConfig:[String:Any]  {
         return ["operator": ["publicKey": PayButtonExample.examplePublicKey],
@@ -533,7 +516,6 @@ extension PayButtonExample: PayButtonDelegate {
     func onError(data: String) {
         //print("CardWebSDKExample onError \(data)")
         eventsTextView.text = "\n\n========\n\nonError \(data)\(eventsTextView.text ?? "")"
-        showLoader(false)
         refreshButton.isHidden = false
         startOver(after: "onError")
     }
@@ -568,7 +550,6 @@ extension PayButtonExample: PayButtonDelegate {
     func onReady(){
         //print("CardWebSDKExample onReady")
         eventsTextView.text = "\n\n========\n\nonReady\(eventsTextView.text ?? "")"
-        showLoader(false)
     }
     
     func onClicked() {
@@ -617,7 +598,6 @@ extension PayButtonExample: PayButtonDelegate {
         // Adds to the log rather than replacing it, a start over is not a reason to lose what the
         // payment before it did
         eventsTextView.text = "\n\n========\n\nCreating an intent...\(eventsTextView.text ?? "")"
-        showLoader(true)
         // Deema and tamara come with a key of their own, and the merchant id has to go with it
         PayButtonExample.alignMerchantWithTheKey()
         // Paypal only takes usd
@@ -626,51 +606,23 @@ extension PayButtonExample: PayButtonDelegate {
         guard let postData:Data = try? PayButtonExample.intentRequestRequest.jsonData(),
               let intentConfig:[String:Any] = try? JSONSerialization.jsonObject(with: postData, options: .fragmentsAllowed) as? [String:Any] else {
             eventsTextView.text = "\n\n========\n\nIntent creation failed:\nCould not encode the intent configuration...\(eventsTextView.text ?? "")"
-            showLoader(false)
-            return
+                return
         }
 
         // The sdk creates the intent against the checkout mw using the public key, so no secret key is embedded in the app
         PayButtonIntent.create(config: intentConfig, publicKey: PayButtonExample.examplePublicKey) { intentResponse, error in
             if let error = error {
                 self.eventsTextView.text = "\n\n========\n\nIntent creation failed:\n\(error)...\(self.eventsTextView.text ?? "")"
-                self.showLoader(false)
                 return
             }
             guard let intentID:String = intentResponse?["id"] as? String,
                   !intentID.isEmpty else{
                 self.eventsTextView.text = "\n\n========\n\nIntent creation failed:\n\(String(describing: intentResponse))...\(self.eventsTextView.text ?? "")"
-                self.showLoader(false)
                 return
             }
             self.eventsTextView.text = "\n\n========\n\nIntent created with id: \n\(intentID)\(self.eventsTextView.text ?? "")"
             PayButtonExample.exampleIntentId = intentID
             self.payButton.initPayButton(configDict: self.dictConfig, delegate: self)
-        }
-    }
-
-    /// Puts the loader where the button is, or the button back.
-    ///
-    /// The wait is longer than creating the intent .. the id is only the first step, the sdk then
-    /// loads the page before there is anything to press. So the loader runs until the button says
-    /// it is ready, and a timeout puts the button back anyway if that never comes
-    /// - Parameter loading: Whether there is still nothing worth showing
-    private func showLoader(_ loading:Bool) {
-        loaderTimeout?.cancel()
-        loaderTimeout = nil
-
-        payButton.isHidden = loading
-        if loading {
-            loader.startAnimating()
-            let timeout:DispatchWorkItem = .init { [weak self] in
-                guard let self = self else { return }
-                self.eventsTextView.text = "\n\n========\n\nThe button never reported ready, showing it anyway\(self.eventsTextView.text ?? "")"
-                self.showLoader(false)
-            }
-            loaderTimeout = timeout
-            DispatchQueue.main.asyncAfter(deadline: .now() + 15, execute: timeout)
-        } else {
-            loader.stopAnimating()
         }
     }
 
