@@ -39,6 +39,9 @@ class PayButtonSettingsViewController: FormViewController {
                 self?.refreshOrderCurrency()
                 // And deema will not take tax, a discount or shipping on the order
                 PayButtonExample.alignOrderExtrasWithTheButton()
+                // Deema needs an order worth financing
+                PayButtonExample.alignAmountWithTheButton()
+                self?.refreshOrderAmount()
             }
         }
         
@@ -517,6 +520,15 @@ class PayButtonSettingsViewController: FormViewController {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         delegate?.updateConfig()
+    }
+
+    /// Puts the order amount row back in step with the configuration, for when picking a button
+    /// changed it
+    private func refreshOrderAmount() {
+        guard let amountRow = form.rowBy(tag: "order.amount") as? DecimalRow else { return }
+        amountRow.value = PayButtonExample.intentRequestRequest.order?.amount
+        amountRow.updateCell()
+        amountRow.reload()
     }
 
     /// Puts the order currency row back in step with the configuration, for when picking a button

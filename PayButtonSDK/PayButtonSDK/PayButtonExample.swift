@@ -370,6 +370,31 @@ class PayButtonExample: UIViewController {
     /// carrying tax, a discount or shipping
     static let methodsWithoutOrderExtras:Set<String> = ["DEEMA"]
 
+    /// The amount a button has to be asked for, when it only works above or around one. Deema
+    /// finances the order rather than charging it, so a couple of dinars is below what it offers on
+    static let amountsByPaymentMethod:[String:Double] = [
+        "DEEMA": 30
+    ]
+
+    /// What the order was worth before a button that demands its own amount replaced it
+    private static var amountBeforeTheOverride:Double?
+
+    /// Puts the order at the amount the picked button needs, and puts the old one back on the way
+    /// out. A button with no demands is left alone, so an amount typed by hand stays
+    static func alignAmountWithTheButton() {
+        guard let required:Double = amountsByPaymentMethod[selectedPaymentMethod] else {
+            guard let remembered:Double = amountBeforeTheOverride else { return }
+            intentRequestRequest.order?.amount = remembered
+            amountBeforeTheOverride = nil
+            return
+        }
+
+        if amountBeforeTheOverride == nil {
+            amountBeforeTheOverride = intentRequestRequest.order?.amount
+        }
+        intentRequestRequest.order?.amount = required
+    }
+
     /// What the order currency was before a button that demands its own replaced it, so leaving
     /// that button puts back whatever was picked rather than a guess
     private static var currencyBeforeTheOverride:String?
@@ -633,6 +658,8 @@ extension PayButtonExample: PayButtonDelegate {
         PayButtonExample.alignCurrencyWithTheButton()
         // And deema will not take an order carrying tax, a discount or shipping
         PayButtonExample.alignOrderExtrasWithTheButton()
+        // Deema needs an order worth financing
+        PayButtonExample.alignAmountWithTheButton()
         // The sdk takes the intent configuration as a dictionary, the same way the web sdk passes the intent object
         guard let postData:Data = try? PayButtonExample.intentRequestRequest.jsonData(),
               let intentConfig:[String:Any] = try? JSONSerialization.jsonObject(with: postData, options: .fragmentsAllowed) as? [String:Any] else {
