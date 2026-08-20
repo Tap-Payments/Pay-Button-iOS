@@ -34,9 +34,11 @@ class PayButtonSettingsViewController: FormViewController {
                 // Deema and tamara are on merchants of their own, so the id has to go with the key
                 PayButtonExample.alignMerchantWithTheKey()
                 self?.refreshMerchantId()
-                // Paypal only takes usd, so the order currency follows the button too
+                // Paypal only takes usd and deema only kwd, so the currency follows the button too
                 PayButtonExample.alignCurrencyWithTheButton()
                 self?.refreshOrderCurrency()
+                // And deema will not take tax, a discount or shipping on the order
+                PayButtonExample.alignOrderExtrasWithTheButton()
             }
         }
         

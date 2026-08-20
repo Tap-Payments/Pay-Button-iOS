@@ -362,8 +362,13 @@ class PayButtonExample: UIViewController {
     /// The currency a button has to be asked for in, when it only takes one. Paypal is not enabled
     /// on the sandbox merchant's local currency, so an order in anything else is refused
     static let currenciesByPaymentMethod:[String:String] = [
-        "PAYPAL": PayButtonConfig.Currency.usd.rawValue
+        "PAYPAL": PayButtonConfig.Currency.usd.rawValue,
+        "DEEMA":  PayButtonConfig.Currency.kwd.rawValue
     ]
+
+    /// The buttons that will not take an order with anything but a price on it. Deema refuses one
+    /// carrying tax, a discount or shipping
+    static let methodsWithoutOrderExtras:Set<String> = ["DEEMA"]
 
     /// What the order currency was before a button that demands its own replaced it, so leaving
     /// that button puts back whatever was picked rather than a guess
@@ -383,6 +388,32 @@ class PayButtonExample: UIViewController {
             currencyBeforeTheOverride = intentRequestRequest.order?.currency
         }
         intentRequestRequest.order?.currency = required
+    }
+
+    /// What the order carried before a button that refuses extras had them taken off, so leaving
+    /// that button puts them back
+    private static var orderExtrasBeforeTheOverride:(tax:[Tax]?, discount:Discount?, shipping:OrderShipping?)?
+
+    /// Strips tax, discount and shipping off the order for a button that will not take them, and
+    /// puts them back on the way out
+    static func alignOrderExtrasWithTheButton() {
+        guard methodsWithoutOrderExtras.contains(selectedPaymentMethod) else {
+            guard let remembered = orderExtrasBeforeTheOverride else { return }
+            intentRequestRequest.order?.tax = remembered.tax
+            intentRequestRequest.order?.discount = remembered.discount
+            intentRequestRequest.order?.shipping = remembered.shipping
+            orderExtrasBeforeTheOverride = nil
+            return
+        }
+
+        if orderExtrasBeforeTheOverride == nil {
+            orderExtrasBeforeTheOverride = (tax: intentRequestRequest.order?.tax,
+                                            discount: intentRequestRequest.order?.discount,
+                                            shipping: intentRequestRequest.order?.shipping)
+        }
+        intentRequestRequest.order?.tax = nil
+        intentRequestRequest.order?.discount = nil
+        intentRequestRequest.order?.shipping = nil
     }
 
     /// Empties the merchant id when the button being asked for lives on a merchant of its own.
@@ -598,8 +629,10 @@ extension PayButtonExample: PayButtonDelegate {
         payButton.isHidden = true
         // Deema and tamara come with a key of their own, and the merchant id has to go with it
         PayButtonExample.alignMerchantWithTheKey()
-        // Paypal only takes usd
+        // Paypal only takes usd, deema only kwd
         PayButtonExample.alignCurrencyWithTheButton()
+        // And deema will not take an order carrying tax, a discount or shipping
+        PayButtonExample.alignOrderExtrasWithTheButton()
         // The sdk takes the intent configuration as a dictionary, the same way the web sdk passes the intent object
         guard let postData:Data = try? PayButtonExample.intentRequestRequest.jsonData(),
               let intentConfig:[String:Any] = try? JSONSerialization.jsonObject(with: postData, options: .fragmentsAllowed) as? [String:Any] else {
