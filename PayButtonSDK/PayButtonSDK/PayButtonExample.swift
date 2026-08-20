@@ -374,7 +374,7 @@ class PayButtonExample: UIViewController {
     /// The amount a button has to be asked for, when it only works above or around one. Deema
     /// finances the order rather than charging it, so a couple of dinars is below what it offers on
     static let amountsByPaymentMethod:[String:Double] = [
-        "DEEMA": 30
+        "DEEMA": 40
     ]
 
     /// What the order was worth before a button that demands its own amount replaced it
