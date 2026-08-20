@@ -53,14 +53,21 @@ import UIKit
         backgroundColor = .clear
     }
     
+    /// Takes down whatever button is on screen, and anything it had presented.
+    ///
+    /// Called the moment a new configuration arrives rather than when its button is ready, so the
+    /// one being replaced is never seen after the configuration that made it is gone
+    private func clearTheButtonOnScreen() {
+        (buttonView as? PayButtonSdk)?.teardown()
+        buttonView.removeFromSuperview()
+    }
+
     /// This creates and sets the internal type based on the passed button type
     /// - Parameter with payButtonType: The needed button to be rendered
     private func generateTheView(with payButtonType:PayButtonTypeEnum) {
-        // The button being replaced may have a 3ds page, a popup or a browser of its own still on
-        // screen. Taking the view out from under them would leave them there with nothing behind
-        (buttonView as? PayButtonSdk)?.teardown()
-        // let us remove if it was there before
-        buttonView.removeFromSuperview()
+        // Gone already when a configuration arrived, this catches the rest .. a type detected late,
+        // or a button generated without one arriving first
+        clearTheButtonOnScreen()
         switch payButtonType {
         //case .BenefitPay:
         //    buttonView = BenefitPayButton()
@@ -146,6 +153,11 @@ import UIKit
            let publicKey:String = operatorModel["publicKey"]  as? String {
             UrlBasedUtils.intentID = intentID
             UrlBasedUtils.publicKey = publicKey
+            // The button that is up belongs to the configuration being replaced, and the one that
+            // replaces it can not be built until the cdn and the intent have both answered. Left
+            // alone it stays on screen through both of those, so changing anything shows the old
+            // button for a second before the new one arrives. It goes now, not two calls from now
+            clearTheButtonOnScreen()
             // Then we need to load base url and encryption keys from cdn
             // We will first need to try to load the latest base url from the CDN to make sure our backend doesn't want us to look somewhere else
             UrlBasedUtils.loadCDNConfiguration {
