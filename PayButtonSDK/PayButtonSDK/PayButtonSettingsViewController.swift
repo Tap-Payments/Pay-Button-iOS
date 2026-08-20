@@ -34,6 +34,9 @@ class PayButtonSettingsViewController: FormViewController {
                 // Deema and tamara are on merchants of their own, so the id has to go with the key
                 PayButtonExample.alignMerchantWithTheKey()
                 self?.refreshMerchantId()
+                // Paypal only takes usd, so the order currency follows the button too
+                PayButtonExample.alignCurrencyWithTheButton()
+                self?.refreshOrderCurrency()
             }
         }
         
@@ -512,6 +515,15 @@ class PayButtonSettingsViewController: FormViewController {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         delegate?.updateConfig()
+    }
+
+    /// Puts the order currency row back in step with the configuration, for when picking a button
+    /// changed it
+    private func refreshOrderCurrency() {
+        guard let currencyRow = form.rowBy(tag: "order.currency") as? AlertRow<String> else { return }
+        currencyRow.value = PayButtonExample.intentRequestRequest.order?.currency?.uppercased()
+        currencyRow.updateCell()
+        currencyRow.reload()
     }
 
     /// Puts the merchant id row back in step with the configuration, for when picking a button

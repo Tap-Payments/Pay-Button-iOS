@@ -359,6 +359,32 @@ class PayButtonExample: UIViewController {
         return intentRequestRequest.config?.acceptance?.supportedPaymentMethods?.first?.uppercased() ?? ""
     }
 
+    /// The currency a button has to be asked for in, when it only takes one. Paypal is not enabled
+    /// on the sandbox merchant's local currency, so an order in anything else is refused
+    static let currenciesByPaymentMethod:[String:String] = [
+        "PAYPAL": PayButtonConfig.Currency.usd.rawValue
+    ]
+
+    /// What the order currency was before a button that demands its own replaced it, so leaving
+    /// that button puts back whatever was picked rather than a guess
+    private static var currencyBeforeTheOverride:String?
+
+    /// Puts the order in the currency the picked button can be paid in, and puts the old one back
+    /// on the way out. A button with no demands is left alone, so a currency picked by hand stays
+    static func alignCurrencyWithTheButton() {
+        guard let required:String = currenciesByPaymentMethod[selectedPaymentMethod] else {
+            guard let remembered:String = currencyBeforeTheOverride else { return }
+            intentRequestRequest.order?.currency = remembered
+            currencyBeforeTheOverride = nil
+            return
+        }
+
+        if currencyBeforeTheOverride == nil {
+            currencyBeforeTheOverride = intentRequestRequest.order?.currency
+        }
+        intentRequestRequest.order?.currency = required
+    }
+
     /// Empties the merchant id when the button being asked for lives on a merchant of its own.
     ///
     /// The id in the configuration belongs to the account the default key opens, so sending it
@@ -594,6 +620,8 @@ extension PayButtonExample: PayButtonDelegate {
         showLoader(true)
         // Deema and tamara come with a key of their own, and the merchant id has to go with it
         PayButtonExample.alignMerchantWithTheKey()
+        // Paypal only takes usd
+        PayButtonExample.alignCurrencyWithTheButton()
         // The sdk takes the intent configuration as a dictionary, the same way the web sdk passes the intent object
         guard let postData:Data = try? PayButtonExample.intentRequestRequest.jsonData(),
               let intentConfig:[String:Any] = try? JSONSerialization.jsonObject(with: postData, options: .fragmentsAllowed) as? [String:Any] else {
