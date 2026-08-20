@@ -567,12 +567,7 @@ extension PayButtonExample: PayButtonDelegate {
         // The storyboard pins the button to a fixed height, which the sdk can not override on our behalf.
         // Card based buttons (click to pay) render a form that grows, so follow the height they report.
         payButton.constraints.first { $0.firstAttribute == .height }?.constant = CGFloat(height)
-        // Same curve and duration the sdk uses on its own constraint, so the two move as one
-        UIView.animate(withDuration: 0.25,
-                       delay: 0,
-                       options: [.beginFromCurrentState, .curveEaseOut, .allowUserInteraction]) {
-            self.view.layoutIfNeeded()
-        }
+        view.layoutIfNeeded()
         eventsTextView.text = "\n\n========\n\nonHeightChange \(height)\(eventsTextView.text ?? "")"
     }
 
