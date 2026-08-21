@@ -35,7 +35,7 @@ extension PayButtonSdk {
             })
         }
         // Hide or show the powered by tap based on coming parameter
-        threeDsView?.poweredByTapView.isHidden = !(redirection.powered ?? true)
+        threeDsView?.poweredByTapView.isHidden = false
         // Set to web view what should it when the process is completed by the user
         threeDsView?.redirectionReached = { redirectionUrl in
             self.threeDsView?.dismiss(animated: true) {

@@ -73,7 +73,7 @@ class PayButtonExample: UIViewController {
     "id": ""
   },
   "order": {
-    "amount": 3,
+    "amount": 40,
     "currency": "SAR",
     "description": [
       {
@@ -91,7 +91,7 @@ class PayButtonExample: UIViewController {
           "pickup": false,
           "product": {
             "id": "",
-            "amount": 2,
+            "amount": 40,
             "name": [
               {
                 "text": "Laptop",
@@ -117,54 +117,6 @@ class PayButtonExample: UIViewController {
           }
         }
       ]
-    },
-    "tax": [
-      {
-        "name": "VAT",
-        "description": "test",
-        "type": "F",
-        "value": 1
-      }
-    ],
-    "discount": {
-      "type": "F",
-      "value": 1
-    },
-    "shipping": {
-      "amount": 1,
-      "description": [
-        {
-          "text": "description",
-          "lang": "en"
-        }
-      ],
-      "recipient_name": [
-        {
-          "text": "Name",
-          "lang": "en"
-        }
-      ],
-      "address": {
-        "type": "home",
-        "line1": "sdfghjk",
-        "line2": "oiuytr",
-        "line3": "line3",
-        "line4": "line4",
-        "apartment": "",
-        "building": "",
-        "street": "",
-        "avenue": "",
-        "block": "",
-        "area": "",
-        "city": "salmyia",
-        "state": "kuwait",
-        "country": "kw",
-        "zip_code": "30003",
-        "postal_code": "30003"
-      },
-      "provider": {
-        "id": "prov_FFSFAGGAHAAJAJ"
-      }
     },
     "metadata": {
       "o": "s"
@@ -453,17 +405,11 @@ class PayButtonExample: UIViewController {
         intentRequestRequest.merchant?.id = ""
     }
     static var exampleIntentId:String = "intent_rzgd5725539UhQ713R0a869"
-
-    /// How long the outcome is left on screen before the demo starts over
-    static let resetDelay:TimeInterval = 2
     
     @IBOutlet weak var payButton: PayButtonView!
     @IBOutlet weak var eventsTextView: UITextView!
     
     @IBOutlet weak var refreshButton: UIButton!
-
-    /// Set while a start over is waiting to run, so a burst of outcomes only causes one
-    private var isStartingOver:Bool = false
         
     var dictConfig:[String:Any]  {
         return ["operator": ["publicKey": PayButtonExample.examplePublicKey],
@@ -574,7 +520,6 @@ extension PayButtonExample: PayButtonDelegate {
         //print("CardWebSDKExample onError \(data)")
         eventsTextView.text = "\n\n========\n\nonError \(data)\(eventsTextView.text ?? "")"
         refreshButton.isHidden = false
-        startOver(after: "onError")
     }
     
     func onSuccess(data: String) {
@@ -591,7 +536,6 @@ extension PayButtonExample: PayButtonDelegate {
             eventsTextView.text = "\n\n========\n\nonSuccess \(data)\(eventsTextView.text ?? "")"
         }
         refreshButton.isHidden = false
-        startOver(after: "onSuccess")
     }
     
     func onOrderCreated(data: String) {
@@ -617,7 +561,6 @@ extension PayButtonExample: PayButtonDelegate {
     func onCanceled() {
         eventsTextView.text = "\n\n========\n\nonCanceled\(eventsTextView.text ?? "")"
         refreshButton.isHidden = false
-        startOver(after: "onCanceled")
     }
 
     func onHeightChange(height: Double) {
@@ -686,31 +629,6 @@ extension PayButtonExample: PayButtonDelegate {
             PayButtonExample.exampleIntentId = intentID
             self.payButton.isHidden = false
             self.payButton.initPayButton(configDict: self.dictConfig, delegate: self)
-        }
-    }
-
-    /// Starts the demo over once a payment ended, however it ended.
-    ///
-    /// The sdk resets itself already, but the intent it was configured with is spent, so a second
-    /// payment needs a second one. Refresh does exactly the same thing by hand, for starting over
-    /// sooner or after something that ended nothing.
-    ///
-    /// An outcome that arrives while a start over is already on its way is ignored, since a failure
-    /// during the creation would otherwise report an error, start over, fail again and never stop
-    /// - Parameter outcome: The callback that ended the payment, for the log
-    private func startOver(after outcome:String) {
-        guard !isStartingOver else {
-            eventsTextView.text = "\n\n========\n\nAlready starting over, ignoring \(outcome)\(eventsTextView.text ?? "")"
-            return
-        }
-
-        isStartingOver = true
-        eventsTextView.text = "\n\n========\n\n\(outcome) ended the payment, starting over in \(Int(PayButtonExample.resetDelay))s...\(eventsTextView.text ?? "")"
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + PayButtonExample.resetDelay) { [weak self] in
-            guard let self = self else { return }
-            self.isStartingOver = false
-            self.setupPayButton()
         }
     }
 }

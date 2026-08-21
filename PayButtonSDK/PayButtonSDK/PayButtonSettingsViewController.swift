@@ -37,11 +37,6 @@ class PayButtonSettingsViewController: FormViewController {
                 // Paypal only takes usd and deema only kwd, so the currency follows the button too
                 PayButtonExample.alignCurrencyWithTheButton()
                 self?.refreshOrderCurrency()
-                // And deema will not take tax, a discount or shipping on the order
-                PayButtonExample.alignOrderExtrasWithTheButton()
-                // Deema needs an order worth financing
-                PayButtonExample.alignAmountWithTheButton()
-                self?.refreshOrderAmount()
             }
         }
         
