@@ -95,6 +95,9 @@ import UIKit
         case .TAMARA:
             buttonView = PayButtonSdk()
             (buttonView as? PayButtonSdk)?.updateType(to: .TAMARA)
+        case .QPAY:
+            buttonView = PayButtonSdk()
+            (buttonView as? PayButtonSdk)?.updateType(to: .QPAY)
         case .GooglePay:
             // Google pay is rendered by the web page like any other redirection based method.
             // The backend reports it as `google_pay`, which lands on the default branch below anyway

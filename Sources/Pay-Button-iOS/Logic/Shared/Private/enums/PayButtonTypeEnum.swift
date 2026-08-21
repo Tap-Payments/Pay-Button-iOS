@@ -41,6 +41,9 @@ import Foundation
     /// The button will work to show payment in form of TAMARA.
     /// Appended last on purpose, the raw values of the cases above are part of the objc facing api
     case TAMARA = 12
+    /// The button will work to show payment in form of QPAY.
+    /// Appended last on purpose, the raw values of the cases above are part of the objc facing api
+    case QPAY = 13
 
     /// A string representation of the payment type
     public func toString() -> String {
@@ -71,6 +74,8 @@ import Foundation
             return "CARD"
         case .TAMARA:
             return "TAMARA"
+        case .QPAY:
+            return "QPAY"
         }
     }
     
