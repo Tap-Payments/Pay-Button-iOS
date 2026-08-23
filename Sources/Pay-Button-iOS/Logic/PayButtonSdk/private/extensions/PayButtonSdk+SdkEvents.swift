@@ -37,7 +37,7 @@ extension PayButtonSdk {
     /// started .. this payment is over and nothing of it belongs to the next one
     func handleOnSuccess(url:URL) {
         self.delegate?.onSuccess?(data: tap_extractDataFromUrl(url, for: "data", shouldBase64Decode: true))
-        reset()
+//        reset()
     }
 
     /// The payer backed out. The web sdk is told first, since reloading the page takes the window
@@ -45,7 +45,7 @@ extension PayButtonSdk {
     func handleOnCancel() {
         self.delegate?.onCanceled?()
         self.webView.evaluateJavaScript("window.cancel()") { [weak self] _, _ in
-            self?.reset()
+//            self?.reset()
         }
     }
 
@@ -53,6 +53,6 @@ extension PayButtonSdk {
     /// next one starts on a clean page
     func handleOnError(data:String) {
         self.delegate?.onError?(data:data)
-        reset()
+//        reset()
     }
 }

@@ -38,6 +38,10 @@ internal enum TapBrowserChrome {
     /// Applies the look to a web view, whoever built it
     /// - Parameter webView: The web view the page renders in
     internal static func style(_ webView: WKWebView) {
+        // The page is pinned to the bottom of the sheet, but a scroll view pads its own content for
+        // the safe area unless told not to, which leaves a strip of nothing under the page and above
+        // the home indicator. The page decides its own bottom
+        webView.scrollView.contentInsetAdjustmentBehavior = .never
         webView.tap_disableZoom()
         webView.isOpaque = false
         webView.backgroundColor = .white

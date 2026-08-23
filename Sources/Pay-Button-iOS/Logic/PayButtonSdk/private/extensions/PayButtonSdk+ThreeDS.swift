@@ -199,8 +199,8 @@ extension PayButtonSdk {
         delegate?.onCanceled?()
         let javaScript:String = """
         (function() {
-            if (window.CardSDK && typeof window.CardSDK.cancelAuthentication === 'function') {
-                window.CardSDK.cancelAuthentication();
+            if (window && typeof window.cancelAuthentication === 'function') {
+                window.cancelAuthentication();
                 return 'CardSDK';
             }
             if (typeof window.cancel === 'function') {
