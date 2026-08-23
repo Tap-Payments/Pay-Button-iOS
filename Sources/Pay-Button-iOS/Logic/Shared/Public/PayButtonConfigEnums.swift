@@ -88,6 +88,7 @@ public enum PayButtonConfig {
         case stcPay      = "STC_PAY"
         case click2Pay   = "CLICK2PAY"
         case qpay        = "QPAY"
+        case fawry       = "FAWRY"
         case tabby       = "TABBY"
         case deema       = "DEEMA"
         case tamara      = "TAMARA"

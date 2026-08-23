@@ -67,10 +67,6 @@ extension PayButtonSdk {
         let javaScript: String = """
         (function() {
             var scanned = \(arguments);
-            if (window.CardSDK && typeof window.CardSDK.fillCardInputs === 'function') {
-                window.CardSDK.fillCardInputs(scanned);
-                return 'CardSDK';
-            }
             if (typeof window.fillCardInputs === 'function') {
                 window.fillCardInputs(scanned);
                 return 'window';

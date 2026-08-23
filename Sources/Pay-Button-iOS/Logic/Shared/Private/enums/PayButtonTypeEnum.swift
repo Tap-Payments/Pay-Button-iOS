@@ -9,7 +9,7 @@ import Foundation
 
 /// Defines which type of buttons to be displayed
 ///
-/// BenefitPay, Fawry and CareemPay are commented out for now. The raw values are written out
+/// BenefitPay and CareemPay are commented out for now. The raw values are written out
 /// explicitly so the remaining cases keep the numbers they have always had .. they are part of the
 /// objc facing api, and letting them shift would silently remap an integrator's stored values
 @objc public enum PayButtonTypeEnum:Int, CaseIterable {
@@ -20,7 +20,7 @@ import Foundation
     /// The button will work to show payment in form of Benefit
     case Benefit = 2
     /// The button will work to show payment in form of Fawry
-    //case Fawry = 3
+    case Fawry = 3
     /// The button will work to show payment in form of paypal
     case Paypal = 4
     /// The button will work to show payment in form of careem pay
@@ -54,8 +54,8 @@ import Foundation
             return "KNET"
         case .Benefit:
             return "BENEFIT"
-        //case .Fawry:
-        //    return "FAWRY"
+        case .Fawry:
+            return "FAWRY"
         case .Paypal:
             return "PAYPAL"
         case .Tabby:

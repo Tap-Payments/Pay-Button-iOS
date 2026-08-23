@@ -80,9 +80,9 @@ import UIKit
         case .ApplePay:
             buttonView = PayButtonSdk()
             (buttonView as? PayButtonSdk)?.updateType(to: .ApplePay)
-        //case .Fawry:
-        //    buttonView = PayButtonSdk()
-        //    (buttonView as? PayButtonSdk)?.updateType(to: .Fawry)
+        case .Fawry:
+            buttonView = PayButtonSdk()
+            (buttonView as? PayButtonSdk)?.updateType(to: .Fawry)
         case .Benefit:
             buttonView = PayButtonSdk()
             (buttonView as? PayButtonSdk)?.updateType(to: .Benefit)
