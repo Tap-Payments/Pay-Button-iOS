@@ -316,7 +316,8 @@ class PayButtonExample: UIViewController {
     static let currenciesByPaymentMethod:[String:String] = [
         "PAYPAL": PayButtonConfig.Currency.usd.rawValue,
         "DEEMA":  PayButtonConfig.Currency.kwd.rawValue,
-        "KNET":   PayButtonConfig.Currency.kwd.rawValue
+        "KNET":   PayButtonConfig.Currency.kwd.rawValue,
+        "FAWRY":  PayButtonConfig.Currency.egp.rawValue
     ]
 
     /// The buttons that will not take an order with anything but a price on it. Deema refuses one
