@@ -1,4 +1,5 @@
 {
+  "originHash" : "423654429c3514e9e53553f579a541c9ba3011685ae4412edf54d16bd3210ecc",
   "pins" : [
     {
       "identity" : "eureka",
@@ -37,6 +38,24 @@
       }
     },
     {
+      "identity" : "tapcardscannerwebwrapper-ios",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Tap-Payments/TapCardScannerWebWrapper-iOS.git",
+      "state" : {
+        "revision" : "389436b81d1de6aafe43fc61ae4e1f8a8b4accec",
+        "version" : "0.0.6"
+      }
+    },
+    {
+      "identity" : "tapcardvlidatorkit-ios",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Tap-Payments/TapCardVlidatorKit-iOS.git",
+      "state" : {
+        "revision" : "61e2949915e2a210d89a57f450cba54d7aac551f",
+        "version" : "1.0.24"
+      }
+    },
+    {
       "identity" : "tapfontkit-ios",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Tap-Payments/TapFontKit-iOS.git",
@@ -55,5 +74,5 @@
       }
     }
   ],
-  "version" : 2
+  "version" : 3
 }

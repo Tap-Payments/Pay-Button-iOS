@@ -31,6 +31,9 @@ extension PayButtonSdk {
             break
         case _ where url.absoluteString.contains(CallBackSchemeEnum.onScannerClick.rawValue):
             delegate?.onScannerClick?()
+            // Ported from Card-iOS .. the sdk answers this itself rather than leaving the merchant
+            // to open a camera and find its way back into the form
+            scanCard()
             break
         case _ where url.absoluteString.contains(CallBackSchemeEnum.onNfcClick.rawValue):
             delegate?.onNfcClick?()

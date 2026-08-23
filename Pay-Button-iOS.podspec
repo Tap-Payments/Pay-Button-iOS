@@ -14,4 +14,5 @@ Pod::Spec.new do |s|
   s.dependency'SharedDataModels-iOS'
   s.dependency'TapFontKit-iOS'
   s.dependency'Robin'
+  s.dependency'TapCardScannerWebWrapper-iOS'
 end

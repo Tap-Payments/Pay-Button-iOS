@@ -19,6 +19,8 @@ internal class PayButtonSdk: PayButtonBaseView {
     /// Runs a passkey authentication in the system browser. Held for the lifetime of the process,
     /// letting go of it early closes the browser
     internal var threeDSPasskeySession:ThreeDSPasskeySession?
+    /// The camera the card form asked for, held while it is on screen
+    internal var cardScanner:CardScannerViewController?
     /// The last redirection the card form announced, kept for its return url. A passkey challenge
     /// that arrives as a plain navigation carries no details of its own
     internal var lastCardRedirection:CardRedirection?
@@ -144,6 +146,11 @@ internal class PayButtonSdk: PayButtonBaseView {
             if let popup:PayButtonPopupViewController = self.popupViewController {
                 self.popupViewController = nil
                 popup.presentingViewController?.dismiss(animated: false)
+            }
+
+            if let scanner:CardScannerViewController = self.cardScanner {
+                self.cardScanner = nil
+                scanner.presentingViewController?.dismiss(animated: false)
             }
 
             // Closes the browser without telling the delegate, the payment it belonged to is over
