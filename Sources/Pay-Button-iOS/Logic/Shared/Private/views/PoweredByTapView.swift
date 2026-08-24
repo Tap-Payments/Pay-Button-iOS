@@ -14,8 +14,9 @@ class PoweredByTapView: UIView {
     var backIconImageView: UIImageView = .init(frame: .zero)
     /// Indicating the powered by tap icon for the user
     var poweredByTapImageView: UIImageView = .init(frame: .zero)
-    /// Represents the main holding view
-    var blurView: TapVisualEffectView = .init(frame: .zero)
+    /// Represents the main holding view. A real system material, genuine backdrop blur with no
+    /// private api behind it, dark on its own so it does not depend on a tint layered under it
+    var blurView: UIVisualEffectView = .init(effect: UIBlurEffect(style: .systemUltraThinMaterialDark))
     /// Represents the locale needed to render the powered by tap view with
     var selectedLocale:String = "en" {
         didSet{
@@ -41,7 +42,6 @@ class PoweredByTapView: UIView {
     private func commonInit() {
         setupConstraints()
         themeController()
-        themeVisualEffectView()
         themeBackButton()
         themePoweredByTap()
         addBackButtonActionHandler()
@@ -72,18 +72,14 @@ class PoweredByTapView: UIView {
 
 // MARK: - Theme based methods
 extension PoweredByTapView {
-    /// Theme the view level
+    /// Theme the view level.
+    ///
+    /// Clear, not a tint of its own. `blurView` fills this view's whole bounds and is what a real
+    /// backdrop blur reads as what is behind it .. a colour sitting behind the blur here would be
+    /// exactly what got blurred instead of whatever is truly behind the bar, flattening it the same
+    /// way an opaque background on the sheet itself did
     func themeController() {
-        backgroundColor = UIColor(white: 0, alpha: 0.5)
-    }
-    
-    /// Theme the blur view level
-    func themeVisualEffectView() {
-        // The background bluring effect
-        blurView.scale = 1
-        blurView.blurRadius = 6
-        blurView.colorTint = UIColor(red: 0, green: 0, blue: 0, alpha: 1)
-        blurView.colorTintAlpha = UIView().traitCollection.userInterfaceStyle == .dark ? 0.32 : 0.06
+        backgroundColor = .clear
     }
     
     
