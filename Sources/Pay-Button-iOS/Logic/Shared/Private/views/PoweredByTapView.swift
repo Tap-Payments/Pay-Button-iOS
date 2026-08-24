@@ -48,18 +48,6 @@ class PoweredByTapView: UIView {
         localize()
     }
     
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        roundCorners(corners: [.topLeft, .topRight], radius: 8.0)
-    }
-    
-    func roundCorners(corners: UIRectCorner, radius: CGFloat) {
-        let path = UIBezierPath(roundedRect: bounds, byRoundingCorners: corners, cornerRadii: CGSize(width: radius, height: radius))
-        let mask = CAShapeLayer()
-        mask.path = path.cgPath
-        layer.mask = mask
-    }
-    
     /// Creates an event listener when clicking on the back button
     func addBackButtonActionHandler() {
         backButton.addTarget(self, action: #selector(didButtonClick), for: .touchUpInside)

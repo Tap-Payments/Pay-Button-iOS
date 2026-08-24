@@ -1,6 +1,15 @@
 {
   "pins" : [
     {
+      "identity" : "quicklayout",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/huri000/QuickLayout",
+      "state" : {
+        "revision" : "6be62decbe508d8fc8f9dbafc349d05bab03c38b",
+        "version" : "3.0.1"
+      }
+    },
+    {
       "identity" : "robin",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/ahmdx/Robin",
@@ -16,6 +25,15 @@
       "state" : {
         "revision" : "1dff74525847544e3e155503acd77f35a2022d7c",
         "version" : "0.0.13"
+      }
+    },
+    {
+      "identity" : "swiftentrykit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/huri000/SwiftEntryKit.git",
+      "state" : {
+        "revision" : "c2d42574e4fe4e1f9719843f35add7922942a16b",
+        "version" : "1.2.7"
       }
     },
     {

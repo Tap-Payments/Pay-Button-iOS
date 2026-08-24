@@ -19,6 +19,7 @@ let package = Package(
         .package(url: "https://github.com/ahmdx/Robin", from: "0.98.0"),
         .package(url: "https://github.com/Tap-Payments/TapFontKit-iOS.git", from: "0.0.1"),
         .package(url: "https://github.com/Tap-Payments/TapCardScannerWebWrapper-iOS.git", exact: "0.0.6"),
+        .package(url: "https://github.com/huri000/SwiftEntryKit.git", from: "1.0.0"),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -29,7 +30,8 @@ let package = Package(
                            "Robin",
                            "TapFontKit-iOS",
                           "SharedDataModels-iOS",
-                          "TapCardScannerWebWrapper-iOS"],
+                          "TapCardScannerWebWrapper-iOS",
+                          "SwiftEntryKit"],
             resources: [.copy("Resources/BenefitLoader.gif"),
                         .process("Resources/PayButtonMedia.xcassets")]
         ),

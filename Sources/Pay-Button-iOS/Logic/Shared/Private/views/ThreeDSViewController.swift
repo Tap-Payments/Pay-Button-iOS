@@ -3,7 +3,10 @@ import UIKit
 import WebKit
 import SharedDataModels_iOS
 
-class ThreeDSView: UIViewController {
+/// The 3ds/redirection page, shown as a `SwiftEntryKit` entry over the button's own screen rather
+/// than presented as a separate view controller .. a `UIView` for the same reason Card-iOS's own
+/// `ThreeDSView` is one, `SwiftEntryKit.display(entry:using:)` takes the view directly
+class ThreeDSView: UIView {
 
     /// The web view used to render the 3ds page
     var webView: WKWebView?
@@ -35,13 +38,18 @@ class ThreeDSView: UIViewController {
     }
     var popupWebView: WKWebView?
     var closePopupImageView:UIImageView = .init(frame: .init(x: 16, y: 16, width: 32, height: 32))
-    
+
     //MARK: - Init methods
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        //commonInit()
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        commonInit()
     }
-    
+
+    required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+        commonInit()
+    }
+
     //MARK: - Private methods
     /// Used as a consolidated method to do all the needed steps upon creating the view
     private func commonInit() {
@@ -52,11 +60,10 @@ class ThreeDSView: UIViewController {
             self.threeDSCanceled()
         }
     }
-    
-    
+
+
     /// Starts loading the urls
     func startLoading() {
-        commonInit()
         webView?.load(URLRequest(url: URL(string: redirectionData.url!)!))
     }
 }
@@ -68,7 +75,7 @@ extension ThreeDSView {
     func themeController() {
         TapBrowserChrome.applyBackground(to: self)
     }
-    
+
     /// Applies theme on web view level
     func themeWebView() {
         // Set the needed preferences
@@ -79,11 +86,11 @@ extension ThreeDSView {
         configuration.preferences = preferences
         configuration.tap_disableZoom()
 
-        
+
         // Let us theme the web view
         webView = .init(frame: .zero, configuration: configuration)
         TapBrowserChrome.style(webView!)
-        
+
         // Let set the delegates
         webView?.scrollView.delegate = self
         webView?.navigationDelegate = self
@@ -103,11 +110,11 @@ extension ThreeDSView: WKNavigationDelegate {
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         // Check if it is the return url
         print("3ds:\(navigationAction.request.url?.absoluteString ?? "")")
-        
+
         DispatchQueue.main.async {
             self.closePopupImageView.removeFromSuperview()
         }
-        
+
         if (navigationAction.request.url?.absoluteString.lowercased() ?? "").contains("apps.apple") {
             let historySize = webView.backForwardList.backList.count
                 let firstItem = webView.backForwardList.item(at: -historySize)
@@ -128,10 +135,10 @@ extension ThreeDSView: WKNavigationDelegate {
             // MARK: GooglePay redirect
             /*if redirectUrl == PayButtonTypeEnum.GooglePay.baseUrl() {
                 self.redirectionReached(requestURL.absoluteString)
-                
+
             }else{*/
                 self.redirectionReached(NSURL(string: requestURL.absoluteString)?.query ??  requestURL.absoluteString)
-                
+
             //}
             decisionHandler(.cancel)
             return
@@ -142,15 +149,15 @@ extension ThreeDSView: WKNavigationDelegate {
         if let timer = timer {
             timer.invalidate()
         }
-        
+
         timer = Timer.scheduledTimer(withTimeInterval: delayTime, repeats: false, block: { (timer) in
             timer.invalidate()
             self.idleForWhile()
         })
     }
-    
-    
-    
+
+
+
     func triggeringValue(from url:URL, with triggeringKeyword:String) -> String? {
         return tap_extractDataFromUrl(url,for:triggeringKeyword, shouldBase64Decode: false)
     }
@@ -160,32 +167,32 @@ extension ThreeDSView: WKNavigationDelegate {
 extension ThreeDSView: WKUIDelegate {
     //MARK: Creating new webView for popup
     func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
-        popupWebView = WKWebView(frame: view.bounds, configuration: configuration)
+        popupWebView = WKWebView(frame: bounds, configuration: configuration)
         popupWebView!.tap_allowInspectionInDebugBuilds()
         popupWebView!.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         popupWebView!.navigationDelegate = self
         popupWebView!.uiDelegate = self
-        
+
         closePopupImageView = .init(frame: .init(x: 16, y: 16, width: 32, height: 32))
         closePopupImageView.removeFromSuperview()
         closePopupImageView.image = UIImage(named: "Close",in: Bundle.currentBundle, with: nil)
         closePopupImageView.tintColor = .white
         closePopupImageView.contentMode = .scaleAspectFit
-        
+
         let closeCareemPayPopupGesture = UITapGestureRecognizer(target: self, action: #selector(self.closeCareemPayPopup(recognizer:)))
-        
+
         closeCareemPayPopupGesture.numberOfTapsRequired = 1
 
         closePopupImageView.isUserInteractionEnabled = true
         closePopupImageView.addGestureRecognizer(closeCareemPayPopupGesture)
-        
-        
-        view.addSubview(popupWebView!)
-        view.addSubview(closePopupImageView)
-        
+
+
+        addSubview(popupWebView!)
+        addSubview(closePopupImageView)
+
         return popupWebView!
     }
-    
+
     /// Will close the careempay popup
     @objc func closeCareemPayPopup(recognizer : UITapGestureRecognizer)
     {
@@ -194,7 +201,7 @@ extension ThreeDSView: WKUIDelegate {
             self.popupWebView?.removeFromSuperview()
         }
     }
-    
+
     //MARK: To close popup
     func webViewDidClose(_ webView: WKWebView) {
         if webView == popupWebView {

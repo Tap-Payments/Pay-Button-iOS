@@ -11,11 +11,11 @@ internal class PayButtonSdk: PayButtonBaseView {
     internal var webView: WKWebView = .init()
     /// keeps a hold of the loaded web sdk configurations url
     internal var currentlyLoadedConfigurations:[String:Any]?
-    /// The view that will present full screen 3ds flow
+    /// The 3ds/redirection page, shown as a `SwiftEntryKit` entry over the button's own screen
     internal var threeDsView:ThreeDSView?
     /// Holds the window the card form opened with `window.open`, ex the click to pay identity flow,
     /// so it can be dismissed again once the page closes it
-    internal var popupViewController:PayButtonPopupViewController?
+    internal var popupView:PayButtonPopupView?
     /// Runs a passkey authentication in the system browser. Held for the lifetime of the process,
     /// letting go of it early closes the browser
     internal var threeDSPasskeySession:ThreeDSPasskeySession?
@@ -137,15 +137,14 @@ internal class PayButtonSdk: PayButtonBaseView {
         let work:() -> Void = { [weak self] in
             guard let self = self else { return }
 
-            if let threeDsView:ThreeDSView = self.threeDsView {
+            if self.threeDsView != nil {
                 self.threeDsView = nil
-                // Ask the presenter, a page presenting something of its own would take that down instead
-                threeDsView.presentingViewController?.dismiss(animated: false)
+                TapBrowserChrome.dismiss(name: TapBrowserChrome.threeDSEntryName)
             }
 
-            if let popup:PayButtonPopupViewController = self.popupViewController {
-                self.popupViewController = nil
-                popup.presentingViewController?.dismiss(animated: false)
+            if self.popupView != nil {
+                self.popupView = nil
+                TapBrowserChrome.dismiss(name: TapBrowserChrome.popupEntryName)
             }
 
             if let scanner:CardScannerViewController = self.cardScanner {

@@ -11,7 +11,7 @@ import WebKit
 import SharedDataModels_iOS
 
 extension PayButtonSdk:WKUIDelegate {
-    
+
     /// The card form asked for a new window.
     ///
     /// The web view has to be built out of the `configuration` WebKit passed us and handed back, that is what
@@ -24,7 +24,7 @@ extension PayButtonSdk:WKUIDelegate {
             webView.load(navigationAction.request)
             return nil
         }
-        
+
         // Webkit's own configuration, so the viewport goes on before the popup is built out of it
         configuration.tap_disableZoom()
         let popupWebView:WKWebView = .init(frame: .zero, configuration: configuration)
@@ -32,30 +32,30 @@ extension PayButtonSdk:WKUIDelegate {
         // The popup fires the same web sdk callbacks and can open windows of its own
         popupWebView.navigationDelegate = self
         popupWebView.uiDelegate = self
-        
-        // The button itself is only as tall as the form, the identity flow needs the whole screen
-        let popupViewController:PayButtonPopupViewController = .init(popupWebView: popupWebView)
-        popupViewController.selectedLocale = currentlyLoadedConfigurations?.getButtonLocale() ?? "en"
-        popupViewController.popupClosedByUser = { [weak self] in
-            self?.popupViewController = nil
-            self?.delegate?.onCanceled?()
+
+        let popup:PayButtonPopupView = .init(popupWebView: popupWebView)
+        popup.selectedLocale = currentlyLoadedConfigurations?.getButtonLocale() ?? "en"
+        popup.popupClosedByUser = { [weak self] in
+            self?.popupView = nil
+            TapBrowserChrome.dismiss(name: TapBrowserChrome.popupEntryName) {
+                self?.delegate?.onCanceled?()
+            }
         }
-        self.popupViewController = popupViewController
-        
+        self.popupView = popup
+
         DispatchQueue.main.async {
-            UIApplication.shared.topViewController()?.present(popupViewController, animated: true)
+            TapBrowserChrome.present(popup, name: TapBrowserChrome.popupEntryName)
         }
-        
+
         return popupWebView
     }
-    
+
     /// The page closed the window it opened, ex click to pay finished and handed its result to the form
     public func webViewDidClose(_ webView: WKWebView) {
-        guard webView === popupViewController?.popupWebView else { return }
-        let closingPopup:PayButtonPopupViewController? = popupViewController
-        popupViewController = nil
+        guard webView === popupView?.popupWebView else { return }
+        popupView = nil
         DispatchQueue.main.async {
-            closingPopup?.dismiss(animated: true)
+            TapBrowserChrome.dismiss(name: TapBrowserChrome.popupEntryName)
         }
     }
 }

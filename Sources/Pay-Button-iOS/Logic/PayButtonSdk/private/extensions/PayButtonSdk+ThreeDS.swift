@@ -20,7 +20,6 @@ extension PayButtonSdk {
     func showRedirectionView(for redirection:Redirection) {
         // This means we are ok to start the authentication process
         threeDsView = .init()
-        TapBrowserChrome.applyPresentation(to: threeDsView!)
         // Set to web view the needed urls
         /// The redirect url scheme
         threeDsView?.redirectUrl = payButtonType.tapRedirectionSchemeUrl()
@@ -29,16 +28,17 @@ extension PayButtonSdk {
         threeDsView?.selectedLocale = currentlyLoadedConfigurations?.getButtonLocale() ?? "en"
         // Set to web view what should it when the process is canceled by the user
         threeDsView?.threeDSCanceled = {
-            // dismiss the threeds page
-            self.threeDsView?.dismiss(animated: true,completion: {
+            self.threeDsView = nil
+            TapBrowserChrome.dismiss(name: TapBrowserChrome.threeDSEntryName) {
                 self.handleOnCancel()
-            })
+            }
         }
         // Hide or show the powered by tap based on coming parameter
         threeDsView?.poweredByTapView.isHidden = false
         // Set to web view what should it when the process is completed by the user
         threeDsView?.redirectionReached = { redirectionUrl in
-            self.threeDsView?.dismiss(animated: true) {
+            self.threeDsView = nil
+            TapBrowserChrome.dismiss(name: TapBrowserChrome.threeDSEntryName) {
                 DispatchQueue.main.async {
                     self.passRedirectionDataToSDK(rediectionUrl: redirectionUrl)
                 }
@@ -48,11 +48,11 @@ extension PayButtonSdk {
         threeDsView?.idleForWhile = {
             self.threeDsView?.idleForWhile = {}
             DispatchQueue.main.async {
-                UIApplication.shared.topViewController()!.present(self.threeDsView!, animated: true)
+                guard let threeDsView = self.threeDsView else { return }
+                TapBrowserChrome.present(threeDsView, name: TapBrowserChrome.threeDSEntryName)
             }
         }
         // Tell it to start rendering 3ds content in background
-        //SwiftEntryKit.display(entry: threeDsView, using: threeDsView.swiftEntryAttributes())
         threeDsView?.startLoading()
     }
 
@@ -83,19 +83,20 @@ extension PayButtonSdk {
         }
         
         threeDsView = .init()
-        TapBrowserChrome.applyPresentation(to: threeDsView!)
         threeDsView?.redirectionData = .init(url: threeDsUrl, id: nil, powered: cardRedirection.powered, stopRedirection: false)
         // Watch for the card sdk's own keyword instead of the shared redirection one
         threeDsView?.cardRedirectionKeyword = cardRedirection.keyword
         threeDsView?.selectedLocale = currentlyLoadedConfigurations?.getButtonLocale() ?? "en"
         threeDsView?.poweredByTapView.isHidden = !(cardRedirection.powered ?? true)
         threeDsView?.threeDSCanceled = {
-            self.threeDsView?.dismiss(animated: true, completion: {
+            self.threeDsView = nil
+            TapBrowserChrome.dismiss(name: TapBrowserChrome.threeDSEntryName) {
                 self.handleCardAuthenticationCanceled()
-            })
+            }
         }
         threeDsView?.redirectionReached = { redirectionUrl in
-            self.threeDsView?.dismiss(animated: true) {
+            self.threeDsView = nil
+            TapBrowserChrome.dismiss(name: TapBrowserChrome.threeDSEntryName) {
                 DispatchQueue.main.async {
                     self.passCardAuthenticationToSDK(redirectionUrl: redirectionUrl)
                 }
@@ -104,7 +105,8 @@ extension PayButtonSdk {
         threeDsView?.idleForWhile = {
             self.threeDsView?.idleForWhile = {}
             DispatchQueue.main.async {
-                UIApplication.shared.topViewController()!.present(self.threeDsView!, animated: true)
+                guard let threeDsView = self.threeDsView else { return }
+                TapBrowserChrome.present(threeDsView, name: TapBrowserChrome.threeDSEntryName)
             }
         }
         threeDsView?.startLoading()
