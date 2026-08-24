@@ -24,9 +24,13 @@ class PayButtonSettingsViewController: FormViewController {
         form +++ Section("button")
         <<< AlertRow<String>("button.type"){ row in
             row.title = "Button"
-            row.options = PayButtonTypeEnum.allCases.map{ $0.toString() }
-            row.value = PayButtonExample.intentRequestRequest.config?.acceptance?.supportedPaymentMethods?.first?.uppercased() ?? "KNET"
+            // Qpay shows as naps in the demo only, nothing about the sdk's own QPAY type changes.
+            // The picker's value is what gets sent as the accepted payment method either way
+            row.options = PayButtonTypeEnum.allCases.map{ PayButtonExample.demoLabel(for: $0.toString()) }
+            row.value = PayButtonExample.demoLabel(for: PayButtonExample.selectedPaymentMethod.isEmpty ? "KNET" : PayButtonExample.selectedPaymentMethod)
             row.onChange { [weak self] row in
+                // The picker's value is what actually gets sent as the accepted payment method,
+                // naps included .. there is nowhere else naps needs to be translated back from
                 let selectedMethod:String = row.value ?? "KNET"
                 PayButtonExample.intentRequestRequest.config?.acceptance?.supportedPaymentMethods = [selectedMethod]
                 // The token scopes belong to one wallet each, so the scope list follows the button

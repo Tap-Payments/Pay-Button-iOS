@@ -311,6 +311,18 @@ class PayButtonExample: UIViewController {
         return intentRequestRequest.config?.acceptance?.supportedPaymentMethods?.first?.uppercased() ?? ""
     }
 
+    /// What the sdk's own qpay type is called in this demo's picker, and nowhere else. Every other
+    /// case shows and sends its own name unchanged
+    private static let demoLabelsByPaymentMethod:[String:String] = [
+        "QPAY": "NAPS"
+    ]
+
+    /// The name a payment method shows under in the demo's picker
+    /// - Parameter paymentMethod: The sdk's own name for it, ex what `PayButtonTypeEnum.toString()` returns
+    static func demoLabel(for paymentMethod:String) -> String {
+        return demoLabelsByPaymentMethod[paymentMethod.uppercased()] ?? paymentMethod
+    }
+
     /// The currency a button has to be asked for in, when it only takes one. Paypal is not enabled
     /// on the sandbox merchant's local currency, so an order in anything else is refused
     static let currenciesByPaymentMethod:[String:String] = [
