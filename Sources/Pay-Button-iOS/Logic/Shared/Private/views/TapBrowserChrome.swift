@@ -28,11 +28,16 @@ internal enum TapBrowserChrome {
         controller.isModalInPresentation = true
     }
 
-    /// Applies the look to the page's own view. Opaque, so nothing behind the sheet shows through a
-    /// strip the bar and the web view do not cover between them
+    /// Applies the look to the page's own view.
+    ///
+    /// Clear, not opaque. The bar and the web view between them cover every pixel of it, so nothing
+    /// of the sheet's own view is ever left showing on its own .. but the bar carries a real backdrop
+    /// blur, and a blur behind an opaque view has nothing to blur but that opaque colour. Clear lets
+    /// it reach past the sheet's own view to whatever the presentation left dimmed behind it, which
+    /// is what makes the header read as glass instead of a flat tinted rectangle
     /// - Parameter controller: The page being laid out
     internal static func applyBackground(to controller: UIViewController) {
-        controller.view.backgroundColor = .white
+        controller.view.backgroundColor = .clear
     }
 
     /// Applies the look to a web view, whoever built it
