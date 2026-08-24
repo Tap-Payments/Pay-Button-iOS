@@ -59,11 +59,11 @@ internal enum TapBrowserChrome {
         attributes.entranceAnimation = .init(translate: .init(duration: 0.35))
         attributes.exitAnimation = .init(translate: .init(duration: 0.25))
         attributes.shadow = .active(with: .init(color: .black, opacity: 0.25, radius: 5, offset: .zero))
-        attributes.positionConstraints.size = .init(width: .fill, height: .ratio(value: 0.85))
+        attributes.positionConstraints.size = .init(width: .fill, height: .ratio(value: 0.97))
         attributes.entryInteraction = .absorbTouches
         attributes.screenInteraction = .forward
         attributes.roundCorners = .all(radius: 8)
-        attributes.positionConstraints.verticalOffset = -50
+        attributes.positionConstraints.verticalOffset = 0
         attributes.positionConstraints.safeArea = .overridden
         attributes.scroll = .enabled(swipeable: false, pullbackAnimation: .jolt)
 
