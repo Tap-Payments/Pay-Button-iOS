@@ -112,6 +112,53 @@ Hj+N6UWFOYK98Xi+sQIDAQAB
         } catch {}
     }
 
+    ///  Turns the card nfc input off in an intent configuration, wherever it sits in one.
+    ///
+    ///  Reading a contactless card needs Core NFC's iso 7816 reader session, which needs an
+    ///  entitlement carrying the payment aids that Apple does not hand out for general card reading.
+    ///  So the form can render the nfc option on ios and tapping it can never lead anywhere. Card-iOS
+    ///  forces the same flag off for the same reason rather than shipping a control that does nothing.
+    ///
+    ///  The flag lives at `config.features.alternative_card_inputs.card_nfc` in an intent request, and
+    ///  is looked for at the root as well since a caller can hand over the config object on its own.
+    ///  A configuration that never asked for nfc is returned untouched rather than having the key
+    ///  added to it, and a merchant creating their intent on their own backend is past this entirely
+    ///  - Parameter config: The intent configuration as the merchant passed it
+    ///  - Returns: The same configuration with card nfc off
+    static func turnOffCardNfc(in config:[String:Any]) -> [String:Any] {
+        // Wherever `features` turns out to live, the rest of the path below it is the same
+        if var nested:[String:Any] = config["config"] as? [String:Any],
+           let features:[String:Any] = nested["features"] as? [String:Any],
+           let turnedOff:[String:Any] = withCardNfcOff(in: features) {
+            nested["features"] = turnedOff
+            var updated:[String:Any] = config
+            updated["config"] = nested
+            return updated
+        }
+
+        if let features:[String:Any] = config["features"] as? [String:Any],
+           let turnedOff:[String:Any] = withCardNfcOff(in: features) {
+            var updated:[String:Any] = config
+            updated["features"] = turnedOff
+            return updated
+        }
+
+        return config
+    }
+
+    ///  Turns card nfc off inside a `features` object
+    ///  - Parameter features: The features object to look in
+    ///  - Returns: The features with card nfc off, or nil when it never asked for it
+    private static func withCardNfcOff(in features:[String:Any]) -> [String:Any]? {
+        guard var alternativeCardInputs:[String:Any] = features["alternative_card_inputs"] as? [String:Any],
+              alternativeCardInputs["card_nfc"] != nil else { return nil }
+
+        alternativeCardInputs["card_nfc"] = false
+        var updated:[String:Any] = features
+        updated["alternative_card_inputs"] = alternativeCardInputs
+        return updated
+    }
+
     ///  Creates an intent out of the passed intent configuration object. Mirrors the web sdk's create intent flow:
     ///  the configuration is posted as is to the checkout mw and the sdk info is attached as a sibling `sdk_info` key
     ///  - Parameter from config: The intent configuration object as passed by the merchant
@@ -121,7 +168,7 @@ Hj+N6UWFOYK98Xi+sQIDAQAB
             // Store for further reference
             currentSdkInfo = sdkInfo
             // The web sdk posts the configuration at the root and adds the sdk info next to it
-            var body:[String:Any] = config
+            var body:[String:Any] = turnOffCardNfc(in: config)
             body["sdk_info"] = sdkInfo.sdkInfo?.dictionary ?? [:]
             let data = try JSONSerialization.data(withJSONObject: body, options: [])
             // construct the create intent url
