@@ -44,7 +44,11 @@ extension PayButtonSdk:WKUIDelegate {
         self.popupView = popup
 
         DispatchQueue.main.async {
-            TapBrowserChrome.present(popup, name: TapBrowserChrome.popupEntryName)
+            TapBrowserChrome.present(popup, name: TapBrowserChrome.popupEntryName) { [weak self] in
+                // Same as the popup's back button, the payer walked away from the window
+                self?.popupView = nil
+                self?.delegate?.onCanceled?()
+            }
         }
 
         return popupWebView

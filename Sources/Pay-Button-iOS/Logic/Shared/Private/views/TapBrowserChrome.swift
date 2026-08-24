@@ -39,14 +39,32 @@ internal enum TapBrowserChrome {
     /// The name a window the web sdk opened with `window.open` is shown under
     internal static let popupEntryName = "TapPopup"
 
+    /// The entries the sdk is taking down itself, by name.
+    ///
+    /// `didDisappear` fires for every dismissal, the payer's and the sdk's alike, and only the
+    /// payer's means they gave up .. the sdk's already reported whatever outcome it took the sheet
+    /// down for. A name in here is one the sdk asked to close, so its `didDisappear` is not a cancel.
+    ///
+    /// Cleared in `didDisappear` and nowhere else. `SwiftEntryKit` runs a dismissal's completion
+    /// handler before that entry's `didDisappear`, so clearing it there would hand the guard an
+    /// already empty set and report every one of the sdk's own dismissals as the payer walking away
+    private static var beingDismissedBySdk: Set<String> = []
+
     /// Shows a page the way every sdk page is shown.
     ///
-    /// A floating card over the button's own screen, dimmed rather than replaced, the payer can not
-    /// swipe away since a half dismissed page leaves whatever it hosts unfinished. Showing the same
-    /// name twice replaces what was there instead of stacking a second one on top of it
+    /// A floating card over the button's own screen, dimmed rather than replaced. The payer can
+    /// swipe it down or tap the dimmed strip above it to leave, which means what the bar's back
+    /// button means and is reported the same way, so nothing is left hanging waiting on a page that
+    /// is gone. Showing the same name twice replaces what was there rather than stacking on it
     /// - Parameter entry: The page to show, already laid out via `install`
     /// - Parameter name: `threeDSEntryName` or `popupEntryName`
-    internal static func present(_ entry: UIView, name: String) {
+    /// - Parameter onDismissedByPayer: Run when the payer swipes the sheet away or taps outside it,
+    /// the same thing the bar's back button means. Not run when the sdk takes the sheet down itself
+    internal static func present(_ entry: UIView, name: String, onDismissedByPayer: @escaping () -> Void) {
+        // Whatever this name meant last time it was on screen, it is being shown now, so it is not
+        // being taken down. Keeps a mark that never got its `didDisappear` from outliving its sheet
+        beingDismissedBySdk.remove(name)
+
         var attributes: EKAttributes = .bottomFloat
         attributes.name = name
         attributes.entryBackground = .clear
@@ -61,11 +79,19 @@ internal enum TapBrowserChrome {
         attributes.shadow = .active(with: .init(color: .black, opacity: 0.25, radius: 5, offset: .zero))
         attributes.positionConstraints.size = .init(width: .fill, height: .ratio(value: 0.92))
         attributes.entryInteraction = .absorbTouches
-        attributes.screenInteraction = .forward
+        // Tapping outside the sheet closes it, the same as the back button. Forwarding those taps to
+        // the button's own screen instead let the payer press things behind a payment in progress
+        attributes.screenInteraction = .dismiss
         attributes.roundCorners = .all(radius: 8)
         attributes.positionConstraints.verticalOffset = 0
         attributes.positionConstraints.safeArea = .overridden
-        attributes.scroll = .enabled(swipeable: false, pullbackAnimation: .jolt)
+        // Swiping a bottom sheet down to close it is what a bottom sheet does
+        attributes.scroll = .enabled(swipeable: true, pullbackAnimation: .jolt)
+        attributes.lifecycleEvents.didDisappear = {
+            // The sdk's own dismissals have already reported their outcome, this is only the payer's
+            guard beingDismissedBySdk.remove(name) == nil else { return }
+            onDismissedByPayer()
+        }
 
         SwiftEntryKit.display(entry: entry, using: attributes)
     }
@@ -74,7 +100,16 @@ internal enum TapBrowserChrome {
     /// - Parameter name: `threeDSEntryName` or `popupEntryName`
     /// - Parameter completion: Run once it is off screen
     internal static func dismiss(name: String, then completion: @escaping () -> Void = {}) {
-        SwiftEntryKit.dismiss(.specific(entryName: name), with: completion)
+        // Marked before it goes, so its `didDisappear` knows the sdk did this and not the payer.
+        // Only worth marking when there is something to take down .. a page can finish before it is
+        // ever shown, ex the 3ds page reaching its redirect while still loading in the background,
+        // and a mark left by a dismissal that never happened would swallow the next real one
+        if SwiftEntryKit.isCurrentlyDisplaying(entryNamed: name) {
+            beingDismissedBySdk.insert(name)
+        }
+        SwiftEntryKit.dismiss(.specific(entryName: name)) {
+            completion()
+        }
     }
 
     /// Applies the look to the page's own view.

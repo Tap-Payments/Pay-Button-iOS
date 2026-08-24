@@ -50,7 +50,12 @@ extension PayButtonSdk {
             self.threeDsView?.idleForWhile = {}
             DispatchQueue.main.async {
                 guard let threeDsView = self.threeDsView else { return }
-                TapBrowserChrome.present(threeDsView, name: TapBrowserChrome.threeDSEntryName)
+                TapBrowserChrome.present(threeDsView, name: TapBrowserChrome.threeDSEntryName) {
+                    // Swiped away or tapped outside, which is the payer saying the same thing the
+                    // back button says
+                    self.threeDsView = nil
+                    self.handleOnCancel()
+                }
             }
         }
         // Tell it to start rendering 3ds content in background
@@ -108,7 +113,11 @@ extension PayButtonSdk {
             self.threeDsView?.idleForWhile = {}
             DispatchQueue.main.async {
                 guard let threeDsView = self.threeDsView else { return }
-                TapBrowserChrome.present(threeDsView, name: TapBrowserChrome.threeDSEntryName)
+                TapBrowserChrome.present(threeDsView, name: TapBrowserChrome.threeDSEntryName) {
+                    // Same as its back button
+                    self.threeDsView = nil
+                    self.handleCardAuthenticationCanceled()
+                }
             }
         }
         threeDsView?.startLoading()
