@@ -33,8 +33,9 @@ extension PayButtonSdk {
                 self.handleOnCancel()
             }
         }
-        // Hide or show the powered by tap based on coming parameter
-        threeDsView?.poweredByTapView.isHidden = false
+        // The back button stays either way, there has to be a way out of the page regardless.
+        // Only the logo answers to `powered`
+        threeDsView?.poweredByTapView.showsPoweredByTapImage = redirection.powered ?? true
         // Set to web view what should it when the process is completed by the user
         threeDsView?.redirectionReached = { redirectionUrl in
             self.threeDsView = nil
@@ -87,7 +88,8 @@ extension PayButtonSdk {
         // Watch for the card sdk's own keyword instead of the shared redirection one
         threeDsView?.cardRedirectionKeyword = cardRedirection.keyword
         threeDsView?.selectedLocale = currentlyLoadedConfigurations?.getButtonLocale() ?? "en"
-        threeDsView?.poweredByTapView.isHidden = !(cardRedirection.powered ?? true)
+        // The back button stays either way, only the logo answers to `powered`
+        threeDsView?.poweredByTapView.showsPoweredByTapImage = cardRedirection.powered ?? true
         threeDsView?.threeDSCanceled = {
             self.threeDsView = nil
             TapBrowserChrome.dismiss(name: TapBrowserChrome.threeDSEntryName) {

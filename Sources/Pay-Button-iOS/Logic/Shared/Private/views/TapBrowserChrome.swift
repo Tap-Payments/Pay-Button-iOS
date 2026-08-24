@@ -51,14 +51,15 @@ internal enum TapBrowserChrome {
         attributes.name = name
         attributes.entryBackground = .clear
         // Dims the button's own screen behind the entry rather than blurring it .. card-ios tried a
-        // visual effect here and left it turned off, a flat colour is what actually ships
+        // visual effect here and left it turned off, a flat colour is what actually ships. The blur
+        // belongs to the bar alone, not to the whole screen
         attributes.screenBackground = .color(color: .init(light: .init(white: 0, alpha: 0.6),
                                                            dark: .init(red: 0.108, green: 0.108, blue: 0.108, alpha: 0.75)))
         attributes.displayDuration = .infinity
         attributes.entranceAnimation = .init(translate: .init(duration: 0.35))
         attributes.exitAnimation = .init(translate: .init(duration: 0.25))
         attributes.shadow = .active(with: .init(color: .black, opacity: 0.25, radius: 5, offset: .zero))
-        attributes.positionConstraints.size = .init(width: .fill, height: .ratio(value: 0.90))
+        attributes.positionConstraints.size = .init(width: .fill, height: .ratio(value: 0.85))
         attributes.entryInteraction = .absorbTouches
         attributes.screenInteraction = .forward
         attributes.roundCorners = .all(radius: 8)
