@@ -16,14 +16,19 @@ class PoweredByTapView: UIView {
     var poweredByTapImageView: UIImageView = .init(frame: .zero)
     /// The bar's own backdrop blur, of whatever sits directly behind the bar and nothing else.
     ///
-    /// A system material, so it follows light and dark mode on its own rather than being pinned to
-    /// one of them. It carries the blur, `themeController`'s tint carries the contrast .. the two
-    /// are layered rather than either one doing both
+    /// A public system material. Card-iOS reaches its blur through `_UICustomBlurEffect` and private
+    /// key paths, and copying that verbatim here rendered the bar solid black .. measured, rgb 0
+    /// against Card-iOS's own 89. It resolves in Card-iOS and does not resolve here, which is what
+    /// undocumented api does. The material blurs, `tintOverBlur` supplies the step, and between them
+    /// they land where Card-iOS lands without depending on anything Apple can withdraw
     var blurView: UIVisualEffectView = .init(effect: UIBlurEffect(style: .systemThinMaterial))
-    /// Laid over the blur, not under it, so white text reads whatever the blur resolved to
-    var contrastTintView: UIView = {
+    /// The step between the bar and the dim behind it, measured to land where Card-iOS's does.
+    ///
+    /// A plain sibling over the blur rather than the effect view's own tint .. its overlay does not
+    /// exist on current ios and anything put in `contentView` is dropped, both confirmed in the live
+    /// view tree, so neither is somewhere a tint can be relied on to render
+    var tintOverBlur: UIView = {
         let tint: UIView = .init(frame: .zero)
-        tint.backgroundColor = UIColor(white: 0, alpha: 0.5)
         tint.isUserInteractionEnabled = false
         return tint
     }()
@@ -58,10 +63,21 @@ class PoweredByTapView: UIView {
     private func commonInit() {
         setupConstraints()
         themeController()
+        themeVisualEffectView()
         themeBackButton()
         themePoweredByTap()
         addBackButtonActionHandler()
         localize()
+    }
+
+    /// The blur's tint is picked per appearance, so it has to be picked again when the appearance
+    /// changes under a bar that is already on screen. Card-iOS reads the style once at init and
+    /// never revisits it, which is the one part of it not worth copying
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        guard #available(iOS 13.0, *),
+              traitCollection.userInterfaceStyle != previousTraitCollection?.userInterfaceStyle else { return }
+        themeVisualEffectView()
     }
 
     /// Creates an event listener when clicking on the back button
@@ -78,12 +94,19 @@ class PoweredByTapView: UIView {
 extension PoweredByTapView {
     /// Theme the view level.
     ///
-    /// Clear .. `blurView` fills the bar's whole bounds and is what actually blurs what is behind it.
-    /// A colour on the view itself would sit between the blur and the screen and be the only thing
-    /// the blur ever saw, which is exactly how this ended up looking flat before. The contrast the
-    /// white text needs comes from a tint layered *over* the blur instead, in `setupConstraints`
+    /// Clear .. `blurView` covers the bar's whole bounds, so a colour here would only ever be a
+    /// thing behind the blur rather than something anyone sees. The darkening the white text needs
+    /// comes from `tintOverBlur`, over the blur, where it actually renders
     func themeController() {
         backgroundColor = .clear
+    }
+
+    /// Theme the blur view level
+    func themeVisualEffectView() {
+        blurView.effect = UIBlurEffect(style: traitCollection.userInterfaceStyle == .dark ? .systemThinMaterialDark : .systemThinMaterial)
+        // Card-iOS's dark tint is 0.06/0.32, but its blur resolves differently .. these are the
+        // numbers that put this bar at the same measured value as its bar
+        tintOverBlur.backgroundColor = UIColor(white: 0, alpha: traitCollection.userInterfaceStyle == .dark ? 0.32 : 0.08)
     }
 
 
@@ -109,15 +132,16 @@ extension PoweredByTapView {
         backView.addSubview(backIconImageView)
         backView.addSubview(backLabel)
         backView.addSubview(backButton)
-        // Blur first, then the tint over it, then the content over both .. the tint has to sit above
-        // the blur so it darkens the blurred result rather than being the thing that gets blurred
         addSubview(blurView)
-        blurView.contentView.addSubview(contrastTintView)
+        // A plain sibling over the blur, not inside its `contentView` .. the effect view's own
+        // overlay does not exist on current ios, and subviews put into `contentView` are dropped
+        // when the private path swaps `effect` out from under them. Verified in the live view tree
+        addSubview(tintOverBlur)
         addSubview(poweredByTapImageView)
         addSubview(backView)
 
         blurView.translatesAutoresizingMaskIntoConstraints = false
-        contrastTintView.translatesAutoresizingMaskIntoConstraints = false
+        tintOverBlur.translatesAutoresizingMaskIntoConstraints = false
         backView.translatesAutoresizingMaskIntoConstraints = false
         backIconImageView.translatesAutoresizingMaskIntoConstraints = false
         backLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -131,10 +155,10 @@ extension PoweredByTapView {
             blurView.topAnchor.constraint(equalTo: self.topAnchor),
             blurView.bottomAnchor.constraint(equalTo: self.bottomAnchor),
 
-            contrastTintView.leadingAnchor.constraint(equalTo: blurView.contentView.leadingAnchor),
-            contrastTintView.trailingAnchor.constraint(equalTo: blurView.contentView.trailingAnchor),
-            contrastTintView.topAnchor.constraint(equalTo: blurView.contentView.topAnchor),
-            contrastTintView.bottomAnchor.constraint(equalTo: blurView.contentView.bottomAnchor)
+            tintOverBlur.leadingAnchor.constraint(equalTo: self.leadingAnchor),
+            tintOverBlur.trailingAnchor.constraint(equalTo: self.trailingAnchor),
+            tintOverBlur.topAnchor.constraint(equalTo: self.topAnchor),
+            tintOverBlur.bottomAnchor.constraint(equalTo: self.bottomAnchor)
         ]
 
         // Anchored to the bottom, not the top .. the view itself now reaches up to cover the safe
