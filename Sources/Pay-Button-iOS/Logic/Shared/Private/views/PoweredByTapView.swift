@@ -128,11 +128,13 @@ extension PoweredByTapView {
             blurView.bottomAnchor.constraint(equalTo: self.bottomAnchor)
         ]
         
+        // Anchored to the bottom, not the top .. the view itself now reaches up to cover the safe
+        // area above it too, and the row has to stay put at the bottom of that, where it always was
         let constraintsPoweredImage = [
             poweredByTapImageView.heightAnchor.constraint(equalToConstant: 30),
             poweredByTapImageView.widthAnchor.constraint(equalToConstant: 112),
             poweredByTapImageView.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -16),
-            poweredByTapImageView.topAnchor.constraint(equalTo: self.topAnchor, constant: 9),
+            poweredByTapImageView.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -17),
         ]
        
         let constraintsBackView = [

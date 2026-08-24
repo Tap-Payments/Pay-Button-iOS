@@ -77,8 +77,12 @@ internal enum TapBrowserChrome {
 
             bar.leadingAnchor.constraint(equalTo: container.leadingAnchor),
             bar.trailingAnchor.constraint(equalTo: container.trailingAnchor),
-            bar.heightAnchor.constraint(equalToConstant: barHeight),
-            bar.topAnchor.constraint(equalTo: container.safeAreaLayoutGuide.topAnchor)
+            // The bar's top goes all the way to the physical top of the sheet, notch and all, so the
+            // dark blur reads as one continuous header rather than stopping short with a plain strip
+            // of background showing above it. Its bottom stays where it always was, barHeight below
+            // the safe area, so the page underneath is untouched
+            bar.topAnchor.constraint(equalTo: container.topAnchor),
+            bar.bottomAnchor.constraint(equalTo: container.safeAreaLayoutGuide.topAnchor, constant: barHeight)
         ])
 
         DispatchQueue.main.async {
