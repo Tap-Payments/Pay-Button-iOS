@@ -159,6 +159,58 @@ Hj+N6UWFOYK98Xi+sQIDAQAB
         return updated
     }
 
+    ///  The names a payment method is asked for by, against the one the mw answers to.
+    ///
+    ///  Qatar's national wallet is NAPS to everyone who uses it and QPAY to the mw. An integrator
+    ///  passes the name they know, and an intent naming a method the mw does not have leaves the
+    ///  button with no page to render, so the sdk translates rather than making every caller
+    ///  remember which of the two names this particular backend wants
+    private static let paymentMethodAliases:[String:String] = [
+        "NAPS": "QPAY"
+    ]
+
+    ///  Renames any aliased payment method in an intent configuration to the name the mw knows,
+    ///  wherever the acceptance object sits in one.
+    ///
+    ///  Lives at `config.acceptance.supported_payment_methods` in an intent request, and is looked
+    ///  for at the root as well since a caller can hand over the config object on its own. A
+    ///  configuration that names nothing aliased is returned untouched, and a merchant creating
+    ///  their intent on their own backend is past this entirely
+    ///  - Parameter config: The intent configuration as the merchant passed it
+    ///  - Returns: The same configuration, asking for the names the mw answers to
+    static func resolvePaymentMethodAliases(in config:[String:Any]) -> [String:Any] {
+        // Wherever `acceptance` turns out to live, the rest of the path below it is the same
+        if var nested:[String:Any] = config["config"] as? [String:Any],
+           let acceptance:[String:Any] = nested["acceptance"] as? [String:Any],
+           let resolved:[String:Any] = withAliasesResolved(in: acceptance) {
+            nested["acceptance"] = resolved
+            var updated:[String:Any] = config
+            updated["config"] = nested
+            return updated
+        }
+
+        if let acceptance:[String:Any] = config["acceptance"] as? [String:Any],
+           let resolved:[String:Any] = withAliasesResolved(in: acceptance) {
+            var updated:[String:Any] = config
+            updated["acceptance"] = resolved
+            return updated
+        }
+
+        return config
+    }
+
+    ///  Renames the aliased payment methods inside an `acceptance` object
+    ///  - Parameter acceptance: The acceptance object to look in
+    ///  - Returns: The acceptance asking for the mw's own names, or nil when it named nothing aliased
+    private static func withAliasesResolved(in acceptance:[String:Any]) -> [String:Any]? {
+        guard let methods:[String] = acceptance["supported_payment_methods"] as? [String],
+              methods.contains(where: { paymentMethodAliases[$0.uppercased()] != nil }) else { return nil }
+
+        var updated:[String:Any] = acceptance
+        updated["supported_payment_methods"] = methods.map { paymentMethodAliases[$0.uppercased()] ?? $0 }
+        return updated
+    }
+
     ///  Creates an intent out of the passed intent configuration object. Mirrors the web sdk's create intent flow:
     ///  the configuration is posted as is to the checkout mw and the sdk info is attached as a sibling `sdk_info` key
     ///  - Parameter from config: The intent configuration object as passed by the merchant
@@ -168,7 +220,7 @@ Hj+N6UWFOYK98Xi+sQIDAQAB
             // Store for further reference
             currentSdkInfo = sdkInfo
             // The web sdk posts the configuration at the root and adds the sdk info next to it
-            var body:[String:Any] = turnOffCardNfc(in: config)
+            var body:[String:Any] = resolvePaymentMethodAliases(in: turnOffCardNfc(in: config))
             body["sdk_info"] = sdkInfo.sdkInfo?.dictionary ?? [:]
             let data = try JSONSerialization.data(withJSONObject: body, options: [])
             // construct the create intent url
