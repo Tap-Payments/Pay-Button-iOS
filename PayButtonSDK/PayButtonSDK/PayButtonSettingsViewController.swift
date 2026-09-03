@@ -349,6 +349,45 @@ class PayButtonSettingsViewController: FormViewController {
             row.value = PayButtonExample.intentRequestRequest.config?.features?.alternativeCardInputs?.cardNFC ?? true
             row.onChange { row in PayButtonExample.intentRequestRequest.config?.features?.alternativeCardInputs?.cardNFC = row.value ?? true }
         }
+        <<< MultipleSelectorRow<String>("features.shippingContactFields"){ row in
+            row.title = "shipping contact fields"
+            row.options = ["postalAddress", "name", "email", "phone", "phoneticName"]
+            row.value = Set(PayButtonExample.intentRequestRequest.config?.features?.shippingContactFields ?? ["postalAddress", "name", "email"])
+            row.onChange { row in PayButtonExample.intentRequestRequest.config?.features?.shippingContactFields = Array(row.value ?? ["postalAddress", "name", "email"]) }
+        }
+        <<< SwitchRow("features.supportsCouponCode"){ row in
+            row.title = "supports coupon code"
+            row.value = PayButtonExample.intentRequestRequest.config?.features?.supportsCouponCode ?? true
+            row.onChange { row in PayButtonExample.intentRequestRequest.config?.features?.supportsCouponCode = row.value ?? true }
+        }
+        <<< TextRow("features.couponCode"){ row in
+            row.title = "coupon code"
+            row.placeholder = "Leave empty for none"
+            row.value = PayButtonExample.intentRequestRequest.config?.features?.couponCode ?? ""
+            row.onChange { row in PayButtonExample.intentRequestRequest.config?.features?.couponCode = row.value ?? "" }
+        }
+        <<< TextRow("features.shippingMethods.standard.amount"){ row in
+            row.title = "standard shipping amount"
+            row.value = PayButtonExample.intentRequestRequest.config?.features?.shippingMethods?.first(where: { $0.identifier == "standard" })?.amount ?? "0.00"
+            row.onChange { row in
+                let methods = PayButtonExample.intentRequestRequest.config?.features?.shippingMethods ?? []
+                PayButtonExample.intentRequestRequest.config?.features?.shippingMethods = methods.map { method in
+                    guard method.identifier == "standard" else { return method }
+                    return method.with(amount: row.value ?? "0.00")
+                }
+            }
+        }
+        <<< TextRow("features.shippingMethods.express.amount"){ row in
+            row.title = "express shipping amount"
+            row.value = PayButtonExample.intentRequestRequest.config?.features?.shippingMethods?.first(where: { $0.identifier == "express" })?.amount ?? "5.00"
+            row.onChange { row in
+                let methods = PayButtonExample.intentRequestRequest.config?.features?.shippingMethods ?? []
+                PayButtonExample.intentRequestRequest.config?.features?.shippingMethods = methods.map { method in
+                    guard method.identifier == "express" else { return method }
+                    return method.with(amount: row.value ?? "5.00")
+                }
+            }
+        }
 
         form +++ Section("field visibility")
         <<< SwitchRow("fieldVisibility.name"){ row in

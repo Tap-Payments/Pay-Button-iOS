@@ -380,6 +380,10 @@ struct Features: Codable {
     var payments: Payments?
     var alternativeCardInputs: AlternativeCardInputs?
     var customerCards: CustomerCards?
+    var shippingContactFields: [String]?
+    var supportsCouponCode: Bool?
+    var couponCode: String?
+    var shippingMethods: [ShippingMethod]?
 
     enum CodingKeys: String, CodingKey {
         case acceptanceBadge = "acceptance_badge"
@@ -389,6 +393,10 @@ struct Features: Codable {
         case payments
         case alternativeCardInputs = "alternative_card_inputs"
         case customerCards = "customer_cards"
+        case shippingContactFields = "shipping_contact_fields"
+        case supportsCouponCode = "supports_coupon_code"
+        case couponCode = "coupon_code"
+        case shippingMethods = "shipping_methods"
     }
 }
 
@@ -417,7 +425,11 @@ extension Features {
         currencyConversions: CurrencyConversions?? = nil,
         payments: Payments?? = nil,
         alternativeCardInputs: AlternativeCardInputs?? = nil,
-        customerCards: CustomerCards?? = nil
+        customerCards: CustomerCards?? = nil,
+        shippingContactFields: [String]?? = nil,
+        supportsCouponCode: Bool?? = nil,
+        couponCode: String?? = nil,
+        shippingMethods: [ShippingMethod]?? = nil
     ) -> Features {
         return Features(
             acceptanceBadge: acceptanceBadge ?? self.acceptanceBadge,
@@ -426,7 +438,57 @@ extension Features {
             currencyConversions: currencyConversions ?? self.currencyConversions,
             payments: payments ?? self.payments,
             alternativeCardInputs: alternativeCardInputs ?? self.alternativeCardInputs,
-            customerCards: customerCards ?? self.customerCards
+            customerCards: customerCards ?? self.customerCards,
+            shippingContactFields: shippingContactFields ?? self.shippingContactFields,
+            supportsCouponCode: supportsCouponCode ?? self.supportsCouponCode,
+            couponCode: couponCode ?? self.couponCode,
+            shippingMethods: shippingMethods ?? self.shippingMethods
+        )
+    }
+
+    func jsonData() throws -> Data {
+        return try newJSONEncoder().encode(self)
+    }
+
+    func jsonString(encoding: String.Encoding = .utf8) throws -> String? {
+        return String(data: try self.jsonData(), encoding: encoding)
+    }
+}
+
+// MARK: - ShippingMethod
+struct ShippingMethod: Codable {
+    var label, detail, amount, identifier: String?
+}
+
+// MARK: ShippingMethod convenience initializers and mutators
+
+extension ShippingMethod {
+    init(data: Data) throws {
+        self = try newJSONDecoder().decode(ShippingMethod.self, from: data)
+    }
+
+    init(_ json: String, using encoding: String.Encoding = .utf8) throws {
+        guard let data = json.data(using: encoding) else {
+            throw NSError(domain: "JSONDecoding", code: 0, userInfo: nil)
+        }
+        try self.init(data: data)
+    }
+
+    init(fromURL url: URL) throws {
+        try self.init(data: try Data(contentsOf: url))
+    }
+
+    func with(
+        label: String?? = nil,
+        detail: String?? = nil,
+        amount: String?? = nil,
+        identifier: String?? = nil
+    ) -> ShippingMethod {
+        return ShippingMethod(
+            label: label ?? self.label,
+            detail: detail ?? self.detail,
+            amount: amount ?? self.amount,
+            identifier: identifier ?? self.identifier
         )
     }
 

@@ -37,5 +37,15 @@ internal enum CallBackSchemeEnum:String {
     case on3dsRedirect
     /// A passkey authentication finished and the return page is handing the answer back
     case onPasskeyRedirect
+    /// Apple Pay asks us to validate the merchant before it will show the sheet's payment methods
+    case onMerchantValidation
+    /// The payer picked a different Apple Pay shipping method
+    case onShippingMethodSelected
+    /// The payer picked or edited their Apple Pay shipping contact
+    case onShippingContactSelected
+    /// The payer picked a different card inside the Apple Pay sheet
+    case onPaymentMethodSelected
+    /// The payer typed or cleared a coupon code
+    case onCouponChanged
 
 }

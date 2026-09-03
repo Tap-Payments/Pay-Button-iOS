@@ -42,5 +42,20 @@ import Foundation
     /// Will be fired by the card form when the customer has to be authenticated on a 3ds page
     /// - Parameter data: json data describing the 3ds page to be displayed
     @objc optional func onThreeDSRedirect(data: String)
+    /// Will be fired when Apple Pay needs the merchant validated before it shows the payment sheet
+    /// - Parameter data: json data describing the merchant validation status
+    @objc optional func onMerchantValidation(data: String)
+    /// Will be fired whenever the payer picks a different shipping method inside the Apple Pay sheet
+    /// - Parameter data: json data describing the selected shipping method
+    @objc optional func onShippingMethodSelected(data: String)
+    /// Will be fired whenever the payer picks or edits their shipping contact inside the Apple Pay sheet
+    /// - Parameter data: json data describing the selected shipping contact
+    @objc optional func onShippingContactSelected(data: String)
+    /// Will be fired whenever the payer picks a different card inside the Apple Pay sheet
+    /// - Parameter data: json data describing the selected payment method
+    @objc optional func onPaymentMethodSelected(data: String)
+    /// Will be fired whenever the payer types or clears a coupon code
+    /// - Parameter data: the coupon code, as json
+    @objc optional func onCouponChanged(data: String)
 
 }

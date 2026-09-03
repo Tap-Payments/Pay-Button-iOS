@@ -58,6 +58,21 @@ extension PayButtonSdk:WKNavigationDelegate {
             case _ where url.absoluteString.contains(CallBackSchemeEnum.onCancel.rawValue):
                 self.delegate?.onCanceled?()
                 break
+            case _ where url.absoluteString.contains(CallBackSchemeEnum.onMerchantValidation.rawValue):
+                delegate?.onMerchantValidation?(data: tap_extractDataFromUrl(url, for: "data", shouldBase64Decode: true))
+                break
+            case _ where url.absoluteString.contains(CallBackSchemeEnum.onShippingMethodSelected.rawValue):
+                delegate?.onShippingMethodSelected?(data: tap_extractDataFromUrl(url, for: "data", shouldBase64Decode: true))
+                break
+            case _ where url.absoluteString.contains(CallBackSchemeEnum.onShippingContactSelected.rawValue):
+                delegate?.onShippingContactSelected?(data: tap_extractDataFromUrl(url, for: "data", shouldBase64Decode: true))
+                break
+            case _ where url.absoluteString.contains(CallBackSchemeEnum.onPaymentMethodSelected.rawValue):
+                delegate?.onPaymentMethodSelected?(data: tap_extractDataFromUrl(url, for: "data", shouldBase64Decode: true))
+                break
+            case _ where url.absoluteString.contains(CallBackSchemeEnum.onCouponChanged.rawValue):
+                delegate?.onCouponChanged?(data: tap_extractDataFromUrl(url, for: "data", shouldBase64Decode: true))
+                break
             default:
                 break
             }

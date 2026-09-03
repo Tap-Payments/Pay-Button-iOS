@@ -196,7 +196,28 @@ class PayButtonExample: UIViewController {
         "save_card": false,
         "auto_save_card": false,
         "display_saved_cards": true
-      }
+      },
+      "shipping_contact_fields": [
+        "postalAddress",
+        "name",
+        "email"
+      ],
+      "supports_coupon_code": true,
+      "coupon_code": "",
+      "shipping_methods": [
+        {
+          "label": "Standard",
+          "detail": "Arrives in 5-7 days",
+          "amount": "0.00",
+          "identifier": "standard"
+        },
+        {
+          "label": "Express",
+          "detail": "Arrives tomorrow",
+          "amount": "5.00",
+          "identifier": "express"
+        }
+      ]
     },
     "acceptance": {
       "supported_regions": [
@@ -599,7 +620,27 @@ extension PayButtonExample: PayButtonDelegate {
     func onThreeDSRedirect(data: String) {
         eventsTextView.text = "\n\n========\n\nonThreeDSRedirect \(data)\(eventsTextView.text ?? "")"
     }
-    
+
+    func onMerchantValidation(data: String) {
+        eventsTextView.text = "\n\n========\n\nonMerchantValidation \(data)\(eventsTextView.text ?? "")"
+    }
+
+    func onShippingMethodSelected(data: String) {
+        eventsTextView.text = "\n\n========\n\nonShippingMethodSelected \(data)\(eventsTextView.text ?? "")"
+    }
+
+    func onShippingContactSelected(data: String) {
+        eventsTextView.text = "\n\n========\n\nonShippingContactSelected \(data)\(eventsTextView.text ?? "")"
+    }
+
+    func onPaymentMethodSelected(data: String) {
+        eventsTextView.text = "\n\n========\n\nonPaymentMethodSelected \(data)\(eventsTextView.text ?? "")"
+    }
+
+    func onCouponChanged(data: String) {
+        eventsTextView.text = "\n\n========\n\nonCouponChanged \(data)\(eventsTextView.text ?? "")"
+    }
+
     /// The sdk creates the intent. `PayButtonIntent.create` posts it against the checkout mw with
     /// the public key, so no secret key is embedded here, and hands back the whole intent
     func createIntentWithTheSdk() {
